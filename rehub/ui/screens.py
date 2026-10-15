@@ -78,12 +78,17 @@ class Screens:
                 return self._story_open(ov["sel"])
             return self.refresh()
         if kind == "personagens":
-            people = characters.load()
+            people = self._people()
             cols = ov.get("cols", 4)
             delta = {"left": -1, "right": 1, "up": -cols, "down": cols}.get(action)
             if delta and people:
                 ov["sel"] = max(0, min(len(people) - 1, ov["sel"] + delta))
                 self._sound("select")
+            elif action in ("next_section", "prev_section"):  # Tab / LB / RB: troca o filtro
+                keys = [k for k, _ in self._people_filters()]
+                self._set_people_filter(keys[(keys.index(ov.get("filtro", "todos")) + (1 if action == "next_section" else -1)) % len(keys)])
+            elif action in ("tab_prev", "tab_next") and people:  # PageUp / PageDown / LT / RT: troca a versão
+                self._step_version(people[min(ov["sel"], len(people) - 1)], -1 if action == "tab_prev" else 1)
             elif action == "enter" and people:
                 apps = people[ov["sel"]].get("aparicoes", [])
                 if apps:
@@ -155,7 +160,8 @@ class Screens:
         titles = {"extras": ("Extras", "Escolha com as setas (ou o controle) e Enter"),
                   "perfil": (self.persona or "Perfil", f"Seu progresso em {FR['nome']}"),
                   "historia": ("Linha da história", "Os capítulos na ordem dos acontecimentos. Enter abre no hub"),
-                  "personagens": ("Personagens", "Clique num jogo para abrir no hub"),
+                  "personagens": ("Personagens", "Tab troca o filtro · PageUp/PageDown (ou LT/RT) troca a versão · "
+                                                 "clique num jogo para abrir no hub"),
                   "ofertas": ("Ofertas e lançamentos", "Preços da Steam Brasil. Clique para abrir na loja")}
         title, sub = titles[kind]
         tx = A.MARGIN
@@ -468,26 +474,105 @@ class Screens:
                       fill=A.DIM, font=self.f["small"])
 
     # ---------- Personagens ----------
+    def _people_filters(self):
+        return (("todos", "Todos"), ("heroi", "Heróis e aliados"), ("vilao", "Vilões"),
+                ("criatura", FR.get("rotulo_criaturas", "Criaturas")))
+
+    def _people(self):
+        f = (self.overlay or {}).get("filtro", "todos")
+        return [p for p in characters.load() if f == "todos" or p.get("tipo", "heroi") == f]
+
+    def _set_people_filter(self, f):
+        self.overlay.update(filtro=f, sel=0, scroll=0)
+        self._sound("tab")
+        self.refresh()
+
     def _fetch_portraits(self):
+        """Baixa os retratos que faltam, seis de cada vez (são mais de cem)."""
         missing = [p for p in characters.load() if not characters.portrait_path(p)]
         if not missing or getattr(self, "_portraits_busy", False):
             return
         self._portraits_busy = True
 
+        def one(p):
+            if characters.download_portrait(p):
+                self.after(0, self.refresh)
+
         def work():
-            for p in missing:
-                if characters.download_portrait(p):
-                    self.after(0, self.refresh)
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(6) as pool:
+                list(pool.map(one, missing))
             self._portraits_busy = False
         threading.Thread(target=work, daemon=True).start()
 
+    def _versions_of(self, p):
+        """Versões do personagem (uma imagem por jogo). Se ainda não buscou, pede para uma thread buscar."""
+        got = characters.versions(p)
+        if got is None:
+            self._want_versions(p)
+        return got or []
+
+    def _want_versions(self, p):
+        """Fila de downloads de versões: atende primeiro o personagem pedido por último (o que está na tela)."""
+        if p["id"] in getattr(self, "_ver_done", set()):
+            return
+        queue = self.__dict__.setdefault("_ver_queue", [])
+        if p in queue:
+            queue.remove(p)
+        queue.append(p)
+        if getattr(self, "_ver_busy", False):
+            return
+        self._ver_busy = True
+        self._ver_done = getattr(self, "_ver_done", set())
+
+        def work():
+            while queue:
+                q = queue.pop()
+                try:
+                    characters.download_versions(q)
+                except Exception:
+                    pass
+                self._ver_done.add(q["id"])
+                self.after(0, self.refresh)
+            self._ver_busy = False
+        threading.Thread(target=work, daemon=True).start()
+
+    def _version_index(self, p, versions):
+        ov = self.overlay
+        if ov.get("ver_of") != p["id"]:  # personagem novo: começa pela versão mais recente
+            ov["ver_of"], ov["ver"] = p["id"], len(versions) - 1
+        ov["ver"] = max(0, min(ov.get("ver", 0), len(versions) - 1))
+        return ov["ver"]
+
+    def _step_version(self, p, d):
+        versions = self._versions_of(p)
+        if len(versions) < 2:
+            return
+        i = self._version_index(p, versions)
+        self.overlay["ver"] = (i + d) % len(versions)
+        self._sound("select")
+
     def _draw_personagens(self, x, y, w, bottom):
         c, ov = self.c, self.overlay
-        people = characters.load()
-        if not people:
+        everyone = characters.load()
+        if not everyone:
             return self._note(x, y, w, "Ainda não há fichas de personagens. Elas ficam em games/_personagens.json.")
-        gw = w * 0.56
-        cell_w, cell_h, pw, ph = 128, 196, 116, 152
+        # filtro: todos / heróis / vilões / criaturas
+        fx = x
+        cur = ov.get("filtro", "todos")
+        for key, label in self._people_filters():
+            n = len(everyone) if key == "todos" else sum(1 for p in everyone if p.get("tipo", "heroi") == key)
+            if not n:
+                continue
+            fx = self._chip(fx, y - 8, f"{label}  {n}", lambda k=key: self._set_people_filter(k), f"ov_pf_{key}",
+                            primary=key == cur) + 8
+        y += 40
+        people = self._people()
+        if not people:
+            return
+        ov["sel"] = min(ov["sel"], len(people) - 1)
+        gw = w * 0.5
+        cell_w, cell_h, pw, ph = 112, 172, 102, 134
         cols = max(2, int(gw // cell_w))
         ov["cols"] = cols
         rows_fit = max(1, int((bottom - y) // cell_h))
@@ -514,7 +599,7 @@ class Screens:
             else:
                 self._round_rect(px, py, px + pw, py + ph, 10, fill="#141922", outline="#262d3a", tags=(tag,))
                 c.create_text(px + pw / 2, py + ph / 2, text=p["nome"][:1], fill=A.DIM, font=self.f["big"], tags=(tag,))
-            c.create_text(px + pw / 2, py + ph + 10, anchor="n", text=self._elide(p["nome"], self.f["small"], cell_w - 6),
+            c.create_text(px + pw / 2, py + ph + 8, anchor="n", text=self._elide(p["nome"], self.f["small"], cell_w - 6),
                           fill=A.WHITE if on else A.MUTED, font=self.f["small"], tags=(tag,))
             self._clickable(tag, lambda i=i: (self.overlay.__setitem__("sel", i), self._sound("select"), self.refresh()))
         if total_rows > rows_fit:
@@ -523,38 +608,80 @@ class Screens:
             by = y + (track - bh) * ov["scroll"] / max(1, total_rows - rows_fit)
             c.create_rectangle(x + cols * cell_w + 4, y, x + cols * cell_w + 6, y + track, fill="#232a36", outline="")
             c.create_rectangle(x + cols * cell_w + 4, by, x + cols * cell_w + 6, by + bh, fill=A.MUTED, outline="")
+        self._draw_person(people[ov["sel"]], x + gw + 40, y, x + w, bottom)
 
-        p = people[min(ov["sel"], len(people) - 1)]
-        dx, dw = x + gw + 40, w - gw - 40
-        self._round_rect(dx - 20, y - 10, x + w + 20, bottom, 18, fill="#10141c", outline="#262d3a")
-        big = (min(260, int(dw * 0.5)), min(340, int((bottom - y) * 0.55)))
-        path = characters.portrait_path(p)
-        img = self._photo_fit(path, big, self._portraits, p["id"], 14, contain=True, bg=(16, 20, 28)) if path else None
+    def _draw_person(self, p, dx, y, right, bottom):
+        """Ficha do personagem: imagem da versão escolhida, texto, todas as versões e onde aparece."""
+        c = self.c
+        self._round_rect(dx - 20, y - 10, right + 20, bottom, 18, fill="#10141c", outline="#262d3a")
+        dw = right - dx
+        versions = self._versions_of(p)
+        vi = self._version_index(p, versions) if versions else None
+        big = (min(250, int(dw * 0.42)), min(320, int((bottom - y) * 0.48)))
+        if versions:
+            v = versions[vi]
+            path, key = characters.version_path(v), ("ver", v["arquivo"])
+        else:
+            path, key = characters.portrait_path(p), p["id"]
+        img = self._photo_fit(path, big, self._portraits, key, 14, contain=True, bg=(16, 20, 28)) if path else None
         if img:
             c.create_image(dx, y + 6, image=img, anchor="nw")
-        tx = dx + big[0] + 24 if dw - big[0] > 220 else dx
-        ty = y + 10 if tx != dx else y + big[1] + 24
-        tw = x + w - tx
-        name = c.create_text(tx, ty, anchor="nw", text=p["nome"], fill=A.WHITE, font=self.f["title"], width=tw)
+        if versions:
+            c.create_text(dx + big[0] / 2, y + big[1] + 14, anchor="n", text=versions[vi]["rotulo"], fill=self.accent,
+                          font=self.f["small"], width=big[0])
+        tx = dx + big[0] + 24
+        tw = right - tx
+        tipo = {"heroi": "HERÓI / ALIADO", "vilao": "VILÃO", "criatura": FR.get("rotulo_criaturas", "Criatura").upper()}
+        c.create_text(tx, y + 8, anchor="nw", text=tipo.get(p.get("tipo", "heroi"), ""), fill=A.MUTED, font=self.f["tiny"])
+        name = c.create_text(tx, y + 26, anchor="nw", text=p["nome"], fill=A.WHITE, font=self.f["title"], width=tw)
         ty = c.bbox(name)[3] + 4
         c.create_text(tx, ty, anchor="nw", text=p.get("papel", ""), fill=self.accent, font=self.f["btn"], width=tw)
         ty += 30
-        desc = c.create_text(tx, ty, anchor="nw", text=p.get("descricao", ""), fill="#d5d9e0", font=self.f["body"], width=tw)
-        ty = max(c.bbox(desc)[3] + 18, y + big[1] + 24 if tx == dx else 0)
-        ay = max(ty, y + big[1] + 24)
-        c.create_text(dx, ay, anchor="nw", text="APARECE EM", fill=A.MUTED, font=self.f["tiny"])
-        ay += 22
-        ax = dx
+        c.create_text(tx, ty, anchor="nw", text=p.get("descricao", ""), fill="#d5d9e0", font=self.f["body"], width=tw)
+
+        # todas as versões (uma por jogo/filme), da mais antiga à mais nova
+        vy = y + big[1] + 46
+        if characters.versions(p) is None and p["id"] not in getattr(self, "_ver_done", set()):
+            c.create_text(dx, vy, anchor="nw", text="VERSÕES  ·  buscando na wiki...", fill=A.MUTED, font=self.f["tiny"])
+            vy += 26
+        elif len(versions) > 1:
+            c.create_text(dx, vy, anchor="nw", text=f"VERSÕES  ·  {len(versions)}", fill=A.MUTED, font=self.f["tiny"])
+            tw_, th_, gap = 58, 78, 8
+            fits = max(1, int((dw + gap) // (tw_ + gap)))
+            start = min(max(0, vi - fits // 2), max(0, len(versions) - fits))
+            for k, v in enumerate(versions[start:start + fits]):
+                j = start + k
+                vx = dx + k * (tw_ + gap)
+                tag = f"ov_pv_{p['id']}_{j}"
+                if j == vi:
+                    self._round_rect(vx - 3, vy + 19, vx + tw_ + 3, vy + 22 + th_ + 3, 9, fill=self.accent, outline="")
+                th = self._photo_fit(characters.version_path(v), (tw_, th_), self._portraits, ("ver", v["arquivo"]), 7,
+                                     contain=True, bg=(24, 29, 39))
+                if th:
+                    c.create_image(vx, vy + 22, image=th, anchor="nw", tags=(tag,))
+                else:
+                    self._round_rect(vx, vy + 22, vx + tw_, vy + 22 + th_, 7, fill="#141922", outline="", tags=(tag,))
+                self._clickable(tag, lambda j=j: (self.overlay.__setitem__("ver", j), self._sound("select"), self.refresh()))
+            if start > 0:
+                c.create_text(dx - 12, vy + 22 + th_ / 2, text="‹", fill=A.WHITE, font=self.f["h"])
+            if start + fits < len(versions):
+                c.create_text(right + 10, vy + 22 + th_ / 2, text="›", fill=A.WHITE, font=self.f["h"])
+            vy += 22 + th_ + 20
+
+        # onde aparece
+        c.create_text(dx, vy, anchor="nw", text="APARECE EM", fill=A.MUTED, font=self.f["tiny"])
+        ay, ax = vy + 22, dx
         titles = self._chapter_titles()
         for cid in p.get("aparicoes", []):
             label = titles.get(cid)
             if not label:
                 continue
-            short = label.replace(FR["prefixo_titulo"], "").strip(" :–") if FR["prefixo_titulo"] else label
+            pre = FR["prefixo_titulo"]
+            short = label[len(pre):].strip(" :–") if pre and label.startswith(pre) else label
             if len(short) < 4:  # "Resident Evil 3" virava só "3"
                 short = label
             cw = self.f["small"].measure(short) + 26
-            if ax + cw > x + w:
+            if ax + cw > right:
                 ax, ay = dx, ay + 36
             if ay + 28 > bottom - 10:
                 break

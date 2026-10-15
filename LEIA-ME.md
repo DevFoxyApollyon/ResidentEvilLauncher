@@ -26,8 +26,11 @@ F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao come
   cada jogo e os seus troféus mais raros.
 - **Linha da história (H):** todos os capítulos ano a ano, com os filmes que se passam dentro da história encaixados.
   Enter abre o capítulo no hub.
-- **Personagens (C):** ficha de cada personagem e em quais jogos aparece (clique para abrir o jogo). As fichas ficam em
-  `games/_personagens.json`; os retratos vêm da wiki da franquia (`"retrato": "<link>"` na ficha troca a imagem).
+- **Personagens (C):** 125 fichas de RE (heróis e aliados, vilões e armas biológicas; Tab troca o filtro) com o que
+  cada um fez e em quais jogos aparece (clique para abrir o jogo). Cada ficha mostra **todas as versões** do personagem,
+  uma imagem por jogo/filme, da mais antiga à mais nova (PageUp/PageDown ou LT/RT trocam). As fichas ficam em
+  `games/_personagens.json`; retratos e versões vêm da wiki da franquia e ficam em `data/covers`
+  (`"retrato": "<link>"` troca a imagem principal; `"versoes": [...]` define as versões à mão).
 - **Ofertas e lançamentos (L):** preço de cada jogo na Steam Brasil, os que estão na sua lista de desejos (★) e a
   contagem regressiva dos anunciados. Quando um jogo que você não tem entra em promoção, aparece um aviso (uma vez por
   dia) e o card ganha o selo "-50%". Para pôr a data de um anúncio à mão: `"data_lancamento": "2027-03-12"` (ou

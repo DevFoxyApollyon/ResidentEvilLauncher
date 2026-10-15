@@ -289,7 +289,7 @@ class Hub(Screens, tk.Tk):
         for key, action in (("<Left>", "left"), ("<Right>", "right"), ("<Up>", "up"), ("<Down>", "down"),
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
-                            ("<e>", "extras")):
+                            ("<e>", "extras"), ("<Prior>", "tab_prev"), ("<Next>", "tab_next")):
             self.bind(key, lambda e, a=action: self._press(a))
         self.bind("<F11>", lambda e: self.toggle_fullscreen())
         self.bind("<F5>", lambda e: self.rescan())

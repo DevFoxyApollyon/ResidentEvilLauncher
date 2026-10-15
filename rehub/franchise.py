@@ -24,6 +24,7 @@ DEFAULTS = {
     "noticias": {"feed": "https://residentevil.com.br/feed/", "fonte": "REVIL", "site": "residentevil.com.br"},
     "fontes": {},                     # capítulo -> fonte do título (chaves em rehub/fonts.py)
     "temas": {},                      # clima do tema composto -> lista de capítulos (rehub/compose.py)
+    "rotulo_criaturas": "Armas biológicas",  # nome do filtro de criaturas na tela Personagens
 }
 
 
