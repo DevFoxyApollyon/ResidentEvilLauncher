@@ -1,6 +1,7 @@
 """Telas por cima do hub (estilo PS5): Extras, Perfil, Linha da história, Personagens, Ofertas, visualizador de
 prints, e a foto do card. Tudo desenhado no mesmo canvas da tela principal; o Hub herda daqui (mixin)."""
 import hashlib
+import math
 import os
 import re
 import threading
@@ -13,6 +14,7 @@ from .. import catalog, characters, deals, library, steam, store, trophies
 from ..franchise import FR
 from ..paths import DATA, ROOT
 from . import app as A
+from .lore_screens import LORE_KINDS
 
 THUMBS = DATA / "cache" / "prints"
 EXTRAS = (("perfil", "Perfil", "Troféus, horas e progresso na franquia", "P"),
@@ -37,6 +39,8 @@ class Screens:
             self.overlay["sel"] = next((i for i, it in enumerate(self.overlay["items"]) if it["ch"]["id"] == cur), 0)
         elif kind == "ofertas":
             self.refresh_deals()
+        elif kind in LORE_KINDS:
+            self._lore_open(kind)
         self._sound("open")
         self.refresh()
 
@@ -59,14 +63,19 @@ class Screens:
             if action == "photo":
                 return self._viewer_set_bg()
             return
+        if kind in LORE_KINDS:
+            return self._lore_press(kind, action)
         if kind == "extras":
-            n = len(EXTRAS)
-            if action in ("left", "up"):
+            items = self._extras()
+            n, cols = len(items), 5
+            if action == "left":
                 ov["sel"] = (ov["sel"] - 1) % n
-            elif action in ("right", "down"):
+            elif action == "right":
                 ov["sel"] = (ov["sel"] + 1) % n
+            elif action in ("up", "down"):
+                ov["sel"] = max(0, min(n - 1, ov["sel"] + (cols if action == "down" else -cols)))
             elif action == "enter":
-                return self.open_overlay(EXTRAS[ov["sel"]][0])
+                return self.open_overlay(items[ov["sel"]][0])
             self._sound("select")
             return self.refresh()
         if kind == "historia":
@@ -108,6 +117,8 @@ class Screens:
         kind = self.overlay["kind"]
         if kind == "viewer":
             return self._viewer_go(1 if delta < 0 else -1)
+        if kind in LORE_KINDS:
+            return self._lore_wheel(kind, delta)
         if kind == "personagens":
             self.overlay["scroll"] = max(0, self.overlay["scroll"] + (1 if delta < 0 else -1))
             self.overlay["scroll_by_wheel"] = True
@@ -162,7 +173,8 @@ class Screens:
                   "historia": ("Linha da história", "Os capítulos na ordem dos acontecimentos. Enter abre no hub"),
                   "personagens": ("Personagens", "Tab troca o filtro · PageUp/PageDown (ou LT/RT) troca a versão · "
                                                  "clique num jogo para abrir no hub"),
-                  "ofertas": ("Ofertas e lançamentos", "Preços da Steam Brasil. Clique para abrir na loja")}
+                  "ofertas": ("Ofertas e lançamentos", "Preços da Steam Brasil. Clique para abrir na loja"),
+                  **self._lore_titles()}
         title, sub = titles[kind]
         tx = A.MARGIN
         avatar = self._avatar() if kind == "perfil" else None
@@ -206,27 +218,33 @@ class Screens:
         return self._photo_fit(p, size, self._minis, ("capa", key), 5)
 
     # ---------- Extras ----------
+    def _extras(self):
+        return list(EXTRAS[:4]) + self._lore_extras() + [EXTRAS[4]]
+
     def _draw_extras(self, x, y, w, bottom):
         c, ov = self.c, self.overlay
-        n = len(EXTRAS)
-        gap = 18
-        cw = min(300, (w - gap * (n - 1)) / n)
-        ch = 210
-        for i, (kind, title, desc, key) in enumerate(EXTRAS):
-            cx = x + i * (cw + gap)
+        items = self._extras()
+        cols, gap = 5, 18
+        cw = (w - gap * (cols - 1)) / cols
+        ch = min(170, (bottom - y - 90 - gap) / 2)
+        for i, (kind, title, desc, key) in enumerate(items):
+            cx = x + (i % cols) * (cw + gap)
+            cy = y + (i // cols) * (ch + gap)
             on = i == ov["sel"]
             tag = f"ov_ex_{kind}"
-            self._round_rect(cx, y, cx + cw, y + ch, 18, fill=A.CHIP_HI if on else "#141922",
-                                     outline=self.accent if on else "#262d3a", width=3 if on else 1, tags=(tag,))
-            self._extra_icon(kind, cx + 28, y + 40, A.WHITE if on else A.MUTED, tag)
-            c.create_text(cx + 22, y + 82, anchor="nw", text=title, fill=A.WHITE, font=self.f["h"], width=cw - 40, tags=(tag,))
-            c.create_text(cx + 22, y + 112, anchor="nw", text=desc, fill=A.MUTED, font=self.f["small"], width=cw - 40, tags=(tag,))
-            c.create_text(cx + cw - 18, y + ch - 16, anchor="se", text=key, fill=A.DIM, font=self.f["h"], tags=(tag,))
+            self._round_rect(cx, cy, cx + cw, cy + ch, 18, fill=A.CHIP_HI if on else "#141922",
+                             outline=self.accent if on else "#262d3a", width=3 if on else 1, tags=(tag,))
+            self._extra_icon(kind, cx + 28, cy + 34, A.WHITE if on else A.MUTED, tag)
+            c.create_text(cx + 22, cy + 66, anchor="nw", text=title, fill=A.WHITE, font=self.f["h"], width=cw - 40, tags=(tag,))
+            c.create_text(cx + 22, cy + 94, anchor="nw", text=desc, fill=A.MUTED, font=self.f["small"], width=cw - 40, tags=(tag,))
+            c.create_text(cx + cw - 18, cy + ch - 14, anchor="se", text=key, fill=A.DIM, font=self.f["h"], tags=(tag,))
             self._clickable(tag, lambda k=kind: self.open_overlay(k))
-        tips = ["Teclado: P perfil · H história · C personagens · L ofertas · F foto do card · Ctrl+Alt+H traz o hub de volta",
+        ty = y + ((len(items) + cols - 1) // cols) * (ch + gap) + 16
+        tips = ["Teclado: P perfil · H história · C personagens · L ofertas · M mapa · A arquivos · R relações · V vírus · "
+                "K conquistas · F foto · Ctrl+Alt+H traz o hub de volta",
                 "Controle: Start abre Extras · View abre o Perfil · Y tira a foto do card · segurar o botão Xbox traz o hub"]
         for k, tip in enumerate(tips):
-            c.create_text(x, y + ch + 40 + k * 24, anchor="nw", text=tip, fill=A.DIM, font=self.f["small"])
+            c.create_text(x, ty + k * 24, anchor="nw", text=tip, fill=A.DIM, font=self.f["small"])
 
     def _extra_icon(self, kind, x, y, color, tag):
         c = self.c
@@ -246,6 +264,27 @@ class Screens:
             c.create_polygon(x - 14, y - 10, x + 6, y - 10, x + 18, y + 2, x + 6, y + 14, x - 14, y + 14,
                              outline=color, fill="", width=2, tags=(tag,))
             c.create_oval(x - 9, y - 1, x - 3, y + 5, outline=color, width=2, tags=(tag,))
+        elif kind == "mapa":
+            c.create_oval(x - 16, y - 16, x + 16, y + 16, outline=color, width=2, tags=(tag,))
+            c.create_line(x - 16, y, x + 16, y, fill=color, tags=(tag,))
+            c.create_oval(x - 7, y - 16, x + 7, y + 16, outline=color, tags=(tag,))
+        elif kind == "arquivos":
+            c.create_rectangle(x - 12, y - 16, x + 12, y + 16, outline=color, width=2, tags=(tag,))
+            for k in range(3):
+                c.create_line(x - 6, y - 7 + k * 7, x + 6, y - 7 + k * 7, fill=color, tags=(tag,))
+        elif kind == "relacoes":
+            pts = ((x - 14, y + 10), (x + 14, y + 10), (x, y - 14))
+            c.create_line(*pts[0], *pts[1], *pts[2], *pts[0], fill=color, width=2, tags=(tag,))
+            for px, py in pts:
+                c.create_oval(px - 5, py - 5, px + 5, py + 5, fill=color, outline="", tags=(tag,))
+        elif kind == "virus":
+            c.create_oval(x - 10, y - 10, x + 10, y + 10, outline=color, width=2, tags=(tag,))
+            for k in range(8):
+                a = k * math.pi / 4
+                c.create_line(x + 10 * math.cos(a), y + 10 * math.sin(a),
+                              x + 17 * math.cos(a), y + 17 * math.sin(a), fill=color, width=2, tags=(tag,))
+        elif kind == "conquistas":
+            self._cup(x, y, 14, color)
         else:
             c.create_rectangle(x - 16, y - 8, x + 18, y + 16, outline=color, width=2, tags=(tag,))
             c.create_oval(x - 6, y - 3, x + 8, y + 11, outline=color, width=2, tags=(tag,))
@@ -637,10 +676,19 @@ class Screens:
         ty = c.bbox(name)[3] + 4
         c.create_text(tx, ty, anchor="nw", text=p.get("papel", ""), fill=self.accent, font=self.f["btn"], width=tw)
         ty += 30
-        c.create_text(tx, ty, anchor="nw", text=p.get("descricao", ""), fill="#d5d9e0", font=self.f["body"], width=tw)
+        desc = c.create_text(tx, ty, anchor="nw", text=p.get("descricao", ""), fill="#d5d9e0", font=self.f["body"], width=tw)
+        ty = c.bbox(desc)[3] + 12
+        self.stat_add("fichas", p["id"])
+        if p.get("fraqueza") or p.get("arma") or p.get("chefe"):  # bestiário
+            for label, key in (("PONTO FRACO", "fraqueza"), ("MELHOR ARMA", "arma"), ("ONDE É CHEFE", "chefe")):
+                if not p.get(key):
+                    continue
+                c.create_text(tx, ty, anchor="nw", text=label, fill=A.MUTED, font=self.f["tiny"])
+                t = c.create_text(tx, ty + 16, anchor="nw", text=p[key], fill=A.WHITE, font=self.f["small"], width=tw)
+                ty = c.bbox(t)[3] + 8
 
         # todas as versões (uma por jogo/filme), da mais antiga à mais nova
-        vy = y + big[1] + 46
+        vy = max(y + big[1] + 46, ty + 10)
         if characters.versions(p) is None and p["id"] not in getattr(self, "_ver_done", set()):
             c.create_text(dx, vy, anchor="nw", text="VERSÕES  ·  buscando na wiki...", fill=A.MUTED, font=self.f["tiny"])
             vy += 26
@@ -1143,5 +1191,6 @@ class Screens:
         out_dir.mkdir(parents=True, exist_ok=True)
         out = out_dir / f"{ch['id']}_{datetime.now():%Y-%m-%d_%H-%M-%S}.png"
         img.convert("RGB").save(out)
+        self.stat_count("fotos")
         self.toast("Foto do card salva", f"Imagens\\{FR['app']}\\{out.name} · clique para abrir", lambda: os.startfile(out))
         return out

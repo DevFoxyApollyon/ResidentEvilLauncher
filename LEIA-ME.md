@@ -35,6 +35,17 @@ F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao come
   contagem regressiva dos anunciados. Quando um jogo que você não tem entra em promoção, aparece um aviso (uma vez por
   dia) e o card ganha o selo "-50%". Para pôr a data de um anúncio à mão: `"data_lancamento": "2027-03-12"` (ou
   `"2027-03"`, `"2027"`) no capítulo em `games/_linha_do_tempo.json`.
+- **Mapa (M):** onde cada capítulo acontece, num mapa-múndi e numa planta de Raccoon City (Tab troca). Clique num jogo
+  para abri-lo. Os lugares ficam em `games/_mapa.json`.
+- **Arquivos dos jogos (A):** os documentos e diários de cada jogo, lidos da wiki da franquia e **traduzidos para o
+  português** automaticamente (o botão "Português / Original" troca; fica guardado em `data/cache/arquivos`).
+- **Relações (R):** famílias, parceiros e inimigos ligados por linhas (`games/_relacoes.json`).
+- **Vírus e parasitas (V):** T, G, T-Veronica, Plaga, Uroboros, mofo... com quem criou, como age e quem foi infectado
+  (`games/_virus.json`).
+- **Conquistas do hub (K):** metas que o hub acompanha sozinho (linha do tempo completa, todas as versões de um jogo,
+  horas, platinas, arquivos lidos...). Quando uma é liberada aparece um aviso com som de troféu.
+- **Bestiário:** nas armas biológicas, a ficha mostra o ponto fraco, a melhor arma e onde ela é chefe.
+- **Speedrun:** aba no painel com o recorde de cada categoria no speedrun.com (clique abre a run).
 - **Foto do card (F):** salva uma imagem 1920x1080 do jogo selecionado (arte, capa, troféus e horas) em
   `Imagens/RE Hub`, pronta para postar.
 

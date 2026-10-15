@@ -23,6 +23,7 @@ from ..paths import COVERS, DATA, ROOT
 from . import theme as t
 from .splash import Splash
 from .manage import ManageWindow
+from .lore_screens import LoreScreens
 from .screens import Screens
 
 BG_RGB = (11, 14, 20)
@@ -219,7 +220,7 @@ def _accent(img):
     return f"#{int(r * 255):02x}{int(gg * 255):02x}{int(b * 255):02x}"
 
 
-class Hub(Screens, tk.Tk):
+class Hub(Screens, LoreScreens, tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(FR["app"])
@@ -256,6 +257,7 @@ class Hub(Screens, tk.Tk):
         self.deals_state = None
         self._minis, self._portraits, self._thumbs, self._thumb_pending, self._media_cache = {}, {}, {}, set(), {}
         self._dim_photo = None
+        self._lore_init()
 
         self._pil, self._tiles, self._remote, self._remote_pending = {}, {}, {}, set()
         self._tile_base, self._halos, self._halo_base = {}, {}, {}
@@ -289,7 +291,8 @@ class Hub(Screens, tk.Tk):
         for key, action in (("<Left>", "left"), ("<Right>", "right"), ("<Up>", "up"), ("<Down>", "down"),
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
-                            ("<e>", "extras"), ("<Prior>", "tab_prev"), ("<Next>", "tab_next")):
+                            ("<e>", "extras"), ("<Prior>", "tab_prev"), ("<Next>", "tab_next"), ("<m>", "map"),
+                            ("<a>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements")):
             self.bind(key, lambda e, a=action: self._press(a))
         self.bind("<F11>", lambda e: self.toggle_fullscreen())
         self.bind("<F5>", lambda e: self.rescan())
@@ -301,7 +304,8 @@ class Hub(Screens, tk.Tk):
         threading.Thread(target=self._fetch_art, daemon=True).start()
         threading.Thread(target=self._fetch_news, daemon=True).start()
         threading.Thread(target=self._fetch_trophies, daemon=True).start()
-        self.after(4000, self.refresh_deals)  # preços e lista de desejos (avisa se algum jogo estiver em promoção)
+        self.after(4000, self.refresh_deals)
+        self.after(8000, self.check_achievements)  # conquistas do hub liberadas desde a última vez  # preços e lista de desejos (avisa se algum jogo estiver em promoção)
         self._tick()
         self._away = self._seen_front = False
         if not os.environ.get("REHUB_TESTE"):
@@ -589,7 +593,8 @@ class Hub(Screens, tk.Tk):
 
     def _press(self, action):
         """Uma ação do teclado ou do controle. Com uma tela aberta por cima, ela recebe a ação."""
-        screens = {"profile": "perfil", "story": "historia", "people": "personagens", "deals": "ofertas", "extras": "extras"}
+        screens = {"profile": "perfil", "story": "historia", "people": "personagens", "deals": "ofertas", "extras": "extras",
+                   "map": "mapa", "files": "arquivos", "relations": "relacoes", "virus": "virus", "achievements": "conquistas"}
         if self.overlay and not (self.overlay["kind"] == "viewer" or action not in screens):
             return self.open_overlay(screens[action])  # atalho de outra tela: troca direto
         if self.overlay:
@@ -603,6 +608,7 @@ class Hub(Screens, tk.Tk):
               "profile": lambda: self.open_overlay("perfil"), "story": lambda: self.open_overlay("historia"),
               "people": lambda: self.open_overlay("personagens"), "deals": lambda: self.open_overlay("ofertas"),
               "extras": lambda: self.open_overlay("extras"), "photo": self.photo_card,
+              **{a: (lambda k=k: self.open_overlay(k)) for a, k in screens.items()},
               "tab_prev": lambda: self.cycle_tab(-1), "tab_next": lambda: self.cycle_tab(1),
               "scroll_up": lambda: self._scroll_panel(-1), "scroll_down": lambda: self._scroll_panel(1),
               "home": self.go_home}.get(action)
@@ -620,7 +626,8 @@ class Hub(Screens, tk.Tk):
     def _panel_tabs(self):
         if self.game and self.game["tipo"] == "info":
             return (("versoes", "Detalhes"),)
-        return (("trofeus", "Troféus"), ("trailer", "Trailer"), ("prints", "Prints"), ("versoes", "Versões"), ("dlcs", "DLCs"))
+        return (("trofeus", "Troféus"), ("trailer", "Trailer"), ("prints", "Prints"), ("speedrun", "Speedrun"),
+                ("versoes", "Versões"), ("dlcs", "DLCs"))
 
     def cycle_tab(self, d):
         keys = [k for k, _ in self._panel_tabs()]
@@ -1366,6 +1373,8 @@ class Hub(Screens, tk.Tk):
             return self._draw_versions(self.chapter, *body)
         if active == "prints":
             return self._draw_prints(self.game, *body)
+        if active == "speedrun":
+            return self._draw_speedrun(self.game, *body)
         g = self.steam_game()
         if g is not None and g is not self.game:  # à esquerda do "Atualizar" para não sobrepor
             right = x + w - (self.f["tiny"].measure("Atualizar") + 16 if self.panel_tab == "trofeus" else 0)

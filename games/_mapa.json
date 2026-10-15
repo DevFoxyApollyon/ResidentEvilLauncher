@@ -1,0 +1,39 @@
+{
+  "_comentario": "Tela Mapa (tecla M). mundo: lugares com lat/lon (lugares inventados ficam numa posição aproximada). cidade: planta desenhada pelo app, x/y de 0 a 1. capitulos: ids de games/_linha_do_tempo.json.",
+  "mundo": [
+    {"nome": "Raccoon City e Montanhas Arklay", "regiao": "Meio-oeste dos EUA (cidade fictícia)", "lat": 40.0, "lon": -89.0,
+     "capitulos": ["re0", "re1", "outbreak", "re3", "re2", "umbrella_chronicles", "darkside_chronicles", "requiem", "resistance", "orc"]},
+    {"nome": "Ilha Rockfort", "regiao": "Hemisfério sul (ilha fictícia, posição aproximada)", "lat": -46.0, "lon": -38.0, "capitulos": ["veronica"]},
+    {"nome": "Base da Umbrella na Antártida", "regiao": "Antártida", "lat": -75.0, "lon": 0.0, "capitulos": ["veronica"]},
+    {"nome": "Vilarejo, castelo e ilha", "regiao": "Espanha (região rural)", "lat": 42.5, "lon": -4.5, "capitulos": ["re4"]},
+    {"nome": "Kijuju", "regiao": "África (região fictícia)", "lat": 6.0, "lon": 20.0, "capitulos": ["re5"]},
+    {"nome": "Mar Mediterrâneo e Terragrigia", "regiao": "Navio Queen Zenobia", "lat": 37.0, "lon": 16.0, "capitulos": ["rev1"]},
+    {"nome": "Ilha Sushestvovanie", "regiao": "Leste Europeu (ilha fictícia)", "lat": 59.0, "lon": 26.0, "capitulos": ["rev2"]},
+    {"nome": "Tall Oaks", "regiao": "EUA", "lat": 38.5, "lon": -78.5, "capitulos": ["re6"]},
+    {"nome": "Lanshiang", "regiao": "China (cidade fictícia)", "lat": 30.0, "lon": 114.0, "capitulos": ["re6"]},
+    {"nome": "Edônia", "regiao": "Leste Europeu (país fictício)", "lat": 45.0, "lon": 21.0, "capitulos": ["re6"]},
+    {"nome": "Dulvey", "regiao": "Louisiana, EUA", "lat": 30.0, "lon": -91.5, "capitulos": ["re7"]},
+    {"nome": "Vilarejo das montanhas", "regiao": "Leste Europeu (Romênia)", "lat": 46.0, "lon": 25.0, "capitulos": ["village", "shadows_of_rose"]},
+    {"nome": "Harvardville", "regiao": "EUA (cidade fictícia)", "lat": 41.5, "lon": -84.0, "capitulos": ["degeneration"]},
+    {"nome": "Eslávia Oriental", "regiao": "Leste Europeu (país fictício)", "lat": 44.0, "lon": 31.0, "capitulos": ["damnation"]},
+    {"nome": "Nova York", "regiao": "EUA", "lat": 40.7, "lon": -74.0, "capitulos": ["vendetta"]},
+    {"nome": "Casa Branca e Penamstan", "regiao": "Washington, EUA", "lat": 38.9, "lon": -77.0, "capitulos": ["infinite_darkness"]},
+    {"nome": "Alcatraz", "regiao": "São Francisco, EUA", "lat": 37.8, "lon": -122.4, "capitulos": ["death_island"]}
+  ],
+  "cidade": {
+    "nome": "Raccoon City",
+    "locais": [
+      {"nome": "Mansão Spencer", "regiao": "Montanhas Arklay", "x": 0.18, "y": 0.14, "capitulos": ["re1", "umbrella_chronicles"]},
+      {"nome": "Centro de treinamento e trem Ecliptic", "regiao": "Montanhas Arklay", "x": 0.42, "y": 0.1, "capitulos": ["re0", "umbrella_chronicles"]},
+      {"nome": "Delegacia (R.P.D.)", "regiao": "Centro", "x": 0.5, "y": 0.48, "capitulos": ["re2", "re3", "outbreak", "darkside_chronicles"]},
+      {"nome": "Bar J's", "regiao": "Centro", "x": 0.4, "y": 0.58, "capitulos": ["outbreak"]},
+      {"nome": "Torre do relógio", "regiao": "Leste da cidade", "x": 0.72, "y": 0.52, "capitulos": ["re3"]},
+      {"nome": "Hospital Spencer Memorial", "regiao": "Leste da cidade", "x": 0.8, "y": 0.4, "capitulos": ["re3", "outbreak"]},
+      {"nome": "Universidade de Raccoon", "regiao": "Norte da cidade", "x": 0.62, "y": 0.3, "capitulos": ["outbreak"]},
+      {"nome": "Zoológico", "regiao": "Oeste da cidade", "x": 0.24, "y": 0.5, "capitulos": ["outbreak"]},
+      {"nome": "Laboratório NEST", "regiao": "Subsolo", "x": 0.52, "y": 0.78, "capitulos": ["re2", "re3", "darkside_chronicles", "resistance"]},
+      {"nome": "Fábrica de descarte", "regiao": "Sul da cidade", "x": 0.8, "y": 0.8, "capitulos": ["re3"]},
+      {"nome": "Ruínas da cidade (2026)", "regiao": "Depois da bomba", "x": 0.3, "y": 0.82, "capitulos": ["requiem"]}
+    ]
+  }
+}
