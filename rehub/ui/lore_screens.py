@@ -6,7 +6,7 @@ import webbrowser
 
 from PIL import Image, ImageTk
 
-from .. import catalog, characters, lore
+from .. import catalog, characters, lore, wikipt
 from ..franchise import FR
 from . import app as A
 
@@ -34,6 +34,53 @@ class LoreScreens:
     def _stat(self, key):
         v = self.cfg.get("_stats").get(key, [])
         return v if isinstance(v, int) else len(v)
+
+    # ---------- Resident Evil Wiki em português ----------
+    def prepare_wiki(self):
+        """Em segundo plano: índice da wiki pt-br (lista de personagens, vírus) e as páginas das fichas à mão."""
+        if not wikipt.available():
+            return
+        names = [n for p in characters.curated() for n in (p.get("busca"), p["nome"]) if n]
+        names += [v.get("pt") or v["nome"] for v in lore.load("virus").get("itens", [])]
+        names += [pl["wiki"] for pl in lore.load("mapa").get("mundo", []) + lore.load("mapa").get("cidade", {}).get("locais", [])
+                  if pl.get("wiki")]
+
+        def work():
+            try:
+                if wikipt.prepare(names):
+                    self.after(0, self.refresh)
+            except Exception:
+                pass
+        threading.Thread(target=work, daemon=True).start()
+
+    def wiki_page(self, title):
+        """Página da wiki pt-br (intro, seções, link): None enquanto busca; {} se não houver."""
+        if not title or not wikipt.available():
+            return {}
+        got = self._async(self._wiki_pages, title, lambda: wikipt.page(title))
+        return got if got is None or "erro" not in got else {}
+
+    @staticmethod
+    def wiki_summary(wiki, limit):
+        """O começo do texto da página, cortado no fim de uma frase."""
+        text = (wiki or {}).get("intro", "").replace("\n\n", "\n").strip()
+        if len(text) <= limit:
+            return text
+        cut = text[:limit]
+        end = max(cut.rfind(". "), cut.rfind(".\n"))
+        return (cut[:end + 1] if end > limit * 0.4 else cut.rstrip() + "…").strip()
+
+    def _virus_items(self):
+        """Vírus escritos à mão + os das categorias Vírus e Parasitas da wiki pt-br."""
+        data = lore.load("virus")
+        items = [dict(v) for v in data.get("itens", [])]
+        if not wikipt.available():
+            return items
+        used = {v.get("pt") for v in items}
+        for t in (wikipt.cached_index() or {}).get("virus", []):
+            if t not in used:
+                items.append({"id": "w_" + characters._slug(t)[2:], "nome": t, "pt": t, "busca": t, "automatica": True})
+        return items
 
     # ---------- entrada / teclas ----------
     def _lore_extras(self):
@@ -190,6 +237,11 @@ class LoreScreens:
         c.create_text(dx, y, anchor="nw", text=pl["nome"], fill=A.WHITE, font=self.f["h"], width=dw)
         c.create_text(dx, y + 26, anchor="nw", text=pl.get("regiao", ""), fill=self.accent, font=self.f["small"], width=dw)
         ay, ax = y + 56, dx
+        wiki = self.wiki_page(pl.get("wiki"))
+        summary = self.wiki_summary(wiki, 360)
+        if summary:
+            t = c.create_text(dx, ay, anchor="nw", text=summary, fill="#d5d9e0", font=self.f["small"], width=dw)
+            ay = c.bbox(t)[3] + 14
         titles = self._chapter_titles()
         for cid in pl.get("capitulos", []):
             label = titles.get(cid)
@@ -428,7 +480,7 @@ class LoreScreens:
 
     # ---------- Vírus / substâncias ----------
     def _fetch_virus_images(self):
-        items = [dict(v, id="virus_" + v["id"]) for v in lore.load("virus").get("itens", [])]
+        items = [dict(v, id="virus_" + v["id"]) for v in self._virus_items()]
         missing = [v for v in items if not characters.portrait_path(v)]
         if not missing:
             return
@@ -456,15 +508,19 @@ class LoreScreens:
 
     def _draw_virus(self, x, y, w, bottom):
         c, ov = self.c, self.overlay
-        items = lore.load("virus").get("itens", [])
+        items = self._virus_items()
         if not items:
             return
         ov["sel"] = min(ov["sel"], len(items) - 1)
+        self._fetch_virus_images()
         lw = int(w * 0.24)
         for k, v in enumerate(items):
             on = k == ov["sel"]
             tag = f"ov_vl_{v['id']}"
-            ry = y + k * 40
+            first = max(0, ov["sel"] - int((bottom - y) // 40) + 1)
+            if k < first:
+                continue
+            ry = y + (k - first) * 40
             if ry + 30 > bottom:
                 break
             if on:
@@ -489,11 +545,20 @@ class LoreScreens:
         if v.get("ano"):
             c.create_text(tx, ty, anchor="nw", text=f"Desde {v['ano']}", fill=self.accent, font=self.f["btn"])
             ty += 28
-        for label, key in (("ORIGEM", "origem"), ("COMO AGE", "efeito")):
-            if v.get(key):
+        wiki = self.wiki_page(v.get("pt"))
+        summary = self.wiki_summary(wiki, 650)
+        fields = [("NA RESIDENT EVIL WIKI", summary)] if summary else []
+        fields += [("ORIGEM", v.get("origem")), ("COMO AGE", v.get("efeito"))] if not summary or not v.get("automatica") else []
+        if v.get("pt") and wiki is None:
+            fields.insert(0, ("", "Buscando na Resident Evil Wiki..."))
+        for label, text in fields:
+            if text:
                 c.create_text(tx, ty, anchor="nw", text=label, fill=A.MUTED, font=self.f["tiny"])
-                t = c.create_text(tx, ty + 18, anchor="nw", text=v[key], fill="#d5d9e0", font=self.f["body"], width=tw)
+                t = c.create_text(tx, ty + 18, anchor="nw", text=text, fill="#d5d9e0", font=self.f["body"], width=tw)
                 ty = c.bbox(t)[3] + 14
+        if wiki and wiki.get("link"):
+            self._chip(tx, ty, "Ler na Resident Evil Wiki  ›", lambda u=wiki["link"]: webbrowser.open(u), "ov_vwiki")
+            ty += 40
         sy = max(ty, y + big[1] + 24)
         for label, key, prefix in (("CRIADO POR", "criadores", "ov_vc"), ("INFECTADOS E HOSPEDEIROS", "infectados", "ov_vi")):
             if v.get(key):
@@ -609,6 +674,36 @@ class LoreScreens:
         if total_rows > rows_fit:
             c.create_text(x + w, bottom, anchor="se", text="role para ver mais", fill=A.DIM, font=self.f["small"])
 
+    # ---------- aba Wiki do painel ----------
+    def _draw_wiki(self, ch, g, x, y, w, bottom):
+        c = self.c
+        title = wikipt.game_page(ch, g) if wikipt.available() else None
+        if not title:
+            return self._note(x, y, w, "Este item não tem página na Resident Evil Wiki em português.")
+        wiki = self.wiki_page(title)
+        if wiki is None:
+            return self._note(x, y, w, "Buscando na Resident Evil Wiki...")
+        if not wiki.get("intro") and not wiki.get("secoes"):
+            return self._note(x, y, w, "A página deste jogo na wiki está vazia.")
+        c.create_text(x, y - 4, anchor="nw", text=self._elide(wiki["titulo"], self.f["h"], w - 120), fill=A.WHITE, font=self.f["h"])
+        self._chip(x + w, y - 8, "Abrir  ›", lambda: webbrowser.open(wiki["link"]), "wk_open", anchor="e")
+        parts = [wiki.get("intro", "")] + [f"{name.upper()}\n{body}" for name, body in wiki.get("secoes", [])
+                                           if name.lower() in ("enredo", "história", "sinopse", "personagens", "jogabilidade")]
+        lines = self._wrap_lines("\n\n".join(p for p in parts if p), self.f["small"], w - 8)
+        top = y + 32
+        fits = max(1, int((bottom - top) // 18))
+        self.panel_scroll = min(self.panel_scroll, max(0, len(lines) - fits))
+        for k, line in enumerate(lines[self.panel_scroll:self.panel_scroll + fits]):
+            head = line.isupper() and len(line) < 30
+            c.create_text(x, top + k * 18, anchor="nw", text=line, fill=self.accent if head else "#d5d9e0",
+                          font=self.f["tiny"] if head else self.f["small"])
+        if len(lines) > fits:
+            track = bottom - top
+            bh = max(24, track * fits / len(lines))
+            by = top + (track - bh) * self.panel_scroll / max(1, len(lines) - fits)
+            c.create_rectangle(x + w + 12, top, x + w + 14, bottom, fill="#232a36", outline="")
+            c.create_rectangle(x + w + 12, by, x + w + 14, by + bh, fill=A.MUTED, outline="")
+
     # ---------- aba Speedrun do painel ----------
     def _draw_speedrun(self, g, x, y, w, bottom):
         c = self.c
@@ -644,5 +739,5 @@ class LoreScreens:
         self._list_window(recs, x, y + 30, w, bottom, 50, row)
 
     def _lore_init(self):
-        self._map_cache, self._files, self._file_texts, self._speedruns = {}, {}, {}, {}
+        self._map_cache, self._files, self._file_texts, self._speedruns, self._wiki_pages = {}, {}, {}, {}, {}
         self._wrap_cache = {}

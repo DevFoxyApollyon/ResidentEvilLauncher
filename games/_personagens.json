@@ -1,5 +1,5 @@
 {
- "_comentario": "Fichas da tela Personagens (tecla C). tipo: heroi (heróis e aliados), vilao ou criatura (armas biológicas). 'busca' é a página da wiki da franquia (franquia.json > wiki_referer) de onde vêm o retrato e as versões (uma imagem por jogo); 'aparicoes' são ids de capítulos de games/_linha_do_tempo.json (de qualquer seção). Versões à mão: \"versoes\": [{\"rotulo\": \"RE2 (1998)\", \"ano\": 1998, \"arquivo\": \"Nome do arquivo na wiki.png\"}].",
+ "_comentario": "Fichas da tela Personagens (tecla C). tipo: heroi (heróis e aliados), vilao ou criatura (armas biológicas). 'busca' é a página da wiki da franquia (franquia.json > wiki_referer) de onde vêm o retrato e as versões (uma imagem por jogo); 'aparicoes' são ids de capítulos de games/_linha_do_tempo.json (de qualquer seção). Versões à mão: \"versoes\": [{\"rotulo\": \"RE2 (1998)\", \"ano\": 1998, \"arquivo\": \"Nome do arquivo na wiki.png\"}]. 'pt' força a página da Resident Evil Wiki em português (a fonte dos textos, imagens e versões); sem ele, o hub procura pelo nome.",
  "personagens": [
   {
    "id": "leon",
@@ -909,7 +909,8 @@
    "descricao": "As três filhas de Alcina, feitas de enxames de insetos. Caçam Ethan pelos corredores do castelo.",
    "aparicoes": [
     "village"
-   ]
+   ],
+   "pt": "Bela Dimitrescu"
   },
   {
    "id": "donna",
@@ -1194,7 +1195,8 @@
    ],
    "fraqueza": "Coração exposto (T-002).",
    "arma": "Magnum; lança-foguetes no heliporto",
-   "chefe": "Chefe final de Resident Evil"
+   "chefe": "Chefe final de Resident Evil",
+   "pt": "Tyrant T-002"
   },
   {
    "id": "proto_tyrant",
@@ -1208,7 +1210,8 @@
    ],
    "fraqueza": "Coração exposto; é lento.",
    "arma": "Magnum, lança-granadas",
-   "chefe": "Chefe em Resident Evil 0"
+   "chefe": "Chefe em Resident Evil 0",
+   "pt": "Tyrant T-001"
   },
   {
    "id": "queen_leech",
@@ -1256,7 +1259,8 @@
    ],
    "fraqueza": "Não morre de vez; tiros na cabeça só fazem ele ajoelhar.",
    "arma": "Fugir; granadas e flash para atordoar; lança-foguetes no fim",
-   "chefe": "Chefe em Resident Evil 2"
+   "chefe": "Chefe em Resident Evil 2",
+   "pt": "Tyrant T-103"
   },
   {
    "id": "nemesis",
@@ -1271,7 +1275,8 @@
    ],
    "fraqueza": "Pode ser derrubado várias vezes, e solta itens quando cai.",
    "arma": "Lança-granadas, Magnum; o canhão Railgun no fim (1999)",
-   "chefe": "Chefe várias vezes em Resident Evil 3"
+   "chefe": "Chefe várias vezes em Resident Evil 3",
+   "pt": "Nemesis T-Type"
   },
   {
    "id": "gravedigger",
@@ -1285,7 +1290,8 @@
    ],
    "fraqueza": "Fica exposto quando sai do chão.",
    "arma": "Magnum, lança-granadas; derrubar os postes de luz nele",
-   "chefe": "Chefe em Resident Evil 3 (1999)"
+   "chefe": "Chefe em Resident Evil 3 (1999)",
+   "pt": "Grave Digger"
   },
   {
    "id": "drain_deimos",
@@ -1341,7 +1347,8 @@
    ],
    "fraqueza": "Coração exposto no peito.",
    "arma": "Rifle de precisão no coração",
-   "chefe": "Chefe em Code: Veronica"
+   "chefe": "Chefe em Code: Veronica",
+   "pt": "Alexander Ashford"
   },
   {
    "id": "ganado",
@@ -1567,7 +1574,8 @@
    ],
    "fraqueza": "Cabeça e pernas.",
    "arma": "Espingarda, lança-chamas (Burner)",
-   "chefe": "Inimigo comum"
+   "chefe": "Inimigo comum",
+   "pt": "Mofado"
   },
   {
    "id": "lycan",

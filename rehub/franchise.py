@@ -19,6 +19,7 @@ DEFAULTS = {
     "icone": "re_hub",                # re_hub.ico / re_hub.png ao lado do .exe
     "prefixo_titulo": "Resident Evil",  # tirado do nome nas capas geradas ("Resident Evil 2" vira "2")
     "wiki_referer": "https://residentevil.fandom.com/",
+    "wiki_pt": "https://residentevil.fandom.com/pt-br",  # fonte das informações (personagens, vírus, jogos, lugares)
     "mensagens": ["Iniciando sistema Umbrella...", "Carregando arquivos dos S.T.A.R.S....",
                   "Lendo a biblioteca da Steam...", "Preparando a linha do tempo...", "Abrindo a mansão Spencer..."],
     "noticias": {"feed": "https://residentevil.com.br/feed/", "fonte": "REVIL", "site": "residentevil.com.br"},

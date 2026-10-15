@@ -26,19 +26,22 @@ F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao come
   cada jogo e os seus troféus mais raros.
 - **Linha da história (H):** todos os capítulos ano a ano, com os filmes que se passam dentro da história encaixados.
   Enter abre o capítulo no hub.
-- **Personagens (C):** 125 fichas de RE (heróis e aliados, vilões e armas biológicas; Tab troca o filtro) com o que
-  cada um fez e em quais jogos aparece (clique para abrir o jogo). Cada ficha mostra **todas as versões** do personagem,
-  uma imagem por jogo/filme, da mais antiga à mais nova (PageUp/PageDown ou LT/RT trocam). As fichas ficam em
-  `games/_personagens.json`; retratos e versões vêm da wiki da franquia e ficam em `data/covers`
-  (`"retrato": "<link>"` troca a imagem principal; `"versoes": [...]` define as versões à mão).
+- **Fonte das informações: [Resident Evil Wiki em português](https://residentevil.fandom.com/pt-br/wiki/Resident_Evil_Wiki).**
+  A lista de personagens, vilões e criaturas, os textos das fichas, das armas biológicas, dos vírus, dos lugares do mapa
+  e a aba **Wiki** de cada jogo vêm de lá (guardados em `data/cache/wiki_pt`; o hub busca de novo a cada poucos dias).
+  As fichas escritas à mão em `games/_personagens.json` completam a wiki (papel, bestiário, jogos onde aparece);
+  `"pt": "<página>"` escolhe a página da wiki de uma ficha.
+- **Personagens (C):** todos os personagens, vilões e armas biológicas da wiki em português (mais de 380; Tab troca
+  o filtro), com o texto da wiki e em quais jogos aparece (clique para abrir o jogo). Cada ficha mostra **todas as
+  versões** do personagem, uma imagem por jogo/filme, da mais antiga à mais nova (PageUp/PageDown ou LT/RT trocam).
 - **Ofertas e lançamentos (L):** preço de cada jogo na Steam Brasil, os que estão na sua lista de desejos (★) e a
   contagem regressiva dos anunciados. Quando um jogo que você não tem entra em promoção, aparece um aviso (uma vez por
   dia) e o card ganha o selo "-50%". Para pôr a data de um anúncio à mão: `"data_lancamento": "2027-03-12"` (ou
   `"2027-03"`, `"2027"`) no capítulo em `games/_linha_do_tempo.json`.
 - **Mapa (M):** onde cada capítulo acontece, num mapa-múndi e numa planta de Raccoon City (Tab troca). Clique num jogo
   para abri-lo. Os lugares ficam em `games/_mapa.json`.
-- **Arquivos dos jogos (A):** os documentos e diários de cada jogo, lidos da wiki da franquia e **traduzidos para o
-  português** automaticamente (o botão "Português / Original" troca; fica guardado em `data/cache/arquivos`).
+- **Arquivos dos jogos (A):** os documentos e diários de cada jogo. A wiki em português não tem esses documentos,
+  então eles vêm da wiki em inglês e são **traduzidos para o português** automaticamente (o botão "Português / Original" troca; fica guardado em `data/cache/arquivos`).
 - **Relações (R):** famílias, parceiros e inimigos ligados por linhas (`games/_relacoes.json`).
 - **Vírus e parasitas (V):** T, G, T-Veronica, Plaga, Uroboros, mofo... com quem criou, como age e quem foi infectado
   (`games/_virus.json`).

@@ -1,4 +1,7 @@
-"""Fichas de personagens (games/_personagens.json) e os retratos, baixados da wiki da franquia.
+"""Fichas de personagens e os retratos e versões, baixados da Resident Evil Wiki em português (rehub/wikipt.py).
+
+A lista junta as fichas escritas à mão (games/_personagens.json: tipo, papel, bestiário...) com todos os personagens,
+vilões e criaturas das categorias da wiki em português (o que só existe lá vira ficha automática).
 
 Além do retrato principal, cada personagem tem as suas versões (uma imagem por jogo/filme): vêm da galeria do
 quadro de informações da página dele na wiki (e da página "/remake", na wiki de RE) ou de "versoes" na ficha.
@@ -9,11 +12,12 @@ import subprocess
 import urllib.parse
 import urllib.request
 
+from . import wikipt
 from .franchise import FR
 from .paths import COVERS, GAMES_DIR
 
 VERSIONS = COVERS / "_versoes"
-CACHE_VERSION = 2
+CACHE_VERSION = 3
 
 # rótulos da wiki -> (nome em português, ano) para ordenar do mais antigo ao mais novo
 LABELS = {
@@ -34,7 +38,10 @@ LABELS = {
     "REQ": ("Requiem", 2026), "STAGE": ("Biohazard: The Stage", 2016), "PACHISLOT": ("Pachislot", 2000),
     "PACHI-SLOT": ("Pachislot", 2000), "HUMAN": ("Humano", None), "MUTATED": ("Mutado", None),
     "SWAMP MAN": ("Homem do pântano", None), "TEEN": ("Adolescente", None), "BABY": ("Bebê", None),
-    "ADULT": ("Adulto", None),
+    "ADULT": ("Adulto", None), "IDTB": ("Infinite Darkness (extra)", 2021), "REM": ("REmake (2002)", 2002),
+    "RE1": ("Resident Evil (1996)", 1996), "RE2": ("Resident Evil 2 (1998)", 1998), "RE4": ("Resident Evil 4 (2005)", 2005),
+    "CVX (2001)": ("Code: Veronica X", 2001), "VILLAGE": ("Village", 2021), "RE8": ("Village", 2021),
+    "RE7 (2017)": ("Resident Evil 7", 2017), "REV1": ("Revelations", 2012), "DA": ("Dead Aim", 2003),
 }
 # na página "/remake" os rótulos curtos querem dizer o remake
 REMAKE_LABELS = {"RE2": "2R", "RE4": "4R", "RE3": "RE3 (2020)"}
@@ -43,11 +50,48 @@ REMAKES = {"2": ("Resident Evil 2 (Remake)", 2019), "3": ("Resident Evil 3 (Rema
            "4": ("Resident Evil 4 (Remake)", 2023)}
 
 
-def load():
+_merged = {"key": None, "list": []}
+
+
+def curated():
+    """Só as fichas escritas à mão."""
     try:
         return json.loads((GAMES_DIR / "_personagens.json").read_text(encoding="utf-8")).get("personagens", [])
     except (OSError, ValueError):
         return []
+
+
+def _slug(title):
+    return "w_" + re.sub(r"[^a-z0-9]+", "_", wikipt._norm_keep(title)).strip("_")
+
+
+def load():
+    """Fichas à mão + todos os personagens/vilões/criaturas da wiki em português (sem repetir).
+    Usa só o que já está guardado: o índice da wiki é buscado em segundo plano (Hub.prepare_wiki)."""
+    f = GAMES_DIR / "_personagens.json"
+    idx_file = wikipt.CACHE / "indice.json"
+    names_file = wikipt.CACHE / "nomes.json"
+    key = tuple(p.stat().st_mtime if p.exists() else 0 for p in (f, idx_file, names_file))
+    if _merged["key"] == key:
+        return _merged["list"]
+    base = [dict(p) for p in curated()]
+    idx = (wikipt.cached_index() or {}).get("pessoas", {}) if wikipt.available() else {}
+    names = wikipt.cached_names() if wikipt.available() else {}
+    used = set()
+    for p in base:
+        t = p.get("pt") or names.get(p.get("busca", "")) or names.get(p["nome"])
+        if t:
+            p["pt"] = t
+            used.add(t)
+            extra = [c for c in idx.get(t, {}).get("capitulos", []) if c not in p.get("aparicoes", [])]
+            p["aparicoes"] = list(p.get("aparicoes", [])) + extra
+    for t, e in sorted(idx.items(), key=lambda kv: kv[0].lower()):
+        if t in used:
+            continue
+        base.append({"id": _slug(t), "tipo": e["tipo"], "nome": t, "pt": t, "busca": t, "papel": "", "descricao": "",
+                     "aparicoes": e.get("capitulos", []), "automatica": True})
+    _merged.update(key=key, list=base)
+    return base
 
 
 def portrait_path(ch):
@@ -83,7 +127,10 @@ def download_portrait(ch):
     """Imagem principal da página do personagem na wiki (pelo título; se não achar, pela busca)."""
     name = ch.get("busca") or ch["nome"]
     try:
-        url = ch.get("retrato") or _thumb(_api({"action": "query", "titles": name, "redirects": 1, "prop": "pageimages", "pithumbsize": 600}))
+        url = ch.get("retrato")
+        if not url and ch.get("pt") and wikipt.available():  # primeiro a wiki em português
+            url = wikipt.thumb(ch["pt"])
+        url = url or _thumb(_api({"action": "query", "titles": name, "redirects": 1, "prop": "pageimages", "pithumbsize": 600}))
         if not url:
             url = _thumb(_api({"action": "query", "generator": "search", "gsrsearch": name, "gsrlimit": 1,
                                "prop": "pageimages", "pithumbsize": 600}))
@@ -173,8 +220,21 @@ def version_path(v):
 def download_versions(ch):
     """Busca na wiki uma imagem por jogo/filme do personagem e guarda em data/covers/_versoes."""
     entries = []  # (arquivo da wiki, rótulo, ano)
+    source = "en"
     for v in ch.get("versoes", []):  # versões escritas à mão na ficha
         entries.append((v["arquivo"], v["rotulo"], v.get("ano")))
+    if not entries and ch.get("pt") and wikipt.available():  # galeria da wiki em português
+        try:
+            items = wikipt.gallery(ch["pt"])
+        except (OSError, ValueError):
+            items = []
+        for f, lab in reversed(items):
+            got = _label(lab)
+            if got:
+                entries.append((f, *got))
+        source = "pt" if len(entries) > 1 else "en"
+        if source == "en":
+            entries = []
     if not entries:
         title, items, _ = _gallery(ch.get("busca") or ch["nome"])
         for f, lab in reversed(items):  # a wiki lista do mais novo para o mais antigo
@@ -198,10 +258,12 @@ def download_versions(ch):
         fixed.append((f, lab, year or last))
     fixed.sort(key=lambda e: e[2])
     try:
-        urls = _urls([f for f, _, _ in fixed])
+        urls = (wikipt.file_urls if source == "pt" else _urls)([f for f, _, _ in fixed])
     except (OSError, ValueError):
         return False
     VERSIONS.mkdir(parents=True, exist_ok=True)
+    for old in VERSIONS.glob(f"{ch['id']}_*"):  # imagens de uma busca anterior
+        old.unlink(missing_ok=True)
     out, seen = [], set()
     for k, (f, lab, year) in enumerate(fixed):
         url = urls.get(f) or urls.get(f.replace("_", " "))
@@ -209,7 +271,7 @@ def download_versions(ch):
             continue
         seen.add(f)
         name = f"{ch['id']}_{k:02d}{'.png' if f.lower().endswith('.png') else '.jpg'}"
-        if (VERSIONS / name).exists() or _curl(url, VERSIONS / name):
+        if _curl(url, VERSIONS / name):
             out.append({"rotulo": lab, "ano": year or None, "arquivo": name})
     (VERSIONS / f"{ch['id']}.json").write_text(json.dumps({"v": CACHE_VERSION, "versoes": out}, ensure_ascii=False),
                                                encoding="utf-8")

@@ -305,7 +305,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
         threading.Thread(target=self._fetch_news, daemon=True).start()
         threading.Thread(target=self._fetch_trophies, daemon=True).start()
         self.after(4000, self.refresh_deals)
-        self.after(8000, self.check_achievements)  # conquistas do hub liberadas desde a última vez  # preços e lista de desejos (avisa se algum jogo estiver em promoção)
+        self.after(8000, self.check_achievements)
+        self.after(2500, self.prepare_wiki)  # Resident Evil Wiki em português: lista de personagens e vírus  # conquistas do hub liberadas desde a última vez  # preços e lista de desejos (avisa se algum jogo estiver em promoção)
         self._tick()
         self._away = self._seen_front = False
         if not os.environ.get("REHUB_TESTE"):
@@ -625,9 +626,9 @@ class Hub(Screens, LoreScreens, tk.Tk):
 
     def _panel_tabs(self):
         if self.game and self.game["tipo"] == "info":
-            return (("versoes", "Detalhes"),)
-        return (("trofeus", "Troféus"), ("trailer", "Trailer"), ("prints", "Prints"), ("speedrun", "Speedrun"),
-                ("versoes", "Versões"), ("dlcs", "DLCs"))
+            return (("versoes", "Detalhes"), ("wiki", "Wiki"))
+        return (("trofeus", "Troféus"), ("trailer", "Trailer"), ("wiki", "Wiki"), ("prints", "Prints"),
+                ("speedrun", "Speedrun"), ("versoes", "Versões"), ("dlcs", "DLCs"))
 
     def cycle_tab(self, d):
         keys = [k for k, _ in self._panel_tabs()]
@@ -1375,6 +1376,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
             return self._draw_prints(self.game, *body)
         if active == "speedrun":
             return self._draw_speedrun(self.game, *body)
+        if active == "wiki":
+            return self._draw_wiki(self.chapter, self.game, *body)
         g = self.steam_game()
         if g is not None and g is not self.game:  # à esquerda do "Atualizar" para não sobrepor
             right = x + w - (self.f["tiny"].measure("Atualizar") + 16 if self.panel_tab == "trofeus" else 0)

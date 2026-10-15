@@ -6,6 +6,7 @@ import os
 import re
 import threading
 import time
+import webbrowser
 from datetime import datetime
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageTk
@@ -674,10 +675,22 @@ class Screens:
         c.create_text(tx, y + 8, anchor="nw", text=tipo.get(p.get("tipo", "heroi"), ""), fill=A.MUTED, font=self.f["tiny"])
         name = c.create_text(tx, y + 26, anchor="nw", text=p["nome"], fill=A.WHITE, font=self.f["title"], width=tw)
         ty = c.bbox(name)[3] + 4
-        c.create_text(tx, ty, anchor="nw", text=p.get("papel", ""), fill=self.accent, font=self.f["btn"], width=tw)
-        ty += 30
-        desc = c.create_text(tx, ty, anchor="nw", text=p.get("descricao", ""), fill="#d5d9e0", font=self.f["body"], width=tw)
-        ty = c.bbox(desc)[3] + 12
+        wiki = self.wiki_page(p.get("pt"))  # texto da Resident Evil Wiki em português
+        papel = p.get("papel") or (wiki or {}).get("papel", "")
+        if papel:
+            c.create_text(tx, ty, anchor="nw", text=self._elide(papel, self.f["btn"], tw), fill=self.accent, font=self.f["btn"])
+            ty += 30
+        text = self.wiki_summary(wiki, 520 if p.get("fraqueza") else 760) or p.get("descricao", "")
+        if p.get("pt") and wiki is None:
+            text = text or "Buscando na Resident Evil Wiki..."
+        desc = c.create_text(tx, ty, anchor="nw", text=text, fill="#d5d9e0", font=self.f["body"], width=tw)
+        ty = c.bbox(desc)[3] + 8
+        if wiki and wiki.get("link"):
+            c.create_text(tx, ty, anchor="nw", text="Resident Evil Wiki (pt-br)  ›", fill=A.MUTED, font=self.f["tiny"],
+                          tags=("ov_pwiki",))
+            self._clickable("ov_pwiki", lambda u=wiki["link"]: webbrowser.open(u))
+            ty += 20
+        ty += 4
         self.stat_add("fichas", p["id"])
         if p.get("fraqueza") or p.get("arma") or p.get("chefe"):  # bestiário
             for label, key in (("PONTO FRACO", "fraqueza"), ("MELHOR ARMA", "arma"), ("ONDE É CHEFE", "chefe")):
