@@ -137,6 +137,14 @@ def effect(name, min_gap=0.05, volume=0.8):
     if now - _last_effect.get(name, 0) < min_gap:
         return
     _last_effect[name] = now
+    own = _theme_sound(name)
+    if own is not None:  # som do jogo selecionado (data/sons/jogos/<capítulo>/)
+        if own.suffix.lower() == ".wav":
+            winsound.PlaySound(str(own), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+        else:
+            _fx = _fx or _Fx()
+            _fx.play(f"{_theme}_{name}", own, volume)
+        return
     mp3 = PS5 / f"{PS5_SOUNDS.get(name, name)}.mp3"
     if mp3.exists():
         _fx = _fx or _Fx()
@@ -145,6 +153,45 @@ def effect(name, min_gap=0.05, volume=0.8):
     p = SOUNDS / f"{FALLBACK.get(name, name)}.wav"
     if p.exists():
         winsound.PlaySound(str(p), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+
+
+# ---------- sons de menu por jogo ----------
+GAME_SOUNDS = SOUNDS / "jogos"
+_theme = None
+_theme_files = {}
+
+
+def set_theme(chapter_id):
+    """Sons de menu do capítulo selecionado: arquivos seus em data/sons/jogos/<id do capítulo>/,
+    com o nome do efeito (Navigation.mp3, Navigation_Enter.wav... ou select.wav, enter.mp3...)."""
+    global _theme
+    if chapter_id == _theme:
+        return
+    _theme = chapter_id
+    _theme_files.clear()
+    folder = GAME_SOUNDS / chapter_id if chapter_id else None
+    if folder and folder.is_dir():
+        for p in folder.iterdir():
+            if p.suffix.lower() in (".mp3", ".wav", ".wma", ".m4a"):
+                _theme_files[p.stem.lower()] = p
+
+
+def _theme_sound(name):
+    if not _theme_files:
+        return None
+    return _theme_files.get(PS5_SOUNDS.get(name, name).lower()) or _theme_files.get(name.lower())
+
+
+def theme_folder(chapter_id):
+    """Cria (se preciso) a pasta de sons do capítulo, com um guia dos nomes de arquivo."""
+    folder = GAME_SOUNDS / chapter_id
+    folder.mkdir(parents=True, exist_ok=True)
+    guide = folder / "LEIA-ME.txt"
+    if not guide.exists():
+        names = "\n".join(f"  {k:<13} -> {v}.mp3 (ou {k}.wav)" for k, v in PS5_SOUNDS.items() if k != "inicio")
+        guide.write_text("Coloque aqui os sons de menu deste jogo (mp3 ou wav). Quando o jogo estiver selecionado,\n"
+                         "eles tocam no lugar dos sons padrão. Nomes dos arquivos:\n\n" + names + "\n", encoding="utf-8")
+    return folder
 
 
 def stop_effect(name, fade=0.8):

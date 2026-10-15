@@ -200,4 +200,6 @@ def _summary(appid, items):
         "por_tier": per_tier,
         "recentes": sorted((i for i in items if i["conquistado"]), key=lambda i: -i["quando"])[:4],
         "proximos": sorted((i for i in items if not i["conquistado"]), key=lambda i: -(i["raridade"] or 0))[:4],
+        "raros": sorted((i for i in items if i["conquistado"] and i["raridade"] is not None),
+                        key=lambda i: i["raridade"])[:6],  # os mais raros que você já tem (tela de perfil)
     }

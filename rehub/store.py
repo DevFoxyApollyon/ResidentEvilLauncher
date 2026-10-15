@@ -39,15 +39,17 @@ def _save(name, data):
 def items(appids):
     """{appid: {"assets": {...}, "lancamento": timestamp}} de vários jogos numa consulta só."""
     data = _cached("itens.json", 7 * 86400) or {}
-    missing = [a for a in appids if str(a) not in data]
+    missing = [a for a in appids if str(a) not in data or "precisao" not in data[str(a)]]
     if missing:
         req = {"ids": [{"appid": a} for a in missing],
                "context": {"language": "brazilian", "country_code": "BR"},
                "data_request": {"include_assets": True, "include_release": True}}
         url = "https://api.steampowered.com/IStoreBrowseService/GetItems/v1?input_json=" + urllib.parse.quote(json.dumps(req))
         for it in _get_json(url).get("response", {}).get("store_items", []):
-            data[str(it["appid"])] = {"assets": it.get("assets", {}),
-                                      "lancamento": (it.get("release") or {}).get("steam_release_date")}
+            rel = it.get("release") or {}
+            # precisao: "date_full" (dia certo), "date_month", "date_quarter", "date_year" ou "" (já saiu / sem data)
+            data[str(it["appid"])] = {"assets": it.get("assets", {}), "lancamento": rel.get("steam_release_date"),
+                                      "precisao": rel.get("coming_soon_display", "") if rel.get("is_coming_soon") else ""}
         _save("itens.json", data)
     return {int(k): v for k, v in data.items()}
 

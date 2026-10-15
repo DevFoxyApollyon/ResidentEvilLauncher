@@ -16,13 +16,14 @@ from tkinter import font as tkfont
 
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps, ImageTk
 
-from .. import audio, catalog, fluffy, fonts, github, news, trailer, launcher, steam, store, trophies
+from .. import audio, catalog, fluffy, fonts, gamepad, github, library, news, trailer, launcher, steam, store, trophies
 from ..mods import ModManager
 from ..franchise import FR, hex_rgb
 from ..paths import COVERS, DATA, ROOT
 from . import theme as t
 from .splash import Splash
 from .manage import ManageWindow
+from .screens import Screens
 
 BG_RGB = (11, 14, 20)
 WHITE, MUTED, DIM = "#f2f4f8", "#a7adb8", "#5d6573"
@@ -218,7 +219,7 @@ def _accent(img):
     return f"#{int(r * 255):02x}{int(gg * 255):02x}{int(b * 255):02x}"
 
 
-class Hub(tk.Tk):
+class Hub(Screens, tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(FR["app"])
@@ -243,12 +244,18 @@ class Hub(tk.Tk):
         self.section, self.order, self.only_installed = "canon", "historia", False
         self.sel = 0
         self.version_idx = {}
+        self.overlay = None
         self.status_text = ""
         self.panel_tab, self.panel_scroll = "trofeus", 0
         self.games = catalog.load_games()
         self._build_chapters()
+        self._start_at_last_played()
         self.trophy_state = {g["appid"]: trophies.cached(g["appid"]) for g in self.games if g["tipo"] == "steam"}
         self.dlc_state = {}
+        self._toasts, self.store_info = [], {}
+        self.deals_state = None
+        self._minis, self._portraits, self._thumbs, self._thumb_pending, self._media_cache = {}, {}, {}, set(), {}
+        self._dim_photo = None
 
         self._pil, self._tiles, self._remote, self._remote_pending = {}, {}, {}, set()
         self._tile_base, self._halos, self._halo_base = {}, {}, {}
@@ -279,16 +286,22 @@ class Hub(tk.Tk):
         self.c.bind("<Leave>", lambda e: self._set_hover(None))
         self.bind("<MouseWheel>", self._wheel)
         self.protocol("WM_DELETE_WINDOW", self.quit_app)
-        for key, fn in (("<Left>", lambda e: self.step(-1)), ("<Right>", lambda e: self.step(1)),
-                        ("<Up>", lambda e: self.pick_version(-1)), ("<Down>", lambda e: self.pick_version(1)),
-                        ("<Return>", lambda e: self.primary_action()), ("<g>", lambda e: self.manage()),
-                        ("<Tab>", lambda e: self.next_section()), ("<F11>", lambda e: self.toggle_fullscreen()),
-                        ("<Escape>", lambda e: (self._sound("back"), self.toggle_fullscreen(False))), ("<F5>", lambda e: self.rescan())):
-            self.bind(key, fn)
+        for key, action in (("<Left>", "left"), ("<Right>", "right"), ("<Up>", "up"), ("<Down>", "down"),
+                            ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
+                            ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
+                            ("<e>", "extras")):
+            self.bind(key, lambda e, a=action: self._press(a))
+        self.bind("<F11>", lambda e: self.toggle_fullscreen())
+        self.bind("<F5>", lambda e: self.rescan())
+        self.pad = gamepad.Pad()
+        self.after(500, self._poll_pad)
+        if not os.environ.get("REHUB_TESTE"):  # Ctrl+Alt+H de qualquer lugar traz o hub de volta
+            self._hotkey = gamepad.global_hotkey(lambda: self.after(0, self.summon))
 
         threading.Thread(target=self._fetch_art, daemon=True).start()
         threading.Thread(target=self._fetch_news, daemon=True).start()
         threading.Thread(target=self._fetch_trophies, daemon=True).start()
+        self.after(4000, self.refresh_deals)  # preços e lista de desejos (avisa se algum jogo estiver em promoção)
         self._tick()
         self._away = self._seen_front = False
         if not os.environ.get("REHUB_TESTE"):
@@ -307,8 +320,54 @@ class Hub(tk.Tk):
             chapters = [ch for ch in chapters if any(launcher.is_ready(g, self.cfg, self.installed) for g in ch["versoes"])]
         if self.order == "lancamento":
             chapters.sort(key=lambda ch: ch.get("lancamento", 9999))
+        elif self.order == "recentes":  # o que você jogou por último primeiro (como na PS5)
+            chapters.sort(key=lambda ch: -max((self.last_played(g) for g in ch["versoes"]), default=0))
         self.chapters = chapters
         self.sel = max(0, min(self.sel, len(chapters) - 1))
+
+    # ---------- horas jogadas e "continuar" ----------
+    def playtimes(self):
+        now = time.time()
+        if now - getattr(self, "_play_at", 0) > 2:  # é lido a cada quadro da animação: confere o arquivo a cada 2 s
+            self._play, self._play_at = library.playtimes(self.steamid), now
+        return self._play
+
+    def last_played(self, g):
+        """Quando a versão foi jogada por último: pela Steam ou pelo próprio app (jogos fora da Steam)."""
+        if g.get("tipo") == "steam":
+            return self.playtimes().get(g["appid"], {}).get("ultima", 0)
+        return self.cfg.get(g["id"]).get("ultima", 0) if g.get("tipo") != "info" else 0
+
+    def continue_target(self):
+        """(seção, capítulo, versão) jogado por último, ou None (guardado por 2 s: é usado a cada quadro)."""
+        now = time.time()
+        if now - getattr(self, "_cont_at", 0) < 2:
+            return self._cont
+        self._cont_at, self._cont = now, self._find_continue()
+        return self._cont
+
+    def _find_continue(self):
+        best = None
+        for sec in ("canon", "spinoff"):
+            for ch in catalog.load_timeline(self.games, sec):
+                for g in ch["versoes"]:
+                    ts = self.last_played(g)
+                    if ts and (best is None or ts > best[0]):
+                        best = (ts, sec, ch, g)
+        return best[1:] if best else None
+
+    def _start_at_last_played(self):
+        """Ao abrir, já para no último jogo que você jogou (se for da linha do tempo)."""
+        target = self.continue_target()
+        if target and target[0] == self.section:
+            _, ch, g = target
+            self.sel = next((i for i, c in enumerate(self.chapters) if c["id"] == ch["id"]), 0)
+            self.version_idx[ch["id"]] = next((i for i, v in enumerate(ch["versoes"]) if v["id"] == g["id"]), 0)
+
+    def continue_last(self):
+        target = self.continue_target()
+        if target:
+            self.goto_chapter(target[1]["id"], target[2]["id"])
 
     def rescan(self):
         self.games = catalog.load_games()
@@ -346,7 +405,19 @@ class Hub(tk.Tk):
         return self._pil[(key, kind)]
 
     def _art(self, g, kind):
-        """Arte da versão; se ela não tiver fundo, usa o da versão Steam do mesmo capítulo."""
+        """Arte da versão; se ela não tiver fundo, usa o da versão Steam do mesmo capítulo.
+        Uma print escolhida em "Usar como fundo" vem antes de tudo."""
+        if kind == "fundo":
+            own = self.cfg.get("_fundos").get(store.art_key(g) or g["id"])
+            if own:
+                key = ("_fundo_usuario", own)
+                if key not in self._pil:
+                    try:
+                        self._pil[key] = Image.open(own).convert("RGB")
+                    except OSError:
+                        self._pil[key] = None
+                if self._pil[key] is not None:
+                    return self._pil[key]
         img = self._image(store.art_key(g), kind)
         if img is None and kind == "fundo":
             ch = self.chapter
@@ -402,6 +473,7 @@ class Hub(tk.Tk):
             info = store.items([g["appid"] for g in self.games if g["tipo"] == "steam"])
         except (OSError, ValueError):
             info = {}
+        self.store_info = info  # datas de lançamento (contagem regressiva)
         extras = [v for sec in ("spinoff", "perdidos", "midia", "hqs", "fas", "noticias") for ch in catalog.load_timeline(self.games, sec)
                   for v in ch["versoes"] if v.get("arte")]  # pôsteres de filmes e HQs
         for g in self.games + extras:
@@ -493,6 +565,7 @@ class Hub(tk.Tk):
 
     def go_home(self):
         """Logo do topo: volta para o começo (primeiro capítulo da primeira aba)."""
+        self.overlay = None
         self.set_section(SECTIONS[0][0])
         if self.chapters:
             self.select(0)
@@ -513,6 +586,91 @@ class Hub(tk.Tk):
             self.sel = len(self.chapters) - 1
             self._queue_music()
             self.refresh()
+
+    def _press(self, action):
+        """Uma ação do teclado ou do controle. Com uma tela aberta por cima, ela recebe a ação."""
+        screens = {"profile": "perfil", "story": "historia", "people": "personagens", "deals": "ofertas", "extras": "extras"}
+        if self.overlay and not (self.overlay["kind"] == "viewer" or action not in screens):
+            return self.open_overlay(screens[action])  # atalho de outra tela: troca direto
+        if self.overlay:
+            return self._ov_press("back" if action == "esc" else action)
+        keys = self._section_keys()
+        fn = {"left": lambda: self.step(-1), "right": lambda: self.step(1),
+              "up": lambda: self.pick_version(-1), "down": lambda: self.pick_version(1),
+              "enter": self.primary_action, "manage": self.manage, "next_section": self.next_section,
+              "prev_section": lambda: self.set_section(keys[keys.index(self.section) - 1]),
+              "esc": lambda: (self._sound("back"), self.toggle_fullscreen(False)), "back": lambda: self._sound("back"),
+              "profile": lambda: self.open_overlay("perfil"), "story": lambda: self.open_overlay("historia"),
+              "people": lambda: self.open_overlay("personagens"), "deals": lambda: self.open_overlay("ofertas"),
+              "extras": lambda: self.open_overlay("extras"), "photo": self.photo_card,
+              "tab_prev": lambda: self.cycle_tab(-1), "tab_next": lambda: self.cycle_tab(1),
+              "scroll_up": lambda: self._scroll_panel(-1), "scroll_down": lambda: self._scroll_panel(1),
+              "home": self.go_home}.get(action)
+        if fn:
+            fn()
+
+    @staticmethod
+    def _section_keys():
+        return [k for k, _ in SECTIONS]
+
+    def _scroll_panel(self, d):
+        self.panel_scroll = max(0, self.panel_scroll + d)
+        self.refresh()
+
+    def _panel_tabs(self):
+        if self.game and self.game["tipo"] == "info":
+            return (("versoes", "Detalhes"),)
+        return (("trofeus", "Troféus"), ("trailer", "Trailer"), ("prints", "Prints"), ("versoes", "Versões"), ("dlcs", "DLCs"))
+
+    def cycle_tab(self, d):
+        keys = [k for k, _ in self._panel_tabs()]
+        cur = self.panel_tab if self.panel_tab in keys else keys[0]
+        self.set_tab(keys[(keys.index(cur) + d) % len(keys)])
+
+    # botão do controle -> ação (Y no visualizador de prints = usar como fundo)
+    PAD_ACTIONS = {"left": "left", "right": "right", "up": "up", "down": "down", "a": "enter", "b": "back",
+                   "x": "manage", "y": "photo", "lb": "prev_section", "rb": "next_section", "lt": "tab_prev",
+                   "rt": "tab_next", "start": "extras", "back": "profile", "rs_up": "scroll_up", "rs_down": "scroll_down",
+                   "guide": "home"}
+
+    def _poll_pad(self):
+        """Lê o controle. Segurar o botão Xbox/Guide traz o hub de volta mesmo com outro programa na frente."""
+        try:
+            events = self.pad.poll()
+            if self.pad.guide_since and time.time() - self.pad.guide_since > 0.8 and not self._is_front():
+                self.pad.guide_since = None
+                self.summon()
+            elif events and self._is_front():
+                for ev in events:
+                    if ev in self.PAD_ACTIONS:
+                        self._press(self.PAD_ACTIONS[ev])
+        except Exception:
+            pass
+        self.after(33 if self.pad.connected else 300, self._poll_pad)
+
+    def _is_front(self):
+        try:
+            fg = ctypes.windll.user32.GetForegroundWindow()
+            pid = ctypes.c_ulong()
+            ctypes.windll.user32.GetWindowThreadProcessId(fg, ctypes.byref(pid))
+            return pid.value == os.getpid()
+        except Exception:
+            return True
+
+    def summon(self):
+        """Traz o hub para a frente em tela cheia (atalho Ctrl+Alt+H ou segurar o botão do controle)."""
+        self.deiconify()
+        if self._away:
+            self._come_back()
+        self.attributes("-fullscreen", True)
+        self.lift()
+        self.focus_force()
+        try:
+            hwnd = int(self.wm_frame(), 16)
+            ctypes.windll.user32.ShowWindow(hwnd, 9)
+            ctypes.windll.user32.SetForegroundWindow(hwnd)
+        except (ValueError, tk.TclError):
+            pass
 
     def _kick(self):
         """Liga o laço de animação (se já não estiver rodando)."""
@@ -546,7 +704,7 @@ class Hub(tk.Tk):
         if self._fade:
             self._fade_step()
             active = True
-        if self._render_job:  # já vem um redesenho completo logo em seguida
+        if self._render_job or self.overlay:  # já vem um redesenho completo (ou o carrossel está escondido)
             pass
         elif moving:
             self._redraw_carousel()
@@ -594,6 +752,7 @@ class Hub(tk.Tk):
         if self._music_job:
             self.after_cancel(self._music_job)
         ch, g = self.chapter, self.game
+        audio.set_theme(ch["id"] if ch else None)  # sons de menu do jogo (data/sons/jogos/<capítulo>)
         self._music_job = self.after(500, lambda: self.music.play_chapter(ch, g) if ch else self.music.stop())
 
     def _save_prefs(self, **values):
@@ -644,6 +803,7 @@ class Hub(tk.Tk):
     def _come_back(self):
         self._away = False
         self.installed = steam.installed_apps()  # pode ter instalado/desinstalado algo na Steam enquanto estava fora
+        self._media_cache.clear()  # prints tiradas durante o jogo
         self.attributes("-fullscreen", True)
         self.music.set_enabled(self.prefs["trilha"])
         self._queue_music()
@@ -692,7 +852,7 @@ class Hub(tk.Tk):
         self.set_section(keys[(keys.index(self.section) + 1) % len(keys)])
 
     def toggle_order(self):
-        self.order = "lancamento" if self.order == "historia" else "historia"
+        self.order = {"historia": "lancamento", "lancamento": "recentes"}.get(self.order, "historia")
         cid = self.chapter["id"] if self.chapter else None
         self._build_chapters()
         self.sel = next((i for i, ch in enumerate(self.chapters) if ch["id"] == cid), 0)
@@ -711,6 +871,8 @@ class Hub(tk.Tk):
         self.refresh()
 
     def _wheel(self, e):
+        if self.overlay:
+            return self._ov_wheel(e.delta)
         x1, y1, x2, y2 = self._panel_box
         if x1 <= e.x_root - self.c.winfo_rootx() <= x2 and y1 <= e.y_root - self.c.winfo_rooty() <= y2:
             self.panel_scroll = max(0, self.panel_scroll + (1 if e.delta < 0 else -1))
@@ -757,6 +919,11 @@ class Hub(tk.Tk):
                 threading.Thread(target=self._preload, daemon=True).start()
         elif key != self._bg_key and key != self._bg_pending and not (self._fade and self._fade["key"] == key):
             self._start_bg_change(hero, key)
+        self._tile_rects = []
+        if self.overlay:  # tela por cima (perfil, história...): o resto da tela principal não é desenhado
+            self._draw_overlay(W, H)
+            self._draw_toasts(W)
+            return
         c.create_image(0, 0, image=self._bg_photo, anchor="nw")
 
         self._draw_header(W)
@@ -769,6 +936,7 @@ class Hub(tk.Tk):
         self._redraw_carousel()
         self._draw_details()
         self._draw_panel(*panel)
+        self._draw_toasts(W)
 
     def _redraw_carousel(self):
         """Apaga e redesenha só as capas e a linha do tempo (camada 'car')."""
@@ -781,6 +949,7 @@ class Hub(tk.Tk):
         for item in c.find_all():
             if item >= mark:
                 c.addtag_withtag("car", item)
+        c.tag_raise("toast")  # avisos sempre por cima das capas
 
     def _preload(self):
         """Em segundo plano: abre do disco as artes e monta as capas grandes, para a troca de capítulo não travar."""
@@ -876,7 +1045,7 @@ class Hub(tk.Tk):
             c.create_text(x, 38, anchor="w", text=label, fill=WHITE if on else MUTED, font=self.f["nav"], tags=(tag,))
             if on:
                 c.create_rectangle(x, 54, x + w, 57, fill=self.accent, outline="")
-            self._clickable(tag, lambda k=key: self.set_section(k))
+            self._clickable(tag, lambda k=key: (setattr(self, "overlay", None), self.set_section(k), self.refresh()))
             x += w + 28
         self._nav_end = x
 
@@ -893,28 +1062,35 @@ class Hub(tk.Tk):
         text = f"{plats}   ·   {got} troféus"
         tw = self.f["h"].measure(text) + 40
         if self.trophy_state and right - tw > self._nav_end + 20:  # sem jogos da Steam ou sem espaço: não mostra
-            c.create_text(right, 38, anchor="e", text=text, fill=WHITE, font=self.f["h"])
+            c.create_text(right, 38, anchor="e", text=text, fill=WHITE, font=self.f["h"], tags=("profile",))
             x = right - self.f["h"].measure(text) - 12
             self._cup(x - 8, 38, 9, TIER_COLORS["platina"])
             if self.persona and x - 40 - self.f["body"].measure(self.persona) > self._nav_end + 20:
-                c.create_text(x - 28, 38, anchor="e", text=self.persona, fill=MUTED, font=self.f["body"])
+                c.create_text(x - 28, 38, anchor="e", text=self.persona, fill=MUTED, font=self.f["body"], tags=("profile",))
+            self._clickable("profile", lambda: self.open_overlay("perfil"))
 
     def _draw_bottom_bar(self, W, H):
         c, y = self.c, H - 32
-        c.create_text(MARGIN, y, anchor="w", fill=DIM, font=self.f["small"],
-                      text="← →  capítulos    ↑ ↓  versões    Enter  jogar    G  gerenciar    Tab  seção    F11  tela cheia")
         x = W - MARGIN
-        for label, cmd, on in (("⚙  Opções", self._options_menu, False),
-                               ("Efeitos", self.toggle_effects, self.prefs["efeitos"]),
-                               ("♪  Trilha", self.toggle_music, self.prefs["trilha"]),
-                               ("Só instalados", self.toggle_installed, self.only_installed),
-                               ("Ordem: " + ("História" if self.order == "historia" else "Lançamento"), self.toggle_order, False)):
+        order = {"historia": "História", "lancamento": "Lançamento", "recentes": "Recentes"}[self.order]
+        chips = [("⚙  Opções", self._options_menu, False), ("☰  Extras", lambda: self.open_overlay("extras"), False),
+                 ("Efeitos", self.toggle_effects, self.prefs["efeitos"]),
+                 ("♪  Trilha", self.toggle_music, self.prefs["trilha"]),
+                 ("Só instalados", self.toggle_installed, self.only_installed),
+                 ("Ordem: " + order, self.toggle_order, False)]
+        target = self.continue_target()
+        if target:
+            chips.append(("▶  Continuar", self.continue_last, False))
+        for label, cmd, on in chips:
             w = self.f["small"].measure(label) + 28
-            tag = "opt_" + label.split()[0].strip("⚙").lower() + str(len(label))
+            tag = "opt_" + label.split()[-1].lower() if label.startswith(("⚙", "☰", "♪", "▶")) else "opt_" + label.split()[0].lower()
             shape = self._round_rect(x - w, y - 14, x, y + 14, 14, fill=WHITE if on else CHIP, outline="", tags=(tag,))
             c.create_text(x - w / 2, y, text=label, fill=t.BG if on else WHITE, font=self.f["small"], tags=(tag,))
             self._clickable(tag, cmd, shape=None if on else shape)
             x -= w + 8
+        hints = "← →  capítulos    ↑ ↓  versões    Enter  jogar    G  gerenciar    Tab  seção    E  extras    F  foto    F11  tela cheia"
+        c.create_text(MARGIN, y, anchor="w", fill=DIM, font=self.f["small"],
+                      text=self._elide(hints, self.f["small"], x - MARGIN - 16))
 
     def _draw_carousel(self, W):
         c = self.c
@@ -925,6 +1101,8 @@ class Hub(tk.Tk):
         first_x = MARGIN + (step if self.sel > 0 else 0) + self._slide  # mostra um capítulo anterior, como na PS5
         line_y = TILES_Y + s[1] + 30
         centers, self._tile_rects = [], []
+        cont = self.continue_target()
+        cont = cont[1]["id"] if cont else None
         for i, ch in enumerate(self.chapters):
             if i < self.sel:
                 x = first_x - (self.sel - i) * step
@@ -945,6 +1123,7 @@ class Hub(tk.Tk):
             c.create_image(dx - 24, dy - 24 + 4 * h, image=self._halo((w2, h2), (0, 0, 0), 150 + int(60 * h), 6), anchor="nw")
             dim = i != self.sel and h < 0.5  # os outros cards ficam um pouco apagados
             c.create_image(dx, dy, image=self._tile(ch, (w2, h2), dim), anchor="nw", tags=(f"tile{i}",))
+            self._card_badges(ch, dx, dy, w2, i == self.sel, cont)
             self._tile_rects.append((i, x, TILES_Y - HOVER_LIFT, x + size[0], TILES_Y + size[1]))
             centers.append((x + size[0] / 2, i, ch))
 
@@ -960,6 +1139,27 @@ class Hub(tk.Tk):
                 else:
                     label = str(ch.get("lancamento", "")) if by_release else self._story_year(ch)
                 c.create_text(cx, line_y + 18, text=label, fill=WHITE if sel else DIM, font=self.f["tiny"])
+
+    def _card_badges(self, ch, x, y, w, selected, cont_id):
+        """Selos sobre o card: CONTINUAR (jogado por último), promoção da Steam e contagem regressiva."""
+        c = self.c
+        if ch["id"] == cont_id:
+            c.create_text(x + 2, y - 8, anchor="sw", text="▶ CONTINUAR", fill=self.accent if selected else MUTED,
+                          font=self.f["tiny"])
+        g = self.version_of(ch)
+        badge = None
+        rel = self.release(ch, g)
+        if rel:
+            badge = (self.countdown(rel, short=True), "#1d3b66", "#cfe2ff")
+        else:
+            sale = next(((v, p) for v in ch["versoes"] if (p := self.price_of(v)) and p["desconto"] and not self.owned(v)), None)
+            if sale:
+                badge = (f"-{sale[1]['desconto']}%", "#4c7a1f", "#d6f5a8")
+        if badge:
+            text, bg, fg = badge
+            bw = self.f["tiny"].measure(text) + 14
+            self._round_rect(x + w - bw - 6, y + 6, x + w - 6, y + 26, 8, fill=bg, outline="")
+            c.create_text(x + w - 6 - bw / 2, y + 16, text=text, fill=fg, font=self.f["tiny"])
 
     def _halo(self, size, color, alpha, dy):
         """Sombra/brilho de card. Desfoca UMA vez no tamanho grande e só redimensiona depois
@@ -1112,7 +1312,17 @@ class Hub(tk.Tk):
             y += 24
 
         state, color = self._state(g)
-        c.create_text(x, y, anchor="nw", text=self.status_text or state, fill=color, font=self.f["body"])
+        item = c.create_text(x, y, anchor="nw", text=self.status_text or state, fill=color, font=self.f["body"])
+        if not self.status_text:
+            sx = c.bbox(item)[2]
+            for text, col, cmd in self._extra_state(ch, g):
+                sep = c.create_text(sx, y, anchor="nw", text="   ·   ", fill=DIM, font=self.f["body"])
+                sx = c.bbox(sep)[2]
+                tag = f"st_{abs(hash(text)) % 10 ** 8}" if cmd else ""
+                it = c.create_text(sx, y, anchor="nw", text=text, fill=col, font=self.f["body"], tags=(tag,) if tag else ())
+                if cmd:
+                    self._clickable(tag, cmd)
+                sx = c.bbox(it)[2]
         y += 32
         bx = x
         for k, (text, cmd, primary) in enumerate(self._actions(g)):
@@ -1131,9 +1341,7 @@ class Hub(tk.Tk):
     def _draw_panel(self, x1, y1, x2, y2):
         c, pad = self.c, 24
         x, y, w = x1 + pad, y1 + 18, x2 - x1 - 2 * pad
-        tabs = (("trofeus", "Troféus"), ("trailer", "Trailer"), ("versoes", "Versões"), ("dlcs", "DLCs"))
-        if self.game["tipo"] == "info":  # filmes, HQs e perdidos: só os detalhes
-            tabs = (("versoes", "Detalhes"),)
+        tabs = self._panel_tabs()  # filmes, HQs e perdidos: só os detalhes
         active = self.panel_tab if any(k == self.panel_tab for k, _ in tabs) else tabs[0][0]
         if active != "trailer":
             self._trailer_stop()
@@ -1156,6 +1364,8 @@ class Hub(tk.Tk):
             return self._draw_trailer(*body)
         if active == "versoes":
             return self._draw_versions(self.chapter, *body)
+        if active == "prints":
+            return self._draw_prints(self.game, *body)
         g = self.steam_game()
         if g is not None and g is not self.game:  # à esquerda do "Atualizar" para não sobrepor
             right = x + w - (self.f["tiny"].measure("Atualizar") + 16 if self.panel_tab == "trofeus" else 0)
@@ -1477,6 +1687,12 @@ class Hub(tk.Tk):
     def _options_menu(self):
         m = tk.Menu(self, tearoff=0, bg=t.PANEL, fg=WHITE, activebackground=t.PANEL_HI, activeforeground=WHITE,
                     font=(t.FONT, 10), bd=0)
+        for kind, label, _, key in (("extras", "Extras", "", "E"), ("perfil", "Perfil", "", "P"),
+                                    ("historia", "Linha da história", "", "H"), ("personagens", "Personagens", "", "C"),
+                                    ("ofertas", "Ofertas e lançamentos", "", "L")):
+            m.add_command(label=f"{label} ({key})", command=lambda k=kind: self.open_overlay(k))
+        m.add_command(label="Foto do card (F)", command=self.photo_card)
+        m.add_separator()
         m.add_command(label="Atualizar troféus de todos os jogos", command=self.refresh_all_trophies)
         m.add_command(label="Baixar as artes de novo", command=self.reload_art)
         m.add_command(label="Recarregar catálogo e jogos instalados (F5)", command=self.rescan)
@@ -1485,6 +1701,8 @@ class Hub(tk.Tk):
         m.add_command(label=f"Escolher música para {name}...", command=self.pick_music)
         m.add_command(label="Abrir pasta de músicas", command=lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True),
                                                                        os.startfile(audio.MUSIC)))
+        if self.chapter:
+            m.add_command(label=f"Sons de menu para {name}...", command=lambda: os.startfile(audio.theme_folder(self.chapter["id"])))
         m.add_command(label="Abrir Fluffy Mod Manager (mods)", command=self.open_fluffy)
         m.add_separator()
         m.add_command(label="Tela cheia (F11)", command=self.toggle_fullscreen)
@@ -1512,6 +1730,35 @@ class Hub(tk.Tk):
         else:
             text, color = ("Não baixado" if g.get("github") else "Não configurado"), MUTED
         return text, color
+
+    def _extra_state(self, ch, g):
+        """Pedaços extras da linha de estado: [(texto, cor, ação ao clicar ou None)]."""
+        out = []
+        rel = self.release(ch, g)
+        if rel:
+            out.append((f"lança {self.countdown(rel)}", self.accent, None))
+        if g["tipo"] == "info":
+            return out
+        p = self.playtimes().get(g["appid"], {}) if g["tipo"] == "steam" else {}
+        if p.get("minutos"):
+            out.append((f"{library.hours(p['minutos'])} jogadas", WHITE, None))
+        last = self.last_played(g)
+        if last:
+            out.append((f"jogado {library.ago(last)}", MUTED, None))
+        if g["tipo"] == "steam" and g["appid"] in self.installed:
+            m = library.manifest(g["appid"])
+            news_url = f"steam://openurl/https://store.steampowered.com/news/app/{g['appid']}"
+            if m.get("precisa_atualizar"):
+                out.append(("atualização pendente na Steam", self.accent, lambda: os.startfile(news_url)))
+            elif m.get("atualizado") and last and m["atualizado"] > last:
+                out.append(("atualizado desde a última vez  ›", self.accent, lambda: os.startfile(news_url)))
+            elif m.get("atualizado"):
+                out.append((f"atualizado em {time.strftime('%d/%m/%Y', time.localtime(m['atualizado']))}", DIM,
+                            lambda: os.startfile(news_url)))
+        price = self.price_of(g)
+        if price and price["desconto"] and not self.owned(g):
+            out.append((f"-{price['desconto']}% na Steam: {price['texto']}", GREEN, lambda: steam.store(g["appid"])))
+        return out
 
     def _actions(self, g):
         if g["tipo"] == "info":  # filmes, HQs e perdidos: links para saber mais
@@ -1616,6 +1863,8 @@ class Hub(tk.Tk):
 
     def play(self, g):
         try:
+            if g["tipo"] != "steam":  # a Steam já guarda quando você jogou; os outros, o app guarda
+                self.cfg.set(g["id"], ultima=int(time.time()))
             launcher.play(g, self.cfg)
         except RuntimeError as e:
             messagebox.showerror(FR["app"], str(e))

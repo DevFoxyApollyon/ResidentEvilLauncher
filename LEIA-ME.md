@@ -7,14 +7,53 @@ Abra com **`RE Hub.exe`** (não precisa de Python). Ou, para rodar o código dir
 
 Abre em tela cheia (uma cópia só: clicar de novo no .exe só traz a janela para frente). Teclado: ← → capítulos
 (no fim de uma aba, mais um toque na seta passa para a próxima) · ↑ ↓ versões · Enter jogar · G gerenciar · Tab troca de seção ·
-F11 tela cheia · Esc sai da tela cheia · F5 atualizar. O ✕ no canto de cima fecha o app.
+F11 tela cheia · Esc sai da tela cheia · F5 atualizar · E extras · P perfil · H história · C personagens · L ofertas ·
+F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao começo; a roda do mouse anda como as setas.
 
 - **Seções:** "Linha do tempo" (história oficial), "Não canônicos" (spin-offs), "Perdidos" (versões canceladas, betas e
   demos), "Filmes" (CG, live-action e séries), "HQs e livros" (quadrinhos, mangás e os livros de S. D. Perry) e
   "Feito por fãs" e "Notícias" (as 20 últimas do REVIL, atualizadas a cada 30 minutos). A lista segue a de residentevil.com.br/jogos/ (`python tools/revil_update.py` reaplica).
 - **Cards:** passe o mouse para destacar (com som); um clique abre o card em tamanho grande.
-- **Barra de baixo:** ordem por história ou lançamento, filtro "Só instalados", trilha e efeitos ligados/desligados
-  e menu de Opções.
+- **Barra de baixo:** ordem por história, lançamento ou **Recentes** (o que você jogou por último primeiro), filtro
+  "Só instalados", trilha e efeitos ligados/desligados, **Extras**, **▶ Continuar** (volta ao último jogo que você abriu;
+  o app também já abre nele) e menu de Opções.
+- **Horas jogadas:** embaixo do título aparecem as horas, quando você jogou por último e quando a Steam atualizou o jogo
+  ("atualizado desde a última vez ›" abre as notas da atualização). Tudo lido da própria Steam no PC.
+
+## Extras (E, ou ☰ Extras na barra de baixo)
+
+- **Perfil (P, ou clique no seu nome/troféus no topo):** platinas, troféus por tipo, horas na franquia, progresso de
+  cada jogo e os seus troféus mais raros.
+- **Linha da história (H):** todos os capítulos ano a ano, com os filmes que se passam dentro da história encaixados.
+  Enter abre o capítulo no hub.
+- **Personagens (C):** ficha de cada personagem e em quais jogos aparece (clique para abrir o jogo). As fichas ficam em
+  `games/_personagens.json`; os retratos vêm da wiki da franquia (`"retrato": "<link>"` na ficha troca a imagem).
+- **Ofertas e lançamentos (L):** preço de cada jogo na Steam Brasil, os que estão na sua lista de desejos (★) e a
+  contagem regressiva dos anunciados. Quando um jogo que você não tem entra em promoção, aparece um aviso (uma vez por
+  dia) e o card ganha o selo "-50%". Para pôr a data de um anúncio à mão: `"data_lancamento": "2027-03-12"` (ou
+  `"2027-03"`, `"2027"`) no capítulo em `games/_linha_do_tempo.json`.
+- **Foto do card (F):** salva uma imagem 1920x1080 do jogo selecionado (arte, capa, troféus e horas) em
+  `Imagens/RE Hub`, pronta para postar.
+
+## Prints e gravações
+
+A aba **Prints** do painel mostra as prints da Steam (F12) e as capturas do Windows (Xbox Game Bar: Win+Alt+PrtScn e
+Win+Alt+R; e pastas da Radeon/NVIDIA com o nome do jogo). Clique numa para ver em tela cheia (← → passam); dá para
+**usar a print como fundo** do jogo (e voltar ao original). Se a janela do jogo tiver outro nome, ponha
+`"nomes_janela": ["NOME DA JANELA"]` no .json do jogo.
+
+## Controle e atalho
+
+Funciona com controle de Xbox (e qualquer um que o Windows ou a Steam mostre como um): direcional/analógico andam,
+A joga/abre, B volta, X gerenciar, Y foto do card, LB/RB trocam de seção, LT/RT trocam a aba do painel, analógico
+direito rola o painel, Start abre Extras, View abre o Perfil, botão Xbox volta ao começo.
+**Segurar o botão Xbox** ou apertar **Ctrl+Alt+H** de qualquer lugar traz o hub de volta para a frente.
+
+## Sons de menu por jogo
+
+Em Opções → "Sons de menu para <jogo>..." abre `data/sons/jogos/<id do capítulo>/`. Coloque ali os sons que quiser
+(o app não traz os da Capcom) com o nome do efeito (`Navigation.mp3`, `Navigation_Enter.mp3`... a lista está no
+LEIA-ME.txt da pasta); com o jogo selecionado, eles tocam no lugar dos sons do PS5.
 
 ## Trilha sonora
 
