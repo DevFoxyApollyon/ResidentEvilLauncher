@@ -278,6 +278,7 @@ class Hub(tk.Tk):
         self.c.bind("<Button-1>", self._canvas_click)
         self.c.bind("<Leave>", lambda e: self._set_hover(None))
         self.bind("<MouseWheel>", self._wheel)
+        self.protocol("WM_DELETE_WINDOW", self.quit_app)
         for key, fn in (("<Left>", lambda e: self.step(-1)), ("<Right>", lambda e: self.step(1)),
                         ("<Up>", lambda e: self.pick_version(-1)), ("<Down>", lambda e: self.pick_version(1)),
                         ("<Return>", lambda e: self.primary_action()), ("<g>", lambda e: self.manage()),
@@ -479,10 +480,28 @@ class Hub(tk.Tk):
             self._kick()
         self.refresh()
 
-    def step(self, delta):
-        """Setas: anda um capítulo; passando do último (ou do primeiro), vai para a aba seguinte (ou anterior)."""
+    def quit_app(self):
+        """Fecha de vez. Antes, o Tk era destruído com as threads (capas, troféus, áudio) ainda rodando,
+        e uma delas mexendo nele derrubava o Tcl ("alloc: invalid block")."""
+        try:
+            if getattr(self, "_tplayer", None):
+                self._tplayer.close()
+            ctypes.windll.winmm.mciSendStringW("close all", None, 0, 0)
+            self.destroy()
+        finally:
+            os._exit(0)
+
+    def go_home(self):
+        """Logo do topo: volta para o começo (primeiro capítulo da primeira aba)."""
+        self.set_section(SECTIONS[0][0])
+        if self.chapters:
+            self.select(0)
+
+    def step(self, delta, wrap=False):
+        """Setas: anda um capítulo; passando do último (ou do primeiro), vai para a aba seguinte (ou anterior).
+        wrap (roda do mouse): não para no fim, segue direto para a aba seguinte."""
         i, now = self.sel + delta, time.time()
-        held = now - getattr(self, "_last_step", 0) < 0.3  # seta segurada: para no fim; outro toque troca de aba
+        held = not wrap and now - getattr(self, "_last_step", 0) < 0.3  # seta segurada: para no fim; outro toque troca de aba
         self._last_step = now
         if self.chapters and 0 <= i < len(self.chapters):
             return self.select(i)
@@ -697,7 +716,7 @@ class Hub(tk.Tk):
             self.panel_scroll = max(0, self.panel_scroll + (1 if e.delta < 0 else -1))
             self.refresh()
         else:
-            self.select(self.sel + (1 if e.delta < 0 else -1))
+            self.step(1 if e.delta < 0 else -1, wrap=True)
 
     def _tick(self):
         self.refresh()
@@ -844,11 +863,12 @@ class Hub(tk.Tk):
         c = self.c
         brand = self._brand()
         if brand:
-            c.create_image(MARGIN, 38, image=brand, anchor="w")
+            c.create_image(MARGIN, 38, image=brand, anchor="w", tags=("home",))
             x = MARGIN + brand.width() + 34
         else:
-            c.create_text(MARGIN, 38, anchor="w", text=FR["nome"].upper(), fill=RED, font=self.f["logo"])
+            c.create_text(MARGIN, 38, anchor="w", text=FR["nome"].upper(), fill=RED, font=self.f["logo"], tags=("home",))
             x = MARGIN + self.f["logo"].measure(FR["nome"].upper()) + 30
+        self._clickable("home", self.go_home)
         for key, label in SECTIONS:
             on = self.section == key
             tag = f"nav_{key}"
@@ -864,7 +884,7 @@ class Hub(tk.Tk):
         if self.attributes("-fullscreen"):  # sem barra de título: botão para fechar
             tag = "quit"
             c.create_text(right, 38, anchor="e", text="✕", fill=MUTED, font=self.f["h"], tags=(tag,))
-            self._clickable(tag, self.destroy)
+            self._clickable(tag, self.quit_app)
             right -= 34
         c.create_text(right, 38, anchor="e", text=time.strftime("%H:%M"), fill=WHITE, font=self.f["clock"])
         right -= self.f["clock"].measure("00:00") + 28
@@ -1472,7 +1492,7 @@ class Hub(tk.Tk):
         m.add_command(label="Abrir pasta do catálogo (games)", command=lambda: os.startfile(ROOT / "games"))
         m.add_command(label="Abrir LEIA-ME", command=lambda: os.startfile(ROOT / "LEIA-ME.md"))
         m.add_separator()
-        m.add_command(label=f"Sair do {FR['app']}", command=self.destroy)
+        m.add_command(label=f"Sair do {FR['app']}", command=self.quit_app)
         self._sound("menu_on")
         try:
             m.tk_popup(self.winfo_pointerx(), self.winfo_pointery())  # no Windows, volta quando o menu fecha
