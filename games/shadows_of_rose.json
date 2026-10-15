@@ -1,0 +1,21 @@
+{
+  "id": "shadows_of_rose",
+  "ordem": 165,
+  "nome": "Resident Evil Village – Shadows of Rose",
+  "capitulo": "shadows_of_rose",
+  "versao": "DLC do Village (Winters' Expansion)",
+  "tipo": "steam",
+  "appid": 1196590,
+  "nexus": "residentevilvillage",
+  "dica": "Vem na expansão Winters' Expansion do Resident Evil Village. Abre pelo próprio Village.",
+  "arte": {
+    "capa": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1731080/hero_capsule.jpg"
+    ],
+    "fundo": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1731080/page_bg_raw.jpg",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1731080/header.jpg"
+    ],
+    "fonte": "Steam (Winters' Expansion)"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "cvx",
+  "ordem": 61,
+  "nome": "Code: Veronica X (original)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte um emulador (PCSX2 para PS2, Flycast para Dreamcast) e a SUA própria ISO.",
+  "projetos": [
+    {
+      "nome": "recvx-decomp (PS2)",
+      "url": "https://github.com/AshfordFamily/recvx-decomp",
+      "status": "Decomp da versão de PS2, descrito pelo projeto como completo. Sem port para PC pronto para baixar."
+    },
+    {
+      "nome": "recvx-gc-decomp (GameCube)",
+      "url": "https://github.com/fmil95/recvx-gc-decomp",
+      "status": "Decomp em andamento."
+    },
+    {
+      "nome": "recv-dc-decomp (Dreamcast)",
+      "url": "https://github.com/fmil95/recv-dc-decomp",
+      "status": "Decomp em andamento."
+    }
+  ],
+  "capitulo": "veronica",
+  "versao": "Original (emulador)",
+  "poster": {
+    "titulo": "CODE: VERONICA X",
+    "subtitulo": "PS2 · Dreamcast · 2001"
+  },
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Code%20-%20Veronica%20X%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/4/44/RECV_boxart.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Code%20-%20Veronica%20X%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

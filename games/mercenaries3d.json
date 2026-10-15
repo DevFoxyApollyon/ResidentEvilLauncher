@@ -1,0 +1,20 @@
+{
+  "id": "mercenaries3d",
+  "ordem": 1045,
+  "nome": "Resident Evil: The Mercenaries 3D",
+  "capitulo": "mercenaries3d",
+  "versao": "3DS (emulador)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte um emulador de 3DS (por exemplo, o Azahar) e a SUA própria cópia do jogo.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_3DS/master/Named_Boxarts/Resident%20Evil%20-%20The%20Mercenaries%203D%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/4/40/The_Mercenaries_3D.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_3DS/master/Named_Snaps/Resident%20Evil%20-%20The%20Mercenaries%203D%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

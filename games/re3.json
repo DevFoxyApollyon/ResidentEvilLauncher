@@ -1,0 +1,19 @@
+{
+  "id": "re3",
+  "ordem": 40,
+  "nome": "Resident Evil 3 (Remake)",
+  "tipo": "steam",
+  "appid": 952060,
+  "sugestoes": [
+    {
+      "nome": "REFramework",
+      "tipo": "mod",
+      "github": "praydog/REFramework-nightly",
+      "asset": "REFramework.zip",
+      "descricao": "Base para a maioria dos mods (scripts .lua, câmera livre, VR, carregar pastas natives/). Versão nightly: a que acompanha as atualizações do jogo (a estável, de 2025, trava nos jogos atualizados)."
+    }
+  ],
+  "capitulo": "re3",
+  "versao": "Remake",
+  "nexus": "residentevil32020"
+}

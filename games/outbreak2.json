@@ -1,0 +1,31 @@
+{
+  "id": "outbreak2",
+  "ordem": 31,
+  "nome": "Resident Evil Outbreak File #2",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "projetos": [
+    {
+      "nome": "REOF2",
+      "url": "https://github.com/caprado/REOF2",
+      "status": "Decomp com port para Windows em andamento: já abre o menu com vídeo, áudio e controle. Sem versão para baixar."
+    }
+  ],
+  "capitulo": "outbreak",
+  "versao": "File #2",
+  "poster": {
+    "titulo": "OUTBREAK FILE #2",
+    "subtitulo": "PS2 · 2004"
+  },
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Outbreak%20-%20File%202%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/9/9c/Resident_Evil_Outbreak_File_2.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Outbreak%20-%20File%202%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

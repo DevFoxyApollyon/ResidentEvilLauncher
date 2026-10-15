@@ -1,0 +1,2756 @@
+{
+  "_comentario": "Capítulos em ordem da história ('capitulos') e spin-offs fora da história oficial ('nao_canonicos'). Cada jogo em games/*.json aponta para um capítulo pelo campo 'capitulo'. Seções extras: 'perdidos', 'midia' (filmes e séries), 'hqs' (HQs, mangás e livros) e 'fas'.",
+  "capitulos": [
+    {
+      "id": "re0",
+      "titulo": "Resident Evil 0",
+      "quando": "Julho de 1998",
+      "onde": "Trem Ecliptic Express e centro de treinamento da Umbrella",
+      "lancamento": 2002,
+      "sinopse": "Rebecca Chambers, novata da equipe Bravo dos S.T.A.R.S., encontra um trem tomado por criaturas e se une a Billy Coen, um ex-fuzileiro condenado. Juntos descobrem as origens do T-Vírus e o passado sombrio de um dos fundadores da Umbrella.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 0",
+          "ano": 2002,
+          "plataformas": "GameCube",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Resident Evil 0 (Wii edition)",
+          "ano": 2009,
+          "plataformas": "Wii",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Resident Evil 0 HD Remaster",
+          "ano": 2016,
+          "plataformas": "PC, PS3, PS4, Xbox 360, Xbox One · Switch em 2019",
+          "onde": "Steam, GOG, PS Store, Xbox, Switch"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 0",
+        "resident evil zero"
+      ]
+    },
+    {
+      "id": "re1",
+      "titulo": "Resident Evil",
+      "quando": "Julho de 1998",
+      "onde": "Mansão Spencer, Montanhas Arklay",
+      "lancamento": 1996,
+      "sinopse": "Procurando a equipe Bravo desaparecida, Chris Redfield e Jill Valentine se refugiam numa mansão isolada nas Montanhas Arklay. Lá dentro, cada porta esconde um quebra-cabeça, um monstro e uma pista dos experimentos secretos da Umbrella.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil",
+          "ano": 1996,
+          "plataformas": "PlayStation",
+          "onde": "Emulador (DuckStation)"
+        },
+        {
+          "nome": "Resident Evil (PC)",
+          "ano": 1997,
+          "plataformas": "PC",
+          "onde": "GOG (relançado em 2024)"
+        },
+        {
+          "nome": "Resident Evil (Saturn)",
+          "ano": 1997,
+          "plataformas": "Sega Saturn",
+          "onde": "Emulador"
+        },
+        {
+          "nome": "Director's Cut",
+          "ano": 1997,
+          "plataformas": "PlayStation",
+          "onde": "Emulador (DuckStation)"
+        },
+        {
+          "nome": "Resident Evil (remake)",
+          "ano": 2002,
+          "plataformas": "GameCube · Wii em 2009",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Deadly Silence",
+          "ano": 2006,
+          "plataformas": "Nintendo DS",
+          "onde": "Emulador (melonDS)"
+        },
+        {
+          "nome": "HD Remaster",
+          "ano": 2015,
+          "plataformas": "PC, PS3, PS4, Xbox 360, Xbox One · Switch em 2019",
+          "onde": "Steam, GOG, PS Store, Xbox, Switch"
+        },
+        {
+          "nome": "Decomp de PC (fãs)",
+          "ano": 2026,
+          "plataformas": "Windows, Linux",
+          "onde": "Neste app, com os arquivos do seu RE1"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil hd",
+        "biohazard hd"
+      ]
+    },
+    {
+      "id": "outbreak",
+      "titulo": "Resident Evil Outbreak",
+      "quando": "Setembro de 1998",
+      "onde": "Raccoon City",
+      "lancamento": 2003,
+      "sinopse": "Enquanto o vírus se espalha por Raccoon City, oito cidadãos comuns — um policial, um encanador, uma jornalista, um estudante e outros — tentam sobreviver juntos, cada um com habilidades próprias, por bares, hospitais e laboratórios da cidade.",
+      "lancamentos": [
+        {
+          "nome": "Outbreak",
+          "ano": 2003,
+          "plataformas": "PlayStation 2",
+          "onde": "Emulador (PCSX2)"
+        },
+        {
+          "nome": "Outbreak File #2",
+          "ano": 2004,
+          "plataformas": "PlayStation 2",
+          "onde": "Emulador (PCSX2); fãs mantêm servidores para o online"
+        }
+      ]
+    },
+    {
+      "id": "re3",
+      "titulo": "Resident Evil 3",
+      "quando": "28 set – 1 out de 1998",
+      "onde": "Raccoon City (começa um dia antes do RE2 e termina depois)",
+      "lancamento": 1999,
+      "sinopse": "Jill Valentine tenta fugir de uma Raccoon City em colapso enquanto é caçada sem trégua pelo Nemesis, uma arma biológica criada para eliminar os S.T.A.R.S. Ao lado de Carlos, mercenário da Umbrella, ela corre contra o tempo antes que a cidade seja varrida do mapa.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 3: Nemesis",
+          "ano": 1999,
+          "plataformas": "PlayStation",
+          "onde": "Emulador (DuckStation)"
+        },
+        {
+          "nome": "Resident Evil 3 (PC)",
+          "ano": 2000,
+          "plataformas": "PC",
+          "onde": "GOG (relançado em 2024)"
+        },
+        {
+          "nome": "Resident Evil 3 (Dreamcast/GameCube)",
+          "ano": 2000,
+          "plataformas": "Dreamcast · GameCube em 2003",
+          "onde": "Emulador (Flycast) ou Dolphin"
+        },
+        {
+          "nome": "Resident Evil 3 (remake)",
+          "ano": 2020,
+          "plataformas": "PC, PS4, Xbox One · depois PS5 e Xbox Series",
+          "onde": "Steam, PS Store, Xbox"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 3"
+      ]
+    },
+    {
+      "id": "re2",
+      "titulo": "Resident Evil 2",
+      "quando": "29 set – 1 out de 1998",
+      "onde": "Delegacia e laboratório de Raccoon City",
+      "lancamento": 1998,
+      "sinopse": "No primeiro dia de trabalho, o policial Leon S. Kennedy chega a Raccoon City e encontra a cidade tomada por zumbis. Ele cruza o caminho de Claire Redfield, que procura o irmão Chris, e os dois tentam escapar pela delegacia e pelos laboratórios escondidos da Umbrella.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 2",
+          "ano": 1998,
+          "plataformas": "PlayStation",
+          "onde": "Emulador (DuckStation)"
+        },
+        {
+          "nome": "Dual Shock Ver.",
+          "ano": 1998,
+          "plataformas": "PlayStation",
+          "onde": "Emulador (DuckStation)"
+        },
+        {
+          "nome": "Resident Evil 2 (PC)",
+          "ano": 1999,
+          "plataformas": "PC",
+          "onde": "GOG (relançado em 2024)"
+        },
+        {
+          "nome": "Resident Evil 2 (N64)",
+          "ano": 1999,
+          "plataformas": "Nintendo 64",
+          "onde": "Emulador"
+        },
+        {
+          "nome": "Resident Evil 2 (Dreamcast/GameCube)",
+          "ano": 2000,
+          "plataformas": "Dreamcast · GameCube em 2003",
+          "onde": "Emulador (Flycast) ou Dolphin"
+        },
+        {
+          "nome": "Resident Evil 2 (remake)",
+          "ano": 2019,
+          "plataformas": "PC, PS4, Xbox One · depois PS5 e Xbox Series",
+          "onde": "Steam, PS Store, Xbox"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 2"
+      ]
+    },
+    {
+      "id": "veronica",
+      "titulo": "Code: Veronica",
+      "quando": "Dezembro de 1998",
+      "onde": "Ilha Rockfort e Antártida",
+      "lancamento": 2000,
+      "sinopse": "Três meses depois de Raccoon City, Claire Redfield é capturada ao investigar a Umbrella em Paris e levada à prisão da Ilha Rockfort. Quando um ataque libera o vírus na ilha, ela e o prisioneiro Steve Burnside precisam escapar, enquanto os gêmeos Ashford revelam segredos da família.",
+      "lancamentos": [
+        {
+          "nome": "Code: Veronica",
+          "ano": 2000,
+          "plataformas": "Dreamcast",
+          "onde": "Emulador (Flycast)"
+        },
+        {
+          "nome": "Code: Veronica X",
+          "ano": 2001,
+          "plataformas": "PlayStation 2 · Dreamcast (Japão)",
+          "onde": "Emulador (PCSX2)"
+        },
+        {
+          "nome": "Code: Veronica X (GameCube)",
+          "ano": 2003,
+          "plataformas": "GameCube",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Code: Veronica X HD",
+          "ano": 2011,
+          "plataformas": "PS3, Xbox 360",
+          "onde": "Emulador (RPCS3 para PS3)"
+        },
+        {
+          "nome": "Resident Evil Veronica (remake)",
+          "ano": 2027,
+          "plataformas": "PC, consoles",
+          "onde": "Steam (ainda não lançado)"
+        }
+      ],
+      "trilha_busca": [
+        "veronica"
+      ]
+    },
+    {
+      "id": "darkside_chronicles",
+      "titulo": "The Darkside Chronicles",
+      "quando": "2002",
+      "onde": "Operação Javier, América do Sul",
+      "lancamento": 2009,
+      "sinopse": "Jogo de tiro sobre trilhos que reconta RE2 e Code: Veronica e mostra a Operação Javier: Leon e Krauser vão à América do Sul atrás de um traficante ligado à Umbrella e encontram uma nova arma biológica.",
+      "lancamentos": [
+        {
+          "nome": "The Darkside Chronicles",
+          "ano": 2009,
+          "plataformas": "Wii",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Chronicles HD Collection",
+          "ano": 2012,
+          "plataformas": "PlayStation 3",
+          "onde": "Emulador (RPCS3)"
+        }
+      ]
+    },
+    {
+      "id": "umbrella_chronicles",
+      "titulo": "The Umbrella Chronicles",
+      "quando": "Fevereiro de 2003",
+      "onde": "Instalação da Umbrella na Rússia",
+      "lancamento": 2007,
+      "sinopse": "Tiro sobre trilhos que revisita RE0, RE1 e RE3 e conta o capítulo que faltava: Chris e Jill invadem a última grande instalação da Umbrella, na Rússia, no ataque que acaba de vez com a corporação.",
+      "lancamentos": [
+        {
+          "nome": "The Umbrella Chronicles",
+          "ano": 2007,
+          "plataformas": "Wii",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Chronicles HD Collection",
+          "ano": 2012,
+          "plataformas": "PlayStation 3",
+          "onde": "Emulador (RPCS3)"
+        }
+      ]
+    },
+    {
+      "id": "re4",
+      "titulo": "Resident Evil 4",
+      "quando": "Outono de 2004",
+      "onde": "Interior da Espanha",
+      "lancamento": 2005,
+      "sinopse": "Seis anos depois de Raccoon City, Leon S. Kennedy, agora agente do governo, vai a um vilarejo no interior da Espanha resgatar Ashley, a filha do presidente dos EUA. Os moradores, controlados por um parasita chamado Las Plagas, estão longe de serem amigáveis.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 4",
+          "ano": 2005,
+          "plataformas": "GameCube",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Resident Evil 4 (PS2)",
+          "ano": 2005,
+          "plataformas": "PlayStation 2",
+          "onde": "Emulador (PCSX2)"
+        },
+        {
+          "nome": "Wii edition",
+          "ano": 2007,
+          "plataformas": "Wii",
+          "onde": "Emulador (Dolphin)"
+        },
+        {
+          "nome": "Ultimate HD Edition",
+          "ano": 2014,
+          "plataformas": "PC",
+          "onde": "Steam"
+        },
+        {
+          "nome": "Resident Evil 4 (2016)",
+          "ano": 2016,
+          "plataformas": "PS4, Xbox One · Switch em 2019",
+          "onde": "PS Store, Xbox, Switch"
+        },
+        {
+          "nome": "Resident Evil 4 VR",
+          "ano": 2021,
+          "plataformas": "Meta Quest",
+          "onde": "Loja da Meta"
+        },
+        {
+          "nome": "Resident Evil 4 (remake)",
+          "ano": 2023,
+          "plataformas": "PC, PS4, PS5, Xbox Series",
+          "onde": "Steam, PS Store, Xbox"
+        },
+        {
+          "nome": "Separate Ways",
+          "ano": 2023,
+          "plataformas": "DLC do remake",
+          "onde": "Steam, PS Store, Xbox"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 4"
+      ]
+    },
+    {
+      "id": "rev1",
+      "titulo": "Resident Evil Revelations",
+      "quando": "2005",
+      "onde": "Navio Queen Zenobia",
+      "lancamento": 2012,
+      "sinopse": "Jill Valentine e Parker Luciani procuram Chris Redfield, desaparecido no Mediterrâneo, e acabam presos no transatlântico Queen Zenobia, infestado por uma nova ameaça: o T-Abyss, um vírus que nasceu no oceano.",
+      "lancamentos": [
+        {
+          "nome": "Revelations",
+          "ano": 2012,
+          "plataformas": "Nintendo 3DS",
+          "onde": "Emulador (Azahar)"
+        },
+        {
+          "nome": "Revelations (HD)",
+          "ano": 2013,
+          "plataformas": "PC, PS3, Xbox 360, Wii U",
+          "onde": "Steam"
+        },
+        {
+          "nome": "Revelations (2017)",
+          "ano": 2017,
+          "plataformas": "PS4, Xbox One, Switch",
+          "onde": "PS Store, Xbox, Switch"
+        }
+      ],
+      "trilha_busca": [
+        "revelations"
+      ]
+    },
+    {
+      "id": "re5",
+      "titulo": "Resident Evil 5",
+      "quando": "2009",
+      "onde": "Kijuju, África",
+      "lancamento": 2009,
+      "sinopse": "Chris Redfield, agora na BSAA, vai a Kijuju, na África, com a parceira Sheva Alomar para impedir uma venda de armas biológicas. A missão o leva a respostas sobre Jill e a um confronto com Albert Wesker.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 5",
+          "ano": 2009,
+          "plataformas": "PS3, Xbox 360, PC",
+          "onde": "Jogue a Gold Edition ou a versão de 2016 (abaixo)"
+        },
+        {
+          "nome": "Gold Edition",
+          "ano": 2010,
+          "plataformas": "PS3, Xbox 360 · PC em 2015",
+          "onde": "Steam"
+        },
+        {
+          "nome": "Resident Evil 5 (2016)",
+          "ano": 2016,
+          "plataformas": "PS4, Xbox One · Switch em 2019",
+          "onde": "PS Store, Xbox, Switch"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 5"
+      ]
+    },
+    {
+      "id": "rev2",
+      "titulo": "Resident Evil Revelations 2",
+      "quando": "2011",
+      "onde": "Ilha Sushestvovanie",
+      "lancamento": 2015,
+      "sinopse": "Claire Redfield e Moira Burton são sequestradas e acordam numa prisão abandonada numa ilha. Meses depois, Barry Burton chega à mesma ilha procurando a filha, guiado por uma garota misteriosa chamada Natalia.",
+      "lancamentos": [
+        {
+          "nome": "Revelations 2",
+          "ano": 2015,
+          "plataformas": "PC, PS3, PS4, Xbox 360, Xbox One · Vita e Switch depois",
+          "onde": "Steam, PS Store, Xbox, Switch"
+        }
+      ],
+      "trilha_busca": [
+        "revelations 2"
+      ]
+    },
+    {
+      "id": "re6",
+      "titulo": "Resident Evil 6",
+      "quando": "2012 – 2013",
+      "onde": "EUA, China e Leste Europeu",
+      "lancamento": 2012,
+      "sinopse": "Um ataque bioterrorista com o C-Vírus atinge o mundo. Quatro campanhas se cruzam — Leon e Helena nos EUA, Chris e Piers na China, Jake e Sherry no Leste Europeu e a misteriosa Ada Wong — para descobrir quem está por trás de tudo.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 6",
+          "ano": 2012,
+          "plataformas": "PS3, Xbox 360 · PC em 2013",
+          "onde": "Steam"
+        },
+        {
+          "nome": "Resident Evil 6 (2016)",
+          "ano": 2016,
+          "plataformas": "PS4, Xbox One · Switch em 2019",
+          "onde": "PS Store, Xbox, Switch"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 6"
+      ]
+    },
+    {
+      "id": "re7",
+      "titulo": "Resident Evil 7 Biohazard",
+      "quando": "Julho de 2017",
+      "onde": "Dulvey, Louisiana",
+      "lancamento": 2017,
+      "sinopse": "Ethan Winters recebe uma mensagem da esposa Mia, desaparecida há três anos, e vai até uma fazenda na Louisiana. Lá encontra a família Baker, que não deixa visitas saírem. Primeira pessoa e terror puro, de volta às raízes da série.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 7 biohazard",
+          "ano": 2017,
+          "plataformas": "PC, PS4 (com PS VR), Xbox One",
+          "onde": "Steam, PS Store, Xbox"
+        },
+        {
+          "nome": "Gold Edition",
+          "ano": 2017,
+          "plataformas": "PC, PS4, Xbox One",
+          "onde": "Steam, PS Store, Xbox"
+        },
+        {
+          "nome": "Not a Hero / End of Zoe",
+          "ano": 2017,
+          "plataformas": "DLCs da história",
+          "onde": "Steam, PS Store, Xbox"
+        }
+      ],
+      "trilha_busca": [
+        "resident evil 7",
+        "biohazard 7"
+      ]
+    },
+    {
+      "id": "village",
+      "titulo": "Resident Evil Village",
+      "quando": "Fevereiro de 2021",
+      "onde": "Vilarejo no Leste Europeu",
+      "lancamento": 2021,
+      "sinopse": "Anos depois dos eventos de RE7, a vida tranquila de Ethan e Mia é destruída e a filha Rose é levada. Ethan a segue até um vilarejo gelado no Leste Europeu, comandado por Mãe Miranda e quatro lordes, entre eles a gigante Lady Dimitrescu.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Village",
+          "ano": 2021,
+          "plataformas": "PC, PS4, PS5, Xbox One, Xbox Series",
+          "onde": "Steam, PS Store, Xbox"
+        },
+        {
+          "nome": "Gold Edition",
+          "ano": 2022,
+          "plataformas": "PC e consoles",
+          "onde": "Steam, PS Store, Xbox"
+        },
+        {
+          "nome": "Village VR",
+          "ano": 2023,
+          "plataformas": "PS VR2",
+          "onde": "PS Store"
+        }
+      ],
+      "trilha_busca": [
+        "village"
+      ]
+    },
+    {
+      "id": "requiem",
+      "titulo": "Resident Evil Requiem",
+      "quando": "2026",
+      "onde": "Hotel Wrenwood",
+      "lancamento": 2026,
+      "sinopse": "Grace Ashcroft, analista do FBI, investiga um corpo com sinais de uma doença desconhecida num hotel abandonado — o mesmo onde a mãe dela morreu oito anos antes. Ao lado de Leon S. Kennedy, ela descobre que as mortes de sobreviventes de Raccoon City estão ligadas.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Requiem",
+          "ano": 2026,
+          "plataformas": "PC, PS5, Xbox Series, Switch 2",
+          "onde": "Steam, PS Store, Xbox, Nintendo eShop"
+        }
+      ],
+      "trilha_busca": [
+        "requiem"
+      ]
+    },
+    {
+      "id": "shadows_of_rose",
+      "titulo": "Shadows of Rose",
+      "quando": "2037",
+      "onde": "Dentro do Megamiceto",
+      "lancamento": 2022,
+      "sinopse": "Dezesseis anos depois de Village, Rose Winters, filha de Ethan, quer se livrar dos poderes que herdou. Ela entra na consciência do Megamiceto para destruir o cristal que pode curá-la e revisita lugares do Village com outros olhos.",
+      "lancamentos": [
+        {
+          "nome": "Shadows of Rose",
+          "ano": 2022,
+          "plataformas": "DLC do Village (Winters' Expansion)",
+          "onde": "Steam, PS Store, Xbox"
+        }
+      ],
+      "trilha_busca": [
+        "village"
+      ]
+    }
+  ],
+  "nao_canonicos": [
+    {
+      "id": "survivor",
+      "titulo": "Resident Evil Survivor",
+      "quando": "1998",
+      "onde": "Ilha Sheena",
+      "lancamento": 2000,
+      "sinopse": "Um homem acorda sem memória depois da queda de um helicóptero numa ilha controlada pela Umbrella. Em primeira pessoa e com pistola de luz, ele tenta descobrir quem é antes que a ilha seja destruída.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Survivor",
+          "ano": 2000,
+          "plataformas": "PlayStation · PC (só na Ásia)",
+          "onde": "Emulador (DuckStation)"
+        }
+      ]
+    },
+    {
+      "id": "outros_jogos",
+      "titulo": "Celular, pachinko e tabuleiro",
+      "quando": "Fora da história",
+      "onde": "Jogos fora dos consoles",
+      "lancamento": 2000,
+      "formato": "Outros jogos",
+      "sinopse": "Resident Evil também saiu em celulares antigos, iPhone e iPad, no Zeebo, em máquinas pachinko japonesas, num jogo de cartas e em jogos de tabuleiro. A maior parte dos jogos de celular saiu do ar.",
+      "lancamentos": [
+        {
+          "nome": "Assault Nightmare",
+          "ano": 2000,
+          "plataformas": "Celular (Japão)",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Confidential Report",
+          "ano": 2004,
+          "plataformas": "Celular",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Genesis",
+          "ano": 2008,
+          "plataformas": "Celular",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Degeneration",
+          "ano": 2008,
+          "plataformas": "Celular",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "RE4 Mobile, iPad e Zeebo",
+          "ano": 2009,
+          "plataformas": "Celular, iPad, Zeebo",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Mercenaries VS",
+          "ano": 2011,
+          "plataformas": "iPhone",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Outbreak Survive",
+          "ano": 2012,
+          "plataformas": "Celular (Japão)",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Clan Master",
+          "ano": 2016,
+          "plataformas": "Celular (Japão)",
+          "onde": "Fora do ar"
+        },
+        {
+          "nome": "Personagens em TEPPEN",
+          "ano": 2020,
+          "plataformas": "Celular",
+          "onde": "App Store e Google Play"
+        },
+        {
+          "nome": "Deck Building Game",
+          "ano": 2010,
+          "plataformas": "Jogo de cartas",
+          "onde": "Lojas de jogos de mesa"
+        },
+        {
+          "nome": "Pachinko e pachislot",
+          "ano": 2008,
+          "plataformas": "Máquinas japonesas",
+          "onde": "Casas de pachinko no Japão"
+        },
+        {
+          "nome": "The Board Game",
+          "ano": 2019,
+          "plataformas": "Tabuleiro",
+          "onde": "Lojas de jogos de mesa"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2016/05/Outros-D3.jpg"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/outros-jogos/"
+        }
+      ]
+    },
+    {
+      "id": "gaiden",
+      "titulo": "Resident Evil Gaiden",
+      "quando": "",
+      "onde": "Navio de cruzeiro Starlight",
+      "lancamento": 2001,
+      "sinopse": "Aventura de Game Boy Color em que Leon S. Kennedy desaparece num cruzeiro tomado por uma arma biológica e Barry Burton vai atrás dele. Os combates usam uma mira que corre pela tela.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Gaiden",
+          "ano": 2001,
+          "plataformas": "Game Boy Color",
+          "onde": "Emulador (mGBA)"
+        }
+      ]
+    },
+    {
+      "id": "survivor2",
+      "titulo": "Survivor 2 – Code: Veronica",
+      "quando": "Pesadelo alternativo",
+      "onde": "Ilha Rockfort e Paris",
+      "lancamento": 2001,
+      "sinopse": "Uma versão de tiro em primeira pessoa e por fases de Code: Veronica, apresentada como um pesadelo de Claire Redfield, com Steve Burnside e um perseguidor que surge se você demorar demais.",
+      "lancamentos": [
+        {
+          "nome": "Survivor 2 – Code: Veronica",
+          "ano": 2001,
+          "plataformas": "PlayStation 2 · arcade",
+          "onde": "Emulador (PCSX2)"
+        }
+      ]
+    },
+    {
+      "id": "dead_aim",
+      "titulo": "Resident Evil: Dead Aim",
+      "quando": "2002",
+      "onde": "Navio Spencer Rain",
+      "lancamento": 2003,
+      "sinopse": "O agente americano Bruce McGivern e a agente chinesa Fong Ling investigam o navio de cruzeiro Spencer Rain, sequestrado por um ex-funcionário da Umbrella que ameaça espalhar o T-Vírus pelo mundo. Mistura terceira pessoa com mira em primeira pessoa.",
+      "lancamentos": [
+        {
+          "nome": "Dead Aim",
+          "ano": 2003,
+          "plataformas": "PlayStation 2",
+          "onde": "Emulador (PCSX2)"
+        }
+      ]
+    },
+    {
+      "id": "mercenaries3d",
+      "titulo": "The Mercenaries 3D",
+      "quando": "",
+      "onde": "Modo arcade com mapas de RE4 e RE5",
+      "lancamento": 2011,
+      "sinopse": "O modo Mercenários transformado em jogo próprio: escolha Chris, Jill, Wesker, HUNK e outros e acumule pontos derrotando ondas de inimigos contra o relógio.",
+      "lancamentos": [
+        {
+          "nome": "The Mercenaries 3D",
+          "ano": 2011,
+          "plataformas": "Nintendo 3DS",
+          "onde": "Emulador (Azahar)"
+        }
+      ]
+    },
+    {
+      "id": "orc",
+      "titulo": "Operation Raccoon City",
+      "quando": "Setembro de 1998",
+      "onde": "Raccoon City (história alternativa)",
+      "lancamento": 2012,
+      "sinopse": "Você joga com o Umbrella Security Service, a equipe enviada para apagar as provas do surto em Raccoon City. Tiro em equipe que cruza com os eventos de RE2 e RE3 e permite mudar o destino de personagens conhecidos.",
+      "lancamentos": [
+        {
+          "nome": "Operation Raccoon City",
+          "ano": 2012,
+          "plataformas": "PC, PS3, Xbox 360",
+          "onde": "Steam (só para quem já tem; saiu da loja)"
+        }
+      ]
+    },
+    {
+      "id": "umbrella_corps",
+      "titulo": "Umbrella Corps",
+      "quando": "Depois de RE6",
+      "onde": "Mapas inspirados na série",
+      "lancamento": 2016,
+      "sinopse": "Tiro competitivo em que mercenários de empresas rivais disputam amostras de armas biológicas, usando um aparelho que faz os zumbis ignorarem quem o carrega.",
+      "lancamentos": [
+        {
+          "nome": "Umbrella Corps",
+          "ano": 2016,
+          "plataformas": "PC, PS4",
+          "onde": "Steam, PS Store"
+        }
+      ]
+    },
+    {
+      "id": "resistance",
+      "titulo": "Resident Evil Resistance",
+      "quando": "Raccoon City",
+      "onde": "Experimentos da Umbrella",
+      "lancamento": 2020,
+      "sinopse": "Multijogador assimétrico: quatro sobreviventes tentam escapar de testes da Umbrella enquanto um Mestre controla câmeras, armadilhas e criaturas para impedir a fuga.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Resistance",
+          "ano": 2020,
+          "plataformas": "PC, PS4, Xbox One",
+          "onde": "Steam (vinha junto com RE3 remake)"
+        }
+      ]
+    },
+    {
+      "id": "reverse",
+      "titulo": "Resident Evil Re:Verse",
+      "quando": "Fora da história",
+      "onde": "Multiplayer online",
+      "lancamento": 2022,
+      "formato": "Multiplayer · grátis com Village",
+      "sinopse": "Mata-mata online para seis jogadores com heróis e vilões da série. Quem morre volta como arma biológica para se vingar. Saiu em outubro de 2022, grátis para quem tinha Resident Evil Village.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Re:Verse",
+          "ano": 2022,
+          "plataformas": "PC, PS4, Xbox One",
+          "onde": "Junto com Resident Evil Village (Steam e consoles)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2023/05/REverse-D3-360x300.jpg"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/resident-evil-reverse"
+        }
+      ]
+    },
+    {
+      "id": "survival_unit",
+      "titulo": "Resident Evil Survival Unit",
+      "quando": "Mundo paralelo",
+      "onde": "Hospital da Umbrella",
+      "lancamento": 2025,
+      "formato": "Estratégia · celular",
+      "sinopse": "Estratégia em tempo real para celular. O protagonista acorda num hospital depois de servir de cobaia da Umbrella e, tentando fugir, encontra personagens da série num mundo paralelo. Feito pela JOYCITY e lançado no mundo todo em 17 de novembro de 2025, com legendas em português.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil Survival Unit",
+          "ano": 2025,
+          "plataformas": "iOS, Android",
+          "onde": "App Store e Google Play (grátis)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2025/11/Survival-Unit-D3.jpg"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/resident-evil-survival-unit"
+        }
+      ]
+    }
+  ],
+  "perdidos": [
+    {
+      "id": "re_dash",
+      "titulo": "Resident Evil Dash",
+      "quando": "1996",
+      "onde": "Sequência do RE1 para Saturn",
+      "lancamento": 1996,
+      "formato": "Jogo cancelado · Sega Saturn",
+      "poster": {
+        "titulo": "RESIDENT EVIL DASH",
+        "subtitulo": "SATURN · 1996",
+        "carimbo": "CANCELADO"
+      },
+      "sinopse": "Citado uma única vez, numa entrevista de Yoshiki Okamoto em 1996. Três anos depois do RE1, plantas infectadas atacariam Raccoon City e dois personagens novos voltariam à mansão Spencer, agora envelhecida. Foi cancelado para não atrasar o RE2; parte das ideias foi para o RE1 de Saturn, as Ivies do RE2 e o cenário Flashback do Outbreak File #2.",
+      "lancamentos": [
+        {
+          "nome": "Conceito anunciado",
+          "ano": 1996,
+          "plataformas": "Sega Saturn",
+          "onde": "Nunca saiu build: só existe a entrevista"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2015/06/BetaDash-D3.jpg"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/betas/resident-evil-dash"
+        }
+      ]
+    },
+    {
+      "id": "re1_5",
+      "titulo": "Resident Evil 1.5",
+      "quando": "1996 – 1997",
+      "onde": "Primeira versão do RE2",
+      "lancamento": 1997,
+      "formato": "Jogo cancelado · PlayStation",
+      "poster": {
+        "titulo": "RESIDENT EVIL 1.5",
+        "subtitulo": "PS1 · 1997",
+        "carimbo": "CANCELADO"
+      },
+      "sinopse": "A primeira versão do RE2, com Leon e a motociclista Elza Walker numa delegacia bem diferente da final. Estava bem adiantada quando a Capcom decidiu recomeçar do zero por achar o jogo sem graça. Uma build vazou anos depois e fãs trabalharam para deixá-la jogável.",
+      "lancamentos": [
+        {
+          "nome": "Build de desenvolvimento",
+          "ano": 1997,
+          "plataformas": "PlayStation",
+          "onde": "Vazou na internet anos depois; fãs fizeram restaurações"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2015/06/BetaRE1meio0D3.jpg",
+          "https://static.wikia.nocookie.net/residentevil/images/f/f9/BH2_1.5_TITLEJ.png/revision/latest?cb=20150830170807"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/betas/resident-evil-1-5"
+        }
+      ]
+    },
+    {
+      "id": "re2_trial",
+      "titulo": "Resident Evil 2 Trial",
+      "quando": "Setembro de 1997",
+      "onde": "Demo do RE2",
+      "lancamento": 1997,
+      "formato": "Demo oficial · PlayStation",
+      "sinopse": "Disco extra do Director's Cut com uma versão quase final do RE2: tela de título diferente, texto no lugar da abertura, sem vozes e itens em lugares que mudaram depois. Leon segue por um caminho mais curto nas ruas de Raccoon.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 2 Trial Edition",
+          "ano": 1997,
+          "plataformas": "PlayStation",
+          "onde": "Disco bônus do Resident Evil Director's Cut: emulador com o seu disco"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2015/06/BetaRE2-D3.jpg"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/betas/resident-evil-2-trial"
+        }
+      ]
+    },
+    {
+      "id": "re_gbc",
+      "titulo": "Resident Evil (Game Boy Color)",
+      "quando": "1999 – 2000",
+      "onde": "Porte do RE1",
+      "lancamento": 2000,
+      "formato": "Porte cancelado · Game Boy Color",
+      "poster": {
+        "titulo": "RESIDENT EVIL GBC",
+        "subtitulo": "GAME BOY COLOR · 2000",
+        "carimbo": "CANCELADO"
+      },
+      "sinopse": "Uma conversão surpreendente do primeiro Resident Evil, com os cenários pré-renderizados, para o Game Boy Color. A Capcom cancelou por achar que não estava à altura do original. Uma ROM quase completa vazou depois e circula entre colecionadores.",
+      "lancamentos": [
+        {
+          "nome": "Protótipo",
+          "ano": 2000,
+          "plataformas": "Game Boy Color",
+          "onde": "ROM vazada; roda em emulador de GBC"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/f/f4/REGBC_Titlescreen.png/revision/latest?cb=20120206054217"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Resident_Evil_(Game_Boy_Color)"
+        }
+      ]
+    },
+    {
+      "id": "re0_n64",
+      "titulo": "Resident Evil Zero (Nintendo 64)",
+      "quando": "1998 – 2000",
+      "onde": "Versão original do RE0",
+      "lancamento": 2000,
+      "formato": "Versão abandonada · Nintendo 64",
+      "poster": {
+        "titulo": "RESIDENT EVIL ZERO",
+        "subtitulo": "NINTENDO 64 · 2000",
+        "carimbo": "ABANDONADO"
+      },
+      "sinopse": "O RE0 nasceu como um jogo de Nintendo 64, aproveitando a troca de personagens em tempo real. O limite de espaço dos cartuchos e a chegada do GameCube fizeram a Capcom refazer tudo para o novo console. Hoje só restam vídeos e imagens da época.",
+      "lancamentos": [
+        {
+          "nome": "Versão de N64",
+          "ano": 2000,
+          "plataformas": "Nintendo 64",
+          "onde": "Só em vídeos e revistas da época"
+        },
+        {
+          "nome": "Lançamento final",
+          "ano": 2002,
+          "plataformas": "GameCube",
+          "onde": "Veja o capítulo Resident Evil 0"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2023/05/Beta_RE0-360x300.jpg",
+          "https://static.wikia.nocookie.net/residentevil/images/9/9d/RebeccaN64.jpg/revision/latest?cb=20100826021016"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/betas/resident-evil-0-beta"
+        }
+      ]
+    },
+    {
+      "id": "re4_perdidos",
+      "titulo": "As versões perdidas do RE4",
+      "quando": "1999 – 2004",
+      "onde": "Quatro jogos diferentes",
+      "lancamento": 2004,
+      "formato": "Versões descartadas · vários consoles",
+      "poster": {
+        "titulo": "RESIDENT EVIL 4",
+        "subtitulo": "1999 – 2004",
+        "carimbo": "DESCARTADO"
+      },
+      "sinopse": "O RE4 foi refeito várias vezes. A primeira versão ficou tão cheia de ação que virou outro jogo: Devil May Cry. Depois vieram a versão do castelo com névoa e a versão com alucinações e o 'homem do gancho', mostradas em trailers e nunca lançadas.",
+      "lancamentos": [
+        {
+          "nome": "A versão que virou Devil May Cry",
+          "ano": 1999,
+          "plataformas": "PlayStation 2",
+          "onde": "Lançada como Devil May Cry (2001)"
+        },
+        {
+          "nome": "Versão da névoa / castelo",
+          "ano": 2002,
+          "plataformas": "GameCube",
+          "onde": "Só em trailers"
+        },
+        {
+          "nome": "Versão das alucinações ('Hookman')",
+          "ano": 2003,
+          "plataformas": "GameCube",
+          "onde": "Só em trailers"
+        },
+        {
+          "nome": "Versão final",
+          "ano": 2005,
+          "plataformas": "GameCube",
+          "onde": "Veja o capítulo Resident Evil 4"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2015/06/BetaRE4-D3.jpg",
+          "https://static.wikia.nocookie.net/residentevil/images/d/de/BH4_Logo.png/revision/latest?cb=20150909122425"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/artigos/versoes-beta-de-resident-evil-4"
+        }
+      ]
+    },
+    {
+      "id": "re5_beta",
+      "titulo": "Resident Evil 5 Beta",
+      "quando": "2005 – 2007",
+      "onde": "Primeiros trailers do RE5",
+      "lancamento": 2005,
+      "formato": "Conceito · PS3 / Xbox 360",
+      "sinopse": "O primeiro vídeo do RE5, de 2005, mostrava Chris com outras roupas, inimigos rápidos parecidos com zumbis e um sistema de calor: Chris precisaria beber e comer para não perder velocidade. Do conceito, só a cegueira ao passar do escuro para o claro chegou ao jogo final.",
+      "lancamentos": [
+        {
+          "nome": "Trailers de 2005 e 2007",
+          "ano": 2005,
+          "plataformas": "PS3, Xbox 360",
+          "onde": "Só vídeos: nada jogável vazou"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://residentevil.com.br/wp-content/uploads/2023/05/Beta_RE5-360x300.jpg"
+        ],
+        "fonte": "capa: REVIL (residentevil.com.br)"
+      },
+      "links": [
+        {
+          "nome": "Ver no REVIL",
+          "url": "https://residentevil.com.br/betas/resident-evil-5-beta"
+        }
+      ]
+    },
+    {
+      "id": "re_portable",
+      "titulo": "Resident Evil Portable",
+      "quando": "2009 – 2011",
+      "onde": "Jogo inédito para portátil",
+      "lancamento": 2011,
+      "formato": "Jogo cancelado · PSP",
+      "poster": {
+        "titulo": "RESIDENT EVIL PORTABLE",
+        "subtitulo": "PSP · 2009",
+        "carimbo": "CANCELADO"
+      },
+      "sinopse": "Anunciado num evento da Sony em 2009 como um Resident Evil feito do zero para o PSP. Depois do anúncio quase nada foi mostrado, e a Capcom confirmou mais tarde que o projeto não ia mais sair.",
+      "lancamentos": [
+        {
+          "nome": "Anúncio",
+          "ano": 2009,
+          "plataformas": "PSP",
+          "onde": "Só o anúncio; nunca foi lançado"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/7/79/Image001CAWZYHCM.jpg/revision/latest?cb=20110207025613"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Resident_Evil_Portable"
+        }
+      ]
+    }
+  ],
+  "midia": [
+    {
+      "id": "executer",
+      "titulo": "Biohazard 4D-Executer",
+      "quando": "Universo próprio",
+      "onde": "Curta em CG para parques temáticos",
+      "lancamento": 2000,
+      "formato": "Curta em CG · não canônico",
+      "sinopse": "Curta em computação gráfica feito para cinemas 4D de parques temáticos no Japão. Uma equipe de resgate entra numa mansão infestada atrás de um cientista desaparecido.",
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/BIOHAZARD_4D-EXECUTER"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Curta",
+          "ano": 2000,
+          "plataformas": "Cinema 4D em parques temáticos (Japão)",
+          "onde": "Raro; circula em gravações de fãs"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/2/26/PosterRE4D.jpg/revision/latest?cb=20161106170025"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      }
+    },
+    {
+      "id": "resident_evil_2002",
+      "titulo": "Resident Evil (2002)",
+      "quando": "Universo dos filmes da Alice",
+      "onde": "Live-action de Paul W. S. Anderson",
+      "lancamento": 2002,
+      "formato": "Filme live-action · não canônico",
+      "sinopse": "Alice acorda sem memória numa mansão e se junta a um comando da Umbrella que desce à Colmeia, o laboratório subterrâneo onde o T-Vírus escapou.",
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil_(2002_film)"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2002,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/a/a1/Resident_evil_ver4.jpg"
+        ],
+        "fonte": "pôster: Wikipedia"
+      }
+    },
+    {
+      "id": "apocalypse",
+      "titulo": "Apocalypse",
+      "quando": "Universo dos filmes da Alice",
+      "onde": "Live-action de Paul W. S. Anderson",
+      "lancamento": 2004,
+      "formato": "Filme live-action · não canônico",
+      "sinopse": "Raccoon City está tomada e prestes a ser destruída. Alice, Jill Valentine e Carlos tentam resgatar a filha de um cientista enquanto o Nemesis os caça.",
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil:_Apocalypse"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2004,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/5/50/Resident_evil_apocalypse_poster.jpg"
+        ],
+        "fonte": "pôster: Wikipedia"
+      }
+    },
+    {
+      "id": "extinction",
+      "titulo": "Extinction",
+      "quando": "Universo dos filmes da Alice",
+      "onde": "Live-action de Paul W. S. Anderson",
+      "lancamento": 2007,
+      "formato": "Filme live-action · não canônico",
+      "sinopse": "Anos depois, o vírus transformou o mundo num deserto. Alice viaja com um comboio de sobreviventes liderado por Claire Redfield rumo ao Alasca.",
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil:_Extinction"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2007,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/3/34/Resident_Evil_Extinction.jpg"
+        ],
+        "fonte": "pôster: Wikipedia"
+      }
+    },
+    {
+      "id": "degeneration",
+      "titulo": "Degeneration",
+      "quando": "2005 na história",
+      "onde": "Aeroporto de Harvardville",
+      "lancamento": 2008,
+      "formato": "Filme em CG · canônico",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/a/a1/BioDPoster.jpg"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil:_Degeneration"
+        }
+      ],
+      "sinopse": "Leon e Claire se reencontram durante um ataque com o T-Vírus num aeroporto dos EUA, sete anos depois de Raccoon City. O primeiro longa em CG ligado aos jogos.",
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2008,
+          "plataformas": "Longa em computação gráfica",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ]
+    },
+    {
+      "id": "afterlife",
+      "titulo": "Afterlife",
+      "quando": "Universo dos filmes da Alice",
+      "onde": "Live-action de Paul W. S. Anderson",
+      "lancamento": 2010,
+      "formato": "Filme live-action · não canônico",
+      "sinopse": "Alice procura o refúgio Arcadia e encontra Claire e Chris Redfield presos numa Los Angeles cercada, até enfrentar Albert Wesker.",
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil:_Afterlife"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2010,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/e/ea/Resident_Evil-_Afterlife.jpg"
+        ],
+        "fonte": "pôster: Wikipedia"
+      }
+    },
+    {
+      "id": "damnation",
+      "titulo": "Damnation",
+      "quando": "2011 na história",
+      "onde": "República da Eslávia Oriental",
+      "lancamento": 2012,
+      "formato": "Filme em CG · canônico",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/b/bd/BioDamnationPoster.jpg"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil:_Damnation"
+        }
+      ],
+      "sinopse": "Leon vai sozinho a um país do Leste Europeu em guerra civil, onde os dois lados usam Las Plagas e armas biológicas. Ada Wong também está por lá.",
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2012,
+          "plataformas": "Longa em computação gráfica",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ]
+    },
+    {
+      "id": "retribution",
+      "titulo": "Retribution",
+      "quando": "Universo dos filmes da Alice",
+      "onde": "Live-action de Paul W. S. Anderson",
+      "lancamento": 2012,
+      "formato": "Filme live-action · não canônico",
+      "sinopse": "Presa numa base submarina da Umbrella que simula cidades do mundo, Alice precisa fugir com a ajuda de Ada Wong e Leon.",
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil:_Retribution"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2012,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/5/50/Resident_evil_retribution_poster.jpg"
+        ],
+        "fonte": "pôster: Wikipedia"
+      }
+    },
+    {
+      "id": "final_chapter",
+      "titulo": "The Final Chapter",
+      "quando": "Universo dos filmes da Alice",
+      "onde": "Live-action de Paul W. S. Anderson",
+      "lancamento": 2016,
+      "formato": "Filme live-action · não canônico",
+      "sinopse": "Alice volta a Raccoon City, onde tudo começou, para um último confronto com a Umbrella e a Rainha Vermelha.",
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil:_The_Final_Chapter"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2016,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/b/bf/Resident_Evil_The_Final_Chapter_poster.jpg"
+        ],
+        "fonte": "pôster: Wikipedia"
+      }
+    },
+    {
+      "id": "vendetta",
+      "titulo": "Vendetta",
+      "quando": "2014 na história",
+      "onde": "México e Nova York",
+      "lancamento": 2017,
+      "formato": "Filme em CG · canônico",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/0/00/Biohazard_vendetta_poster.jpg"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil:_Vendetta"
+        }
+      ],
+      "sinopse": "Chris, Leon e Rebecca se unem contra um traficante de armas biológicas que planeja um ataque com um novo vírus em Nova York.",
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2017,
+          "plataformas": "Longa em computação gráfica",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ]
+    },
+    {
+      "id": "infinite_darkness",
+      "titulo": "Infinite Darkness",
+      "quando": "2006 na história",
+      "onde": "Casa Branca e China",
+      "lancamento": 2021,
+      "formato": "Série em CG · canônica",
+      "poster": {
+        "titulo": "INFINITE DARKNESS",
+        "subtitulo": "NETFLIX · 2021"
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil:_Infinite_Darkness"
+        }
+      ],
+      "sinopse": "Leon investiga uma invasão aos computadores da Casa Branca enquanto Claire descobre pistas de uma arma biológica ligada a uma guerra na Ásia.",
+      "lancamentos": [
+        {
+          "nome": "Minissérie (4 episódios)",
+          "ano": 2021,
+          "plataformas": "Série em computação gráfica",
+          "onde": "Netflix"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/d/d7/InfiniteDarknessPoster.jpg/revision/latest?cb=20211031181712"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      }
+    },
+    {
+      "id": "welcome_raccoon",
+      "titulo": "Welcome to Raccoon City",
+      "quando": "1998",
+      "onde": "Raccoon City",
+      "lancamento": 2021,
+      "formato": "Filme live-action · não canônico",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/0/01/Welcome_to_Raccoon_City.jpg"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil:_Welcome_to_Raccoon_City"
+        }
+      ],
+      "sinopse": "Recomeço da série nos cinemas que junta as histórias do RE1 e do RE2 numa noite só, com Claire, Chris, Jill, Leon e Wesker.",
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2021,
+          "plataformas": "Cinema",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ]
+    },
+    {
+      "id": "serie_netflix",
+      "titulo": "Resident Evil (série)",
+      "quando": "2022 e 2036",
+      "onde": "New Raccoon City",
+      "lancamento": 2022,
+      "formato": "Série live-action · não canônica",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/5/51/Resident_Evil_%282022_TV_series%29.png"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil_(série)"
+        }
+      ],
+      "sinopse": "Duas linhas do tempo acompanham as filhas de Albert Wesker: uma na cidade-empresa da Umbrella e outra anos depois, num mundo devastado.",
+      "lancamentos": [
+        {
+          "nome": "Temporada única",
+          "ano": 2022,
+          "plataformas": "Série",
+          "onde": "Netflix"
+        }
+      ]
+    },
+    {
+      "id": "death_island",
+      "titulo": "Death Island",
+      "quando": "2015 na história",
+      "onde": "Alcatraz",
+      "lancamento": 2023,
+      "formato": "Filme em CG · canônico",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/4/4f/Resident_Evil_-_Death_Island.png"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil:_Death_Island"
+        }
+      ],
+      "sinopse": "Leon, Chris, Jill, Claire e Rebecca acabam juntos em Alcatraz, onde um novo surto ameaça São Francisco. É a primeira vez que os cinco aparecem lado a lado.",
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2023,
+          "plataformas": "Longa em computação gráfica",
+          "onde": "Compra ou aluguel digital (varia por país)"
+        }
+      ]
+    },
+    {
+      "id": "filme_2026",
+      "titulo": "Resident Evil (2026)",
+      "quando": "Raccoon City",
+      "onde": "Filme de Zach Cregger",
+      "lancamento": 2026,
+      "formato": "Filme live-action",
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/3/3c/Resident_Evil_2026_film_poster.png"
+        ]
+      },
+      "links": [
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil_(2026_film)"
+        }
+      ],
+      "sinopse": "Austin Abrams vive Bryan Hodukavich, um entregador de material médico que precisa atravessar Raccoon City no meio de um surto de criaturas infectadas.",
+      "lancamentos": [
+        {
+          "nome": "Filme",
+          "ano": 2026,
+          "plataformas": "Cinema",
+          "onde": "Cinema; depois compra e aluguel digital"
+        }
+      ]
+    }
+  ],
+  "fas": [
+    {
+      "id": "fan_rebirth",
+      "titulo": "Classic REbirth",
+      "categoria": "Patch",
+      "quando": "RE1, RE2, RE3 e Dino Crisis de PC",
+      "onde": "Patch de fãs",
+      "lancamento": 2018,
+      "formato": "Patch de fãs · PC",
+      "sinopse": "Patch que faz os Resident Evil clássicos de PC rodarem bem no Windows atual: novas resoluções, tela cheia sem borda, controles modernos e suporte a mods. É a base da maioria dos mods dos clássicos.",
+      "arte": {
+        "capa": [
+          "https://classicrebirth.com/wp-content/uploads/2018/09/resident_evil_2.0.0.jpg"
+        ],
+        "fonte": "imagem: site do projeto"
+      },
+      "links": [
+        {
+          "nome": "Site oficial",
+          "url": "https://www.classicrebirth.com/"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Classic REbirth",
+          "ano": 2018,
+          "plataformas": "PC (versões clássicas originais)",
+          "onde": "classicrebirth.com (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_shdp",
+      "titulo": "Seamless HD Project",
+      "categoria": "Remaster",
+      "quando": "RE1, RE2 e RE3 clássicos",
+      "onde": "Cenários em HD",
+      "lancamento": 2020,
+      "formato": "Remaster de fãs · PC",
+      "sinopse": "Refaz em alta resolução os cenários pré-renderizados dos três primeiros jogos, sem as emendas que aparecem em outras melhorias. Precisa do Classic REbirth.",
+      "arte": {
+        "capa": [
+          "http://www.reshdp.com/img/RE1SHDP_logo_og.jpg"
+        ],
+        "fonte": "imagem: site do projeto"
+      },
+      "links": [
+        {
+          "nome": "Site oficial",
+          "url": "https://www.reshdp.com/"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "RE2 e RE3 SHDP",
+          "ano": 2020,
+          "plataformas": "PC + Classic REbirth",
+          "onde": "reshdp.com (grátis)"
+        },
+        {
+          "nome": "RE1 SHDP",
+          "ano": 2022,
+          "plataformas": "PC (versão japonesa Mediakite) + Classic REbirth",
+          "onde": "reshdp.com (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_re4hd",
+      "titulo": "Resident Evil 4 HD Project",
+      "categoria": "Remaster",
+      "quando": "RE4 de 2005 (PC)",
+      "onde": "Remaster de fãs",
+      "lancamento": 2022,
+      "formato": "Remaster de fãs · PC",
+      "sinopse": "Anos de trabalho de dois fãs refazendo texturas, modelos e iluminação do RE4 original com base em fotos e referências reais. Instala por cima do RE4 Ultimate HD da Steam.",
+      "links": [
+        {
+          "nome": "Site oficial",
+          "url": "https://www.re4hd.com/"
+        },
+        {
+          "nome": "Wikipedia (inglês)",
+          "url": "https://en.wikipedia.org/wiki/Resident_Evil_4_HD_Project"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "RE4 HD Project",
+          "ano": 2022,
+          "plataformas": "PC (RE4 Ultimate HD Edition)",
+          "onde": "re4hd.com (grátis)"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/en/8/83/RE4_HD_Project_logo.png"
+        ],
+        "fonte": "imagem: Wikipedia"
+      }
+    },
+    {
+      "id": "fan_biorand",
+      "titulo": "BioRand",
+      "categoria": "Randomizer",
+      "quando": "Clássicos e RE Engine",
+      "onde": "Randomizer",
+      "lancamento": 2023,
+      "formato": "Randomizer de fãs · PC",
+      "sinopse": "Embaralha inimigos, itens, portas e até vozes para que cada partida seja diferente. Vem com pacotes de melhorias da comunidade já prontos.",
+      "arte": {
+        "capa": [
+          "https://opengraph.githubassets.com/1/IntelOrca/biorand"
+        ],
+        "fonte": "imagem: GitHub"
+      },
+      "links": [
+        {
+          "nome": "Site oficial",
+          "url": "https://biorand.net/"
+        },
+        {
+          "nome": "GitHub",
+          "url": "https://github.com/IntelOrca/biorand"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "BioRand",
+          "ano": 2023,
+          "plataformas": "PC",
+          "onde": "biorand.net (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_decomp",
+      "titulo": "RE1 PC Decomp",
+      "categoria": "Decomp",
+      "quando": "Resident Evil (1996)",
+      "onde": "Código reconstruído",
+      "lancamento": 2026,
+      "formato": "Decomp de fãs · Windows e Linux",
+      "sinopse": "O código do RE1 de PC reconstruído por fãs e jogável do início ao fim no Windows e no Linux, com os arquivos do seu jogo. Dá para baixar e jogar pelo capítulo Resident Evil deste app.",
+      "arte": {
+        "capa": [
+          "https://opengraph.githubassets.com/1/ecruells/resident-evil-pc-decomp"
+        ],
+        "fonte": "imagem: GitHub"
+      },
+      "links": [
+        {
+          "nome": "GitHub",
+          "url": "https://github.com/ecruells/resident-evil-pc-decomp"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Decomp de PC",
+          "ano": 2026,
+          "plataformas": "Windows, Linux",
+          "onde": "Neste app (capítulo Resident Evil)"
+        }
+      ]
+    },
+    {
+      "id": "fan_openbio2",
+      "titulo": "OpenBiohazard2",
+      "categoria": "Engine",
+      "quando": "Resident Evil 2 (1998)",
+      "onde": "Engine refeita",
+      "lancamento": 2019,
+      "formato": "Engine de fãs · código aberto",
+      "sinopse": "Reimplementação em código aberto da engine do RE2 original, que usa os arquivos do seu jogo. Ainda em desenvolvimento.",
+      "arte": {
+        "capa": [
+          "https://opengraph.githubassets.com/1/OpenBiohazard2/OpenBiohazard2"
+        ],
+        "fonte": "imagem: GitHub"
+      },
+      "links": [
+        {
+          "nome": "GitHub",
+          "url": "https://github.com/OpenBiohazard2/OpenBiohazard2"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "OpenBiohazard2",
+          "ano": 2019,
+          "plataformas": "PC",
+          "onde": "Compilar a partir do código-fonte"
+        }
+      ]
+    },
+    {
+      "id": "fan_reborn",
+      "titulo": "Resident Evil 2 Reborn",
+      "categoria": "Fan remake",
+      "quando": "Remake de fãs do RE2",
+      "onde": "Virou Daymare: 1998",
+      "lancamento": 2015,
+      "formato": "Remake de fãs · cancelado",
+      "sinopse": "Remake do RE2 feito por fãs italianos na Unreal Engine. A Capcom pediu para parar porque ia fazer o próprio remake, e convidou a equipe para conversar. O grupo seguiu com um jogo original inspirado na série: Daymare: 1998.",
+      "links": [
+        {
+          "nome": "Daymare: 1998 (Wikipedia)",
+          "url": "https://en.wikipedia.org/wiki/Daymare:_1998"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Demo de fãs",
+          "ano": 2015,
+          "plataformas": "PC",
+          "onde": "Encerrado a pedido da Capcom"
+        },
+        {
+          "nome": "Daymare: 1998",
+          "ano": 2020,
+          "plataformas": "PC e consoles",
+          "onde": "Steam e lojas de console"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://upload.wikimedia.org/wikipedia/commons/5/5c/Daymare1998.png"
+        ],
+        "fonte": "imagem: Wikipedia"
+      }
+    },
+    {
+      "id": "fan_re1_remake",
+      "titulo": "Resident Evil (fan remake em Unity)",
+      "categoria": "Fan remake",
+      "quando": "2022",
+      "onde": "Fan remake · cancelado",
+      "formato": "Fan remake · cancelado",
+      "sinopse": "Remake do primeiro jogo feito por fãs na Unity, com modo clássico de câmeras fixas. A demo saiu em outubro de 2022, e o projeto foi encerrado em dezembro do mesmo ano depois que a Capcom pediu para parar.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil (fan remake em Unity)",
+          "ano": 2022,
+          "plataformas": "Fan remake · cancelado",
+          "onde": "Cancelado a pedido da Capcom; a demo saiu do ar"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Notícia (Game Developer)",
+          "url": "https://www.gamedeveloper.com/business/capcom-shuts-down-fan-remakes-of-resident-evil-games"
+        }
+      ],
+      "lancamento": 2022
+    },
+    {
+      "id": "fan_cv_remake",
+      "titulo": "Code: Veronica (fan remake em Unity)",
+      "categoria": "Fan remake",
+      "quando": "2022",
+      "onde": "Fan remake · cancelado",
+      "formato": "Fan remake · cancelado",
+      "sinopse": "Remake de Code: Veronica feito pela mesma equipe, com modos Remake (câmera no ombro) e Classic (câmeras fixas). Teve demo, mas foi cancelado em dezembro de 2022 a pedido da Capcom, pouco antes de sair completo.",
+      "lancamentos": [
+        {
+          "nome": "Code: Veronica (fan remake em Unity)",
+          "ano": 2022,
+          "plataformas": "Fan remake · cancelado",
+          "onde": "Cancelado a pedido da Capcom"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Notícia (TheGamer)",
+          "url": "https://www.thegamer.com/resident-evil-code-veronica-fan-remake-shut-down-capcom/"
+        }
+      ],
+      "lancamento": 2022
+    },
+    {
+      "id": "fan_re3_classic",
+      "titulo": "Resident Evil 3 Classic Remake (UE5)",
+      "categoria": "Fan remake",
+      "quando": "2021",
+      "onde": "Fan remake · em vídeo",
+      "formato": "Fan remake · em vídeo",
+      "sinopse": "Projeto de fãs que refaz o RE3 na Unreal Engine 5 com câmeras fixas, como o original, usando cenários do remake de 2020 e a Jill com a roupa clássica. Mostrado em 2021; não há notícia de versão final.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil 3 Classic Remake (UE5)",
+          "ano": 2021,
+          "plataformas": "Fan remake · em vídeo",
+          "onde": "Só vídeos de demonstração"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Notícia (DSOGaming)",
+          "url": "https://www.dsogaming.com/videotrailer-news/fans-working-on-a-classic-remake-of-resident-evil-3-in-unreal-engine-5/"
+        }
+      ],
+      "lancamento": 2021
+    },
+    {
+      "id": "fan_obsrv",
+      "titulo": "Outbreak Server Resurrection",
+      "categoria": "Servidor de fãs",
+      "quando": "2014",
+      "onde": "Servidor online de fãs",
+      "formato": "Servidor online de fãs",
+      "sinopse": "Os servidores oficiais do Outbreak fecharam em 2007 (EUA) e 2011 (Japão). Desde 1º de janeiro de 2014, fãs mantêm servidores alternativos para as versões japonesas, com placares e listas de banimento.",
+      "lancamentos": [
+        {
+          "nome": "Outbreak Server Resurrection",
+          "ano": 2014,
+          "plataformas": "Servidor online de fãs",
+          "onde": "Online de novo com a versão japonesa (PS2 ou emulador)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Grupo na Steam",
+          "url": "https://steamcommunity.com/groups/outbreakserver"
+        },
+        {
+          "nome": "Notícia (Kotaku)",
+          "url": "https://kotaku.com/ten-years-later-fans-bring-resident-evil-outbreak-back-1494567563"
+        }
+      ],
+      "lancamento": 2014
+    },
+    {
+      "id": "fan_revisited",
+      "titulo": "Resident Evil REvisited",
+      "categoria": "Mod clássico",
+      "quando": "Mod clássico",
+      "onde": "Mod do RE2 clássico (PC)",
+      "formato": "Mod do RE2 clássico (PC)",
+      "sinopse": "Mod para o RE2 de PC que vira um prólogo do primeiro jogo, baseado nos livros de S. D. Perry. Você joga como Trent (Victor Darius) nas Montanhas Arklay e na mansão Spencer no começo do surto, com câmeras fixas, salas inspiradas no remake de GameCube e um motel tirado de um cenário cortado do Outbreak.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil REvisited",
+          "ano": "—",
+          "plataformas": "Mod do RE2 clássico (PC)",
+          "onde": "Em produção (demo anunciada)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Notícia (GameRevolution)",
+          "url": "https://www.gamerevolution.com/news/699940-resident-evil-revisited-mod-re1-prequel"
+        },
+        {
+          "nome": "Notícia (MegaVisions)",
+          "url": "https://megavisions.net/this-new-resident-evil-2-mod-is-inspired-by-s-d-perrys-novels"
+        }
+      ]
+    },
+    {
+      "id": "fan_re2_rearranged",
+      "titulo": "RE2: Classic Re-arranged",
+      "categoria": "Mod clássico",
+      "quando": "2026",
+      "onde": "Mod do RE2 clássico · v1.22",
+      "formato": "Mod do RE2 clássico · v1.22",
+      "sinopse": "Muda a posição de inimigos, itens e caminhos do RE2 para deixar o jogo mais difícil sem mexer em vida, dano ou armas. Precisa do Classic REbirth.",
+      "lancamentos": [
+        {
+          "nome": "RE2: Classic Re-arranged",
+          "ano": 2026,
+          "plataformas": "Mod do RE2 clássico · v1.22",
+          "onde": "ModDB (grátis)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Abrir no ModDB",
+          "url": "https://www.moddb.com/mods/resident-evil-2-classic-re-arranged"
+        }
+      ],
+      "lancamento": 2026
+    },
+    {
+      "id": "fan_reenhance",
+      "titulo": "RE:Enhance",
+      "categoria": "Mod clássico",
+      "quando": "Mod clássico",
+      "onde": "Mod visual · RE1, RE2, RE3",
+      "formato": "Mod visual · RE1, RE2, RE3",
+      "sinopse": "Refaz os cenários pré-renderizados dos clássicos em resolução bem maior, de SonicB00M. Tem versões para RE1, RE2 e RE3.",
+      "lancamentos": [
+        {
+          "nome": "RE:Enhance",
+          "ano": "—",
+          "plataformas": "Mod visual · RE1, RE2, RE3",
+          "onde": "ModDB e fóruns (grátis)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Discussão (ResetEra)",
+          "url": "https://www.resetera.com/threads/the-definitive-way-to-play-classic-resident-evil-2-3-today-re-enhance-mod.1382446/"
+        }
+      ]
+    },
+    {
+      "id": "fan_re3_definitive",
+      "titulo": "RE3: Definitive Edition",
+      "categoria": "Mod clássico",
+      "quando": "Mod clássico",
+      "onde": "Mod do RE3 clássico",
+      "formato": "Mod do RE3 clássico",
+      "sinopse": "Pacote para o RE3 de 1999 que junta Classic REbirth, o HD Mod da TeamX, modelos novos dos personagens e ReShade.",
+      "lancamentos": [
+        {
+          "nome": "RE3: Definitive Edition",
+          "ano": "—",
+          "plataformas": "Mod do RE3 clássico",
+          "onde": "ModDB (grátis)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Abrir no ModDB",
+          "url": "https://www.moddb.com/mods/resident-evil-3-definitive-edition"
+        }
+      ]
+    },
+    {
+      "id": "fan_re3_necropolis",
+      "titulo": "RE3: Lord of the Necropolis",
+      "categoria": "Mod clássico",
+      "quando": "Mod clássico",
+      "onde": "Mod do RE3 clássico",
+      "formato": "Mod do RE3 clássico",
+      "sinopse": "Overhaul do RE3 de 1999 (versão SourceNext) pensado como um \"Director's Cut\" do jogo.",
+      "lancamentos": [
+        {
+          "nome": "RE3: Lord of the Necropolis",
+          "ano": "—",
+          "plataformas": "Mod do RE3 clássico",
+          "onde": "ModDB (grátis)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Mods do RE3 no ModDB",
+          "url": "https://www.moddb.com/games/resident-evil-3/mods"
+        }
+      ]
+    },
+    {
+      "id": "fan_re3_restoration",
+      "titulo": "RE3: Restoration Project",
+      "categoria": "Mod clássico",
+      "quando": "Mod clássico",
+      "onde": "Mod do RE3 clássico",
+      "formato": "Mod do RE3 clássico",
+      "sinopse": "Patch acumulado para o RE3 de PC: vídeos em tela cheia, som sem perda, correções de bugs e outras melhorias. Não precisa do Classic REbirth.",
+      "lancamentos": [
+        {
+          "nome": "RE3: Restoration Project",
+          "ano": "—",
+          "plataformas": "Mod do RE3 clássico",
+          "onde": "ModDB (grátis)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Abrir no ModDB",
+          "url": "https://www.moddb.com/mods/resident-evil-3-restoration-project"
+        }
+      ]
+    },
+    {
+      "id": "fan_re2_hd_teamx",
+      "titulo": "RE2 e RE3 HD Mod (TeamX)",
+      "categoria": "Mod clássico",
+      "quando": "Mod clássico",
+      "onde": "Mod de texturas · RE2, RE3",
+      "formato": "Mod de texturas · RE2, RE3",
+      "sinopse": "Texturas e fundos em HD para o RE2 e o RE3 clássicos, muito usado junto com o Classic REbirth.",
+      "lancamentos": [
+        {
+          "nome": "RE2 e RE3 HD Mod (TeamX)",
+          "ano": "—",
+          "plataformas": "Mod de texturas · RE2, RE3",
+          "onde": "ModDB (grátis)"
+        }
+      ],
+      "links": [
+        {
+          "nome": "RE3 HD Mod no ModDB",
+          "url": "https://www.moddb.com/mods/resident-evil-3-hd-mod"
+        }
+      ]
+    },
+    {
+      "id": "fan_keeper",
+      "titulo": "The Keeper's Diary",
+      "categoria": "Fan film",
+      "quando": "Mansão Spencer",
+      "onde": "Fan film live-action",
+      "lancamento": 2024,
+      "formato": "Fan film · live-action",
+      "sinopse": "Fan film de Andrew Saullo que leva para as telas o famoso diário do zelador da mansão do RE1, mostrando um pesquisador sendo tomado aos poucos pelo vírus.",
+      "poster": {
+        "titulo": "THE KEEPER'S DIARY",
+        "subtitulo": "FAN FILM · 2024",
+        "carimbo": "FAN FILM"
+      },
+      "links": [
+        {
+          "nome": "Assistir (busca no YouTube)",
+          "url": "https://www.youtube.com/results?search_query=The+Keeper%27s+Diary+A+Biohazard+Story"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Fan film",
+          "ano": 2024,
+          "plataformas": "Live-action",
+          "onde": "YouTube (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_resurrection",
+      "titulo": "Resurrection: A Biohazard Story",
+      "categoria": "Fan série",
+      "quando": "Depois da mansão",
+      "onde": "Websérie de fãs",
+      "lancamento": 2026,
+      "formato": "Websérie de fãs · live-action",
+      "sinopse": "Websérie em quatro partes, também de Andrew Saullo, que reúne atores das cenas live-action do RE1 de 1996 de volta como Chris, Wesker, Barry e Rebecca. Foi anunciada para março de 2026, nos 30 anos da série.",
+      "poster": {
+        "titulo": "RESURRECTION",
+        "subtitulo": "WEBSÉRIE DE FÃS · 2026",
+        "carimbo": "FAN FILM"
+      },
+      "links": [
+        {
+          "nome": "Assistir (busca no YouTube)",
+          "url": "https://www.youtube.com/results?search_query=Resurrection+A+Biohazard+Story"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Websérie (4 partes)",
+          "ano": 2026,
+          "plataformas": "Live-action",
+          "onde": "YouTube (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_biohazard_2ronin",
+      "titulo": "BioHazard (2 Ronin Pictures)",
+      "categoria": "Fan film",
+      "quando": "Universo alternativo",
+      "onde": "Fan film live-action",
+      "lancamento": 2020,
+      "formato": "Fan film · live-action",
+      "sinopse": "Curta de fãs que imagina uma versão alternativa da história do primeiro jogo. Começou como um longa e acabou virando um curta.",
+      "poster": {
+        "titulo": "BIOHAZARD",
+        "subtitulo": "2 RONIN PICTURES",
+        "carimbo": "FAN FILM"
+      },
+      "links": [
+        {
+          "nome": "Assistir (busca no YouTube)",
+          "url": "https://www.youtube.com/results?search_query=BioHazard+2+Ronin+Pictures"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Fan film",
+          "ano": "—",
+          "plataformas": "Live-action",
+          "onde": "YouTube (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_fractions",
+      "titulo": "RE: Fractions",
+      "categoria": "Fan CG",
+      "quando": "Universo dos jogos",
+      "onde": "Série em CG de fãs",
+      "lancamento": 2021,
+      "formato": "Série em CG de fãs",
+      "sinopse": "Série animada em computação gráfica feita por fãs, com histórias curtas no universo dos jogos.",
+      "poster": {
+        "titulo": "RE: FRACTIONS",
+        "subtitulo": "SÉRIE EM CG DE FÃS",
+        "carimbo": "FAN FILM"
+      },
+      "links": [
+        {
+          "nome": "Assistir (busca no YouTube)",
+          "url": "https://www.youtube.com/results?search_query=RE+Fractions+Resident+Evil+fan"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Série em CG",
+          "ano": "—",
+          "plataformas": "Animação",
+          "onde": "YouTube (grátis)"
+        }
+      ]
+    },
+    {
+      "id": "fan_red_falls",
+      "titulo": "Resident Evil: Red Falls",
+      "categoria": "Fan film",
+      "quando": "2013",
+      "onde": "Fan film · 53 min",
+      "formato": "Fan film · 53 min",
+      "sinopse": "Filme de fãs de quase uma hora, roteirizado por Jordan Page. Um capitão interroga um homem ligado a bioterroristas que mantêm agentes da BSAA reféns, enquanto a equipe Foxtrot entra na cidade infestada de Red Falls.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil: Red Falls",
+          "ano": 2013,
+          "plataformas": "Fan film · 53 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Resident+Evil+Red+Falls+fan+film"
+        }
+      ],
+      "lancamento": 2013
+    },
+    {
+      "id": "fan_biohazard_riggs",
+      "titulo": "Biohazard (Chandler Riggs)",
+      "categoria": "Fan film",
+      "quando": "2026",
+      "onde": "Fan film · 19 min",
+      "formato": "Fan film · 19 min",
+      "sinopse": "Curta de 19 minutos baseado no RE7, escrito, dirigido e estrelado por Chandler Riggs (o Carl de The Walking Dead) como Ethan Winters. Recria o jantar da família Baker e a luta com Jack na garagem.",
+      "lancamentos": [
+        {
+          "nome": "Biohazard (Chandler Riggs)",
+          "ano": 2026,
+          "plataformas": "Fan film · 19 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Biohazard+Chandler+Riggs+Resident+Evil+7+fan+film"
+        }
+      ],
+      "lancamento": 2026
+    },
+    {
+      "id": "fan_leaving_rc",
+      "titulo": "Leaving Raccoon City",
+      "categoria": "Fan film",
+      "quando": "2025",
+      "onde": "Fan film · 7 min",
+      "formato": "Fan film · 7 min",
+      "sinopse": "Curta de Beau Preiser sobre a fuga de Raccoon City.",
+      "lancamentos": [
+        {
+          "nome": "Leaving Raccoon City",
+          "ano": 2025,
+          "plataformas": "Fan film · 7 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Leaving+Raccoon+City+Resident+Evil+Fan+Film"
+        }
+      ],
+      "lancamento": 2025
+    },
+    {
+      "id": "fan_invasion",
+      "titulo": "Resident Evil: Invasion",
+      "categoria": "Fan film",
+      "quando": "2023",
+      "onde": "Fan film · 6 min",
+      "formato": "Fan film · 6 min",
+      "sinopse": "Curta de fãs de seis minutos.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil: Invasion",
+          "ano": 2023,
+          "plataformas": "Fan film · 6 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Resident+Evil+Invasion+fan+film"
+        }
+      ],
+      "lancamento": 2023
+    },
+    {
+      "id": "fan_downfall",
+      "titulo": "Downfall RC",
+      "categoria": "Fan film",
+      "quando": "Fan film",
+      "onde": "Fan film · 14 min",
+      "formato": "Fan film · 14 min",
+      "sinopse": "Curta de Jose Angel Salazar sobre a queda de Raccoon City.",
+      "lancamentos": [
+        {
+          "nome": "Downfall RC",
+          "ano": "—",
+          "plataformas": "Fan film · 14 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=DOWNFALL+RC+A+Resident+Evil+Fan-Film"
+        }
+      ]
+    },
+    {
+      "id": "fan_falling_stars",
+      "titulo": "Resident Evil: Falling Stars",
+      "categoria": "Fan film",
+      "quando": "Fan film",
+      "onde": "Fan film · 38 min",
+      "formato": "Fan film · 38 min",
+      "sinopse": "Média-metragem de fãs dirigido por Mariano Caterinozzi.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil: Falling Stars",
+          "ano": "—",
+          "plataformas": "Fan film · 38 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Resident+Evil+Falling+Stars+fan+made+short+movie"
+        }
+      ]
+    },
+    {
+      "id": "fan_breakout",
+      "titulo": "Resident Evil: Breakout",
+      "categoria": "Fan film",
+      "quando": "Fan film",
+      "onde": "Fan film · 13 min",
+      "formato": "Fan film · 13 min",
+      "sinopse": "Curta de Ryan Brewer (Brewed Images).",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil: Breakout",
+          "ano": "—",
+          "plataformas": "Fan film · 13 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Resident+Evil+Breakout+Brewed+Images"
+        }
+      ]
+    },
+    {
+      "id": "fan_village_short",
+      "titulo": "Village (curta de fãs)",
+      "categoria": "Fan film",
+      "quando": "Fan film",
+      "onde": "Fan film · 4 min",
+      "formato": "Fan film · 4 min",
+      "sinopse": "Curta de quatro minutos inspirado em Resident Evil Village, gravado com uma GoPro por cineastas estreantes.",
+      "lancamentos": [
+        {
+          "nome": "Village (curta de fãs)",
+          "ano": "—",
+          "plataformas": "Fan film · 4 min",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=Resident+Evil+Village+fan+film+Dimitrescu+short"
+        }
+      ]
+    },
+    {
+      "id": "fan_stars_serie",
+      "titulo": "S.T.A.R.S. (websérie)",
+      "categoria": "Fan série",
+      "quando": "Fan série",
+      "onde": "Websérie de fãs",
+      "formato": "Websérie de fãs",
+      "sinopse": "Websérie de comédia de humor ácido sobre a equipe S.T.A.R.S., dois anos antes do primeiro jogo.",
+      "lancamentos": [
+        {
+          "nome": "S.T.A.R.S. (websérie)",
+          "ano": "—",
+          "plataformas": "Websérie de fãs",
+          "onde": "Grátis no YouTube"
+        }
+      ],
+      "links": [
+        {
+          "nome": "Procurar no YouTube",
+          "url": "https://www.youtube.com/results?search_query=S.T.A.R.S.+Resident+Evil+fan+series"
+        }
+      ]
+    }
+  ],
+  "hqs": [
+    {
+      "id": "hq_magazine",
+      "titulo": "The Official Comic Magazine",
+      "quando": "1998 – 1999",
+      "onde": "Revista em quadrinhos (Image / WildStorm)",
+      "lancamento": 1998,
+      "formato": "Revista em quadrinhos (Image / WildStorm)",
+      "sinopse": "Cinco revistas com histórias curtas dos S.T.A.R.S. e de Raccoon City, adaptações do RE1 e do RE2 e contos originais. Foi a primeira HQ ocidental da série.",
+      "lancamentos": [
+        {
+          "nome": "The Official Comic Magazine",
+          "ano": 1998,
+          "plataformas": "Revista em quadrinhos (Image / WildStorm)",
+          "onde": "Edições usadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/e/e6/RE_Magazine_1.jpg/revision/latest?cb=20090514234238"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Resident_Evil_Vol_1_Issue_1"
+        }
+      ]
+    },
+    {
+      "id": "hq_bh2_manhua",
+      "titulo": "Bio Hazard 2 (manhua)",
+      "quando": "1998",
+      "onde": "Quadrinho de Hong Kong",
+      "lancamento": 1998,
+      "formato": "Quadrinho de Hong Kong",
+      "sinopse": "Adaptação longa e bem livre do RE2, publicada em Hong Kong, com Leon e Claire enfrentando criaturas que não estão no jogo.",
+      "lancamentos": [
+        {
+          "nome": "Bio Hazard 2 (manhua)",
+          "ano": 1998,
+          "plataformas": "Quadrinho de Hong Kong",
+          "onde": "Edições importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/a/a8/BIO_HAZARD_2_comic_-_Volume_8.png/revision/latest?cb=20121102002158"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/BIO_HAZARD_2_(manhua)"
+        }
+      ]
+    },
+    {
+      "id": "livros",
+      "titulo": "Livros de S. D. Perry",
+      "quando": "1998 – 2004",
+      "onde": "Romances dos jogos",
+      "lancamento": 1998,
+      "formato": "Livros",
+      "poster": {
+        "titulo": "OS LIVROS",
+        "subtitulo": "S. D. PERRY · 1998 – 2004"
+      },
+      "links": [
+        {
+          "nome": "Wikipedia",
+          "url": "https://pt.wikipedia.org/wiki/Resident_Evil"
+        }
+      ],
+      "sinopse": "Sete romances que recontam os jogos clássicos com liberdades próprias, além de duas histórias originais. Muito procurados por fãs da era clássica.",
+      "lancamentos": [
+        {
+          "nome": "The Umbrella Conspiracy",
+          "ano": 1998,
+          "plataformas": "Livro (RE1)",
+          "onde": "Edições usadas"
+        },
+        {
+          "nome": "Caliban Cove",
+          "ano": 1998,
+          "plataformas": "Livro (história original)",
+          "onde": "Edições usadas"
+        },
+        {
+          "nome": "City of the Dead",
+          "ano": 1999,
+          "plataformas": "Livro (RE2)",
+          "onde": "Edições usadas"
+        },
+        {
+          "nome": "Underworld",
+          "ano": 1999,
+          "plataformas": "Livro (história original)",
+          "onde": "Edições usadas"
+        },
+        {
+          "nome": "Nemesis",
+          "ano": 2000,
+          "plataformas": "Livro (RE3)",
+          "onde": "Edições usadas"
+        },
+        {
+          "nome": "Code: Veronica",
+          "ano": 2001,
+          "plataformas": "Livro",
+          "onde": "Edições usadas"
+        },
+        {
+          "nome": "Zero Hour",
+          "ano": 2004,
+          "plataformas": "Livro (RE0)",
+          "onde": "Edições usadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/3/30/RE_TUC.jpg/revision/latest?cb=20060508195940"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      }
+    },
+    {
+      "id": "hq_bh3_manhua",
+      "titulo": "Biohazard 3 Last Escape (manhua)",
+      "quando": "1999",
+      "onde": "Quadrinho de Hong Kong",
+      "lancamento": 1999,
+      "formato": "Quadrinho de Hong Kong",
+      "sinopse": "A fuga de Jill de Raccoon City contada em quadrinhos de Hong Kong, com o Nemesis como perseguidor.",
+      "lancamentos": [
+        {
+          "nome": "Biohazard 3 Last Escape (manhua)",
+          "ano": 1999,
+          "plataformas": "Quadrinho de Hong Kong",
+          "onde": "Edições importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/9/9b/BIOHAZARD_3_LAST_ESCAPE_VOL.1_-_front_cover.jpg/revision/latest?cb=20131006222630"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/BIOHAZARD_3_LAST_ESCAPE_(manhua)"
+        }
+      ]
+    },
+    {
+      "id": "hq_fire_ice",
+      "titulo": "Fire & Ice",
+      "quando": "2000 – 2001",
+      "onde": "Minissérie (WildStorm)",
+      "lancamento": 2000,
+      "formato": "Minissérie (WildStorm)",
+      "sinopse": "Quatro edições sobre a Charlie Team dos S.T.A.R.S., uma equipe que nunca aparece nos jogos, presa num surto da Umbrella.",
+      "lancamentos": [
+        {
+          "nome": "Fire & Ice",
+          "ano": 2000,
+          "plataformas": "Minissérie (WildStorm)",
+          "onde": "Edições usadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/b/b5/Fire_and_Ice_issue_1.jpg/revision/latest?cb=20210422004425"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Resident_Evil:_Fire_and_Ice"
+        }
+      ]
+    },
+    {
+      "id": "hq_veronica",
+      "titulo": "Code: Veronica (manhua)",
+      "quando": "2001",
+      "onde": "Quadrinho de Hong Kong · WildStorm em inglês",
+      "lancamento": 2001,
+      "formato": "Quadrinho de Hong Kong · WildStorm em inglês",
+      "sinopse": "Adaptação de Code: Veronica em Hong Kong, depois traduzida pela WildStorm em quatro volumes. Segue a história do jogo com mais ação.",
+      "lancamentos": [
+        {
+          "nome": "Code: Veronica (manhua)",
+          "ano": 2001,
+          "plataformas": "Quadrinho de Hong Kong · WildStorm em inglês",
+          "onde": "Edições usadas ou importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/a/a7/BIOHAZARD_CODE_Veronica_VOL.1_-_front_cover.jpg/revision/latest?cb=20130710024118"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/BIOHAZARD_CODE:Veronica_(manhua)"
+        }
+      ]
+    },
+    {
+      "id": "hq_bh0_manhua",
+      "titulo": "Biohazard 0 (manhua)",
+      "quando": "2003",
+      "onde": "Quadrinho de Hong Kong",
+      "lancamento": 2003,
+      "formato": "Quadrinho de Hong Kong",
+      "sinopse": "Rebecca e Billy no trem Ecliptic Express e no centro de treinamento da Umbrella, em quadrinhos de Hong Kong.",
+      "lancamentos": [
+        {
+          "nome": "Biohazard 0 (manhua)",
+          "ano": 2003,
+          "plataformas": "Quadrinho de Hong Kong",
+          "onde": "Edições importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/6/6e/Biohazard_0_VOL.1_-_front_cover.jpg/revision/latest?cb=20130709023501"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Biohazard_0_(manhua)"
+        }
+      ]
+    },
+    {
+      "id": "hq_wildstorm_2009",
+      "titulo": "Resident Evil (2009)",
+      "quando": "2009 – 2011",
+      "onde": "Minissérie (WildStorm / DC)",
+      "lancamento": 2009,
+      "formato": "Minissérie (WildStorm / DC)",
+      "sinopse": "Seis edições que servem de prólogo do RE5: Mina Gere, agente da BSAA, investiga a morte dos pais na África, região onde o jogo se passa.",
+      "lancamentos": [
+        {
+          "nome": "Resident Evil (2009)",
+          "ano": 2009,
+          "plataformas": "Minissérie (WildStorm / DC)",
+          "onde": "Edições usadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/2/26/Resident_Evil_Vol_2_Issue_1.jpg/revision/latest?cb=20140126054907"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Resident_Evil_Vol_2_Issue_1"
+        }
+      ]
+    },
+    {
+      "id": "marhawa",
+      "titulo": "Marhawa Desire",
+      "quando": "Entre RE5 e RE6",
+      "onde": "Academia Marhawa, Singapura",
+      "lancamento": 2012,
+      "formato": "Mangá · canônico",
+      "sinopse": "Chris Redfield e Piers Nivans investigam um surto numa escola de elite em Singapura. Mostra a primeira missão dos dois juntos, antes de RE6.",
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/Resident_Evil:_The_Marhawa_Desire"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Mangá (5 volumes)",
+          "ano": 2012,
+          "plataformas": "Quadrinho japonês",
+          "onde": "Edições importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/1/13/Resident_Evil_Vol_1_The_Marhawa_Desire.jpg/revision/latest?cb=20210617121747"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      }
+    },
+    {
+      "id": "heavenly_island",
+      "titulo": "Heavenly Island",
+      "quando": "Depois de RE6",
+      "onde": "Ilha tropical",
+      "lancamento": 2015,
+      "formato": "Mangá · canônico",
+      "sinopse": "Uma gravação de reality show numa ilha paradisíaca vira pesadelo quando uma infecção se espalha. Claire Redfield, agora na TerraSave, entra na história.",
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/BIOHAZARD_heavenly_island"
+        }
+      ],
+      "lancamentos": [
+        {
+          "nome": "Mangá (5 volumes)",
+          "ano": 2015,
+          "plataformas": "Quadrinho japonês",
+          "onde": "Edições importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/8/8f/BIOHAZARD_heavenly_island_vol_1.jpg/revision/latest?cb=20150815170103"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      }
+    },
+    {
+      "id": "hq_death_island",
+      "titulo": "Death Island (mangá)",
+      "quando": "2023",
+      "onde": "Mangá",
+      "lancamento": 2023,
+      "formato": "Mangá",
+      "sinopse": "Adaptação em mangá do filme em CG Death Island, que junta Leon, Chris, Jill, Claire e Rebecca em Alcatraz.",
+      "lancamentos": [
+        {
+          "nome": "Death Island (mangá)",
+          "ano": 2023,
+          "plataformas": "Mangá",
+          "onde": "Edições importadas"
+        }
+      ],
+      "arte": {
+        "capa": [
+          "https://static.wikia.nocookie.net/residentevil/images/6/62/BIOHAZARD_DEATH_ISLAND_manga_promo_2.jpg/revision/latest?cb=20230515142221"
+        ],
+        "fonte": "imagem: Resident Evil Wiki (fãs)"
+      },
+      "links": [
+        {
+          "nome": "Resident Evil Wiki",
+          "url": "https://residentevil.fandom.com/wiki/BIOHAZARD_DEATH_ISLAND_(manga)"
+        }
+      ]
+    }
+  ]
+}

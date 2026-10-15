@@ -1,0 +1,17 @@
+{
+  "id": "re4_2005",
+  "ordem": 81,
+  "nome": "Resident Evil 4 (2005)",
+  "tipo": "steam",
+  "appid": 254700,
+  "projetos": [
+    {
+      "nome": "re4 (GameCube, build de debug)",
+      "url": "https://github.com/adonis-singh/re4",
+      "status": "Decomp da build de debug de GameCube (nov/2004). Ainda sem port para PC para baixar."
+    }
+  ],
+  "capitulo": "re4",
+  "versao": "Original (2005)",
+  "nexus": "residentevil4"
+}

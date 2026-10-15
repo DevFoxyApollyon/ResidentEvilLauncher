@@ -1,0 +1,20 @@
+{
+  "id": "gaiden",
+  "ordem": 1005,
+  "nome": "Resident Evil Gaiden",
+  "capitulo": "gaiden",
+  "versao": "Game Boy Color (emulador)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte um emulador de Game Boy Color (por exemplo, o mGBA) e a SUA própria ROM.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Boxarts/Resident%20Evil%20Gaiden%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/d/dd/Resident_Evil_Gaiden_Boxart.gif"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Titles/Resident%20Evil%20Gaiden%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "survivor2",
+  "ordem": 1020,
+  "nome": "Resident Evil Survivor 2 – Code: Veronica",
+  "capitulo": "survivor2",
+  "versao": "PS2 (emulador)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "poster": {
+    "titulo": "SURVIVOR 2",
+    "subtitulo": "CODE: VERONICA · PS2 · 2001"
+  },
+  "arte": {
+    "capa": [
+      "https://upload.wikimedia.org/wikipedia/en/c/ca/RESurvivor2CV.jpg",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Survivor%202%20-%20Code%20-%20Veronica%20%28Europe%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Survivor%202%20-%20Code%20-%20Veronica%20%28Europe%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

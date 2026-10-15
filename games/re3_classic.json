@@ -1,0 +1,40 @@
+{
+  "id": "re3_classic",
+  "ordem": 41,
+  "nome": "Resident Evil 3 (1999, clássico)",
+  "tipo": "local",
+  "dica": "Versão original de PC (a da GOG é a mais fácil de achar hoje; a antiga funciona com o patch Classic REbirth). Aponte o executável.",
+  "capitulo": "re3",
+  "versao": "Clássico",
+  "arte": {
+    "capa": "https://images.gog-statics.com/e751c5a8f087878bfa6867a734ada47057c37c5e1b1f4109cc0ab7136e3cdace.jpg",
+    "fundo": "https://images-1.gog-statics.com/4400bc14ab4a580ddd6033b14461cc5d88a558caff4365ec0598f09e6eac038d.jpg"
+  },
+  "nexus": "residentevil3nemesis",
+  "sugestoes": [
+    {
+      "nome": "RE3: Definitive Edition",
+      "tipo": "mod",
+      "url": "https://www.moddb.com/mods/resident-evil-3-definitive-edition",
+      "descricao": "Classic REbirth + HD Mod + personagens novos + ReShade num pacote só."
+    },
+    {
+      "nome": "RE3: Restoration Project",
+      "tipo": "mod",
+      "url": "https://www.moddb.com/mods/resident-evil-3-restoration-project",
+      "descricao": "Vídeos em tela cheia, som sem perda e correções."
+    },
+    {
+      "nome": "RE3 HD Mod (TeamX)",
+      "tipo": "mod",
+      "url": "https://www.moddb.com/mods/resident-evil-3-hd-mod",
+      "descricao": "Texturas e fundos em HD."
+    },
+    {
+      "nome": "Mods do RE3 no ModDB",
+      "tipo": "mod",
+      "url": "https://www.moddb.com/games/resident-evil-3/mods",
+      "descricao": "Lista completa de mods do RE3 clássico."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "requiem",
+  "ordem": 150,
+  "nome": "Resident Evil Requiem",
+  "tipo": "steam",
+  "appid": 3764200,
+  "capitulo": "requiem",
+  "versao": "PC",
+  "nexus": "residentevilrequiem",
+  "logo_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Resident_Evil_Requiem_logo.png",
+  "sugestoes": [
+    {
+      "nome": "REFramework",
+      "tipo": "mod",
+      "github": "praydog/REFramework-nightly",
+      "asset": "REFramework.zip",
+      "descricao": "Base para a maioria dos mods (scripts .lua, câmera livre, VR, carregar pastas natives/). Versão nightly: a que acompanha as atualizações do jogo (a estável, de 2025, trava nos jogos atualizados)."
+    }
+  ]
+}

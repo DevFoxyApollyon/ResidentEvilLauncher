@@ -1,0 +1,31 @@
+{
+  "id": "dead_aim",
+  "ordem": 1030,
+  "nome": "Resident Evil: Dead Aim",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "projetos": [
+    {
+      "nome": "Bullseye",
+      "url": "https://github.com/cakehonolulu/Bullseye",
+      "status": "Decomp da versão de PS2 em andamento."
+    }
+  ],
+  "capitulo": "dead_aim",
+  "versao": "PS2 (emulador)",
+  "poster": {
+    "titulo": "DEAD AIM",
+    "subtitulo": "PS2 · 2003"
+  },
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Dead%20Aim%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/a/a5/Residentevildeadaim.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Dead%20Aim%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

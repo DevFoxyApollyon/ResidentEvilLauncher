@@ -1,0 +1,19 @@
+{
+  "id": "re4",
+  "ordem": 80,
+  "nome": "Resident Evil 4 (Remake)",
+  "tipo": "steam",
+  "appid": 2050650,
+  "sugestoes": [
+    {
+      "nome": "REFramework",
+      "tipo": "mod",
+      "github": "praydog/REFramework-nightly",
+      "asset": "REFramework.zip",
+      "descricao": "Base para a maioria dos mods (scripts .lua, câmera livre, VR, carregar pastas natives/). Versão nightly: a que acompanha as atualizações do jogo (a estável, de 2025, trava nos jogos atualizados)."
+    }
+  ],
+  "capitulo": "re4",
+  "versao": "Remake",
+  "nexus": "residentevil42023"
+}

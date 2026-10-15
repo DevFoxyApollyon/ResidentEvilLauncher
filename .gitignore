@@ -1,0 +1,16 @@
+# gerado pelo app ou baixado (músicas, sons, capas, trailers, ffmpeg, Fluffy, configurações pessoais)
+data/
+# builds
+build/
+_internal/
+*.exe
+*.spec
+__pycache__/
+*.pyc
+# capturas de tela de testes
+_shot*.png
+_splash*.png
+_sh_*.png
+_f_*.png
+screenshot.png
+perf.txt

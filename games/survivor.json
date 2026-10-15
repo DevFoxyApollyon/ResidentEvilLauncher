@@ -1,0 +1,24 @@
+{
+  "id": "survivor",
+  "ordem": 1010,
+  "nome": "Resident Evil Survivor",
+  "capitulo": "survivor",
+  "versao": "PS1 (emulador)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o DuckStation (emulador de PS1) e a SUA própria imagem do jogo.",
+  "poster": {
+    "titulo": "SURVIVOR",
+    "subtitulo": "PS1 · 2000"
+  },
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation/master/Named_Boxarts/Resident%20Evil%20-%20Survivor%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/e/e3/RE_Survivor_front.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation/master/Named_Titles/Resident%20Evil%20-%20Survivor%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "outbreak",
+  "ordem": 30,
+  "nome": "Resident Evil Outbreak",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "capitulo": "outbreak",
+  "versao": "File #1",
+  "poster": {
+    "titulo": "OUTBREAK",
+    "subtitulo": "PS2 · 2003"
+  },
+  "arte": {
+    "capa": [
+      "https://upload.wikimedia.org/wikipedia/en/a/ad/Re_outbreak_a.jpg",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

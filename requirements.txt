@@ -1,0 +1,5 @@
+pillow
+numpy
+# só para gerar o .exe e para tools/audio_inicio.py:
+# pyinstaller
+# imageio-ffmpeg

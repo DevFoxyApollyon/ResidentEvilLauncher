@@ -1,0 +1,10 @@
+{
+  "id": "re5",
+  "ordem": 100,
+  "nome": "Resident Evil 5",
+  "tipo": "steam",
+  "appid": 21690,
+  "capitulo": "re5",
+  "versao": "PC",
+  "nexus": "residentevil5"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "umbrella_chronicles",
+  "ordem": 125,
+  "nome": "Resident Evil: The Umbrella Chronicles",
+  "capitulo": "umbrella_chronicles",
+  "versao": "Wii (emulador)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o Dolphin (emulador de Wii) e a SUA própria imagem do jogo. Dá para jogar com mouse ou controle como pistola de luz.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Boxarts/Resident%20Evil%20-%20The%20Umbrella%20Chronicles%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/b/b5/Resident_Evil%2C_The_Umbrella_Chronicles_%282007_video_game%29.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Snaps/Resident%20Evil%20-%20The%20Umbrella%20Chronicles%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

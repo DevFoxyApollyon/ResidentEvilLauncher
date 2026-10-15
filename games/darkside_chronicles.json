@@ -1,0 +1,20 @@
+{
+  "id": "darkside_chronicles",
+  "ordem": 115,
+  "nome": "Resident Evil: The Darkside Chronicles",
+  "capitulo": "darkside_chronicles",
+  "versao": "Wii (emulador)",
+  "tipo": "local",
+  "args": "\"{iso}\"",
+  "dica": "Aponte o Dolphin (emulador de Wii) e a SUA própria imagem do jogo.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Boxarts/Resident%20Evil%20-%20The%20Darkside%20Chronicles%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/9/91/REDC_Cover.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Snaps/Resident%20Evil%20-%20The%20Darkside%20Chronicles%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

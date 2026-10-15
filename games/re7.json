@@ -1,0 +1,19 @@
+{
+  "id": "re7",
+  "ordem": 130,
+  "nome": "Resident Evil 7 Biohazard",
+  "tipo": "steam",
+  "appid": 418370,
+  "sugestoes": [
+    {
+      "nome": "REFramework",
+      "tipo": "mod",
+      "github": "praydog/REFramework-nightly",
+      "asset": "REFramework.zip",
+      "descricao": "Base para a maioria dos mods (scripts .lua, câmera livre, VR, carregar pastas natives/). Versão nightly: a que acompanha as atualizações do jogo (a estável, de 2025, trava nos jogos atualizados)."
+    }
+  ],
+  "capitulo": "re7",
+  "versao": "PC",
+  "nexus": "residentevil7"
+}
