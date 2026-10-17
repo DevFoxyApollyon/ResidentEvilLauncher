@@ -1,0 +1,14 @@
+{
+  "id": "re1_classic",
+  "ordem": 22,
+  "nome": "Resident Evil (1996, clássico)",
+  "tipo": "steam",
+  "appid": 4249100,
+  "capitulo": "re1",
+  "versao": "Clássico",
+  "arte": {
+    "capa": "https://images.gog-statics.com/1dccf8539e8f271aa17a6cb0ee102374e7f58adf7aba0b132029aed5a114b53c.jpg",
+    "fundo": "https://images-3.gog-statics.com/52f4f1f6ef95238b8e7b9b144b9ea8fbe880cf33cdfd31340ae30d163e205606.jpg"
+  },
+  "nexus": "residentevil1996"
+}

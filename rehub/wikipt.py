@@ -31,6 +31,7 @@ SKIP = {"Arma Bio-Orgânica", "B.O.W.", "Ganados", "Parasita", "Locais", "Tyrant
 
 # página da wiki de cada versão do catálogo (games/*.json) e dos filmes (capítulos)
 GAME_PAGES = {"re0": "Resident Evil Zero", "re1": "Resident Evil Remake", "re1_decomp": "Resident Evil",
+              "re1_classic": "Resident Evil",
               "re2": "Resident Evil 2 (2019)", "re2_classic": "Resident Evil 2", "re3": "Resident Evil 3 (2020)",
               "re3_classic": "Resident Evil 3: Nemesis", "re4": "Resident Evil 4 (2023)", "re4_2005": "Resident Evil 4",
               "re5": "Resident Evil 5", "re6": "Resident Evil 6", "re7": "Resident Evil 7: Biohazard",

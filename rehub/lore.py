@@ -197,7 +197,8 @@ def _norm(s):
 
 
 # abreviação no speedrun.com de cada versão do catálogo (onde a busca pelo nome erraria)
-SPEEDRUN = {"re0": "re0", "re1": "remake_hd", "re1_decomp": "residentevil", "re2": "re2remake", "re2_classic": "re2",
+SPEEDRUN = {"re0": "re0", "re1": "remake_hd", "re1_decomp": "residentevil", "re1_classic": "residentevil",
+            "re2": "re2remake", "re2_classic": "re2",
             "re3": "re3r", "re3_classic": "re3", "re4": "re4r", "re4_2005": "re4steam", "re5": "re5steam", "re6": "re6",
             "re7": "re7", "village": "re8", "requiem": "RE9", "rev1": "rerev", "rev2": "rev2", "outbreak": "reobf1",
             "outbreak2": "reobf2"}

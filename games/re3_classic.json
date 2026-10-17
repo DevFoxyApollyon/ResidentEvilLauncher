@@ -1,9 +1,9 @@
 {
   "id": "re3_classic",
   "ordem": 41,
-  "nome": "Resident Evil 3 (1999, clássico)",
-  "tipo": "local",
-  "dica": "Versão original de PC (a da GOG é a mais fácil de achar hoje; a antiga funciona com o patch Classic REbirth). Aponte o executável.",
+  "nome": "Resident Evil 3: Nemesis (1999, clássico)",
+  "tipo": "steam",
+  "appid": 4249120,
   "capitulo": "re3",
   "versao": "Clássico",
   "arte": {

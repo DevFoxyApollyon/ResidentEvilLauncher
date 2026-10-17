@@ -2,8 +2,8 @@
   "id": "re2_classic",
   "ordem": 51,
   "nome": "Resident Evil 2 (1998, clássico)",
-  "tipo": "local",
-  "dica": "Versão original de PC (a da GOG é a mais fácil de achar hoje; a antiga funciona com o patch Classic REbirth). Aponte o executável.",
+  "tipo": "steam",
+  "appid": 4249110,
   "projetos": [
     {
       "nome": "OpenBiohazard2",
