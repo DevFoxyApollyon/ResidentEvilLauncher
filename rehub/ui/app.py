@@ -1096,9 +1096,20 @@ class Hub(Screens, LoreScreens, tk.Tk):
             c.create_text(x - w / 2, y, text=label, fill=t.BG if on else WHITE, font=self.f["small"], tags=(tag,))
             self._clickable(tag, cmd, shape=None if on else shape)
             x -= w + 8
-        hints = "← →  capítulos    ↑ ↓  versões    Enter  jogar    G  gerenciar    Tab  seção    E  extras    F  foto    F11  tela cheia"
-        c.create_text(MARGIN, y, anchor="w", fill=DIM, font=self.f["small"],
-                      text=self._elide(hints, self.f["small"], x - MARGIN - 16))
+        # atalhos como teclas: a tecla numa tampinha, o que ela faz ao lado; os que não cabem ficam de fora
+        hints = (("← →", "capítulos"), ("↑ ↓", "versões"), ("Enter", "jogar"), ("G", "gerenciar"), ("Tab", "seção"),
+                 ("E", "extras"), ("F", "foto"), ("F11", "tela cheia"))
+        kf, lf = self.f["tiny"], self.f["small"]
+        hx, limit = MARGIN, x - 16
+        for key, label in hints:
+            kw = max(kf.measure(key) + 14, 24)
+            need = kw + 6 + lf.measure(label) + 18
+            if hx + need > limit:
+                break
+            self._round_rect(hx, y - 11, hx + kw, y + 11, 6, fill="#1a1f29", outline="#353d4c")
+            c.create_text(hx + kw / 2, y, text=key, fill=WHITE, font=kf)
+            c.create_text(hx + kw + 6, y, anchor="w", text=label, fill=MUTED, font=lf)
+            hx += need
 
     def _draw_carousel(self, W):
         c = self.c
@@ -1353,20 +1364,28 @@ class Hub(Screens, LoreScreens, tk.Tk):
         active = self.panel_tab if any(k == self.panel_tab for k, _ in tabs) else tabs[0][0]
         if active != "trailer":
             self._trailer_stop()
-        # abas em cápsula: a ativa fica em destaque; as outras clareiam ao passar o mouse
-        widths = [self.f["small"].measure(label) + 26 for _, label in tabs]
-        total = sum(widths) + 4 * (len(tabs) - 1) + 8
-        self._round_rect(x, y - 4, x + min(total, w), y + 28, 16, fill="#10141c", outline="#262d3a")
-        tx = x + 4
+        # abas em cápsula, sempre dentro do painel: a folga de cada aba encolhe para caberem todas;
+        # a ativa fica na cor do capítulo, as outras clareiam ao passar o mouse
+        font = self.f["tiny"]
+        texts = [font.measure(label) for _, label in tabs]
+        gap, inner = 4, w - 12 - 4 * (len(tabs) - 1)
+        pad = max(10, min(28, (inner - sum(texts)) // len(tabs)))
+        widths = [tw + pad for tw in texts]
+        if sum(widths) > inner:  # nem com a folga mínima: divide o que sobrou igualmente
+            widths = [inner / len(tabs)] * len(tabs)
+        total = sum(widths) + gap * (len(tabs) - 1) + 12
+        self._round_rect(x, y - 6, x + total, y + 30, 18, fill="#0d1118", outline="#2a3140")
+        tx = x + 6
         for (key, label), tw in zip(tabs, widths):
             on = active == key
             tag = f"tab_{key}"
-            pill = self._round_rect(tx, y, tx + tw, y + 24, 12, fill=WHITE if on else "#10141c", outline="", tags=(tag,))
-            txt = c.create_text(tx + tw / 2, y + 12, text=label, fill=t.BG if on else MUTED,
-                                font=self.f["tiny"], tags=(tag,))
+            pill = self._round_rect(tx, y, tx + tw, y + 24, 12, fill=self.accent if on else "#0d1118",
+                                    outline="", tags=(tag,))
+            txt = c.create_text(tx + tw / 2, y + 12, text=self._elide(label, font, tw - 8),
+                                fill=WHITE if on else MUTED, font=font, tags=(tag,))
             self._clickable(tag, lambda k=key: self.set_tab(k),
-                            hover=None if on else [(pill, "#10141c", "#202734"), (txt, MUTED, WHITE)])
-            tx += tw + 4
+                            hover=None if on else [(pill, "#0d1118", "#1f2633"), (txt, MUTED, WHITE)])
+            tx += tw + gap
         body = (x, y + 44, w, y2 - 14)
         if active == "trailer":
             return self._draw_trailer(*body)
@@ -1379,9 +1398,10 @@ class Hub(Screens, LoreScreens, tk.Tk):
         if active == "wiki":
             return self._draw_wiki(self.chapter, self.game, *body)
         g = self.steam_game()
-        if g is not None and g is not self.game:  # à esquerda do "Atualizar" para não sobrepor
+        if g is not None and g is not self.game:  # embaixo das abas (antes ficava por cima delas)
             right = x + w - (self.f["tiny"].measure("Atualizar") + 16 if self.panel_tab == "trofeus" else 0)
-            c.create_text(right, y + 3, anchor="ne", text=f"de {g['versao']} (Steam)", fill=DIM, font=self.f["small"])
+            c.create_text(right, y + 44, anchor="ne", text=f"de {g['versao']} (Steam)", fill=DIM, font=self.f["tiny"])
+            body = (x, y + 68, w, y2 - 14)
         if self.panel_tab == "dlcs":
             self._draw_dlcs(g, *body)
         else:
