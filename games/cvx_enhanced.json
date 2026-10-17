@@ -7,6 +7,10 @@
   "asset": "recvx-enhanced-port-*-windows-x86.zip",
   "exe": "recvx.exe",
   "args": "\"{iso}\"",
+  "preparar": {
+    "cmd": "tools/ptbr_mods.py --iso \"{iso}\" --mods mods --exe recvx.exe",
+    "aviso": "Preparando a tradução a partir da sua ISO (textos e menus). Na primeira vez leva alguns minutos; o jogo abre sozinho quando terminar."
+  },
   "dica": "Versão própria do port nativo de PC (baseado no aikatore/recvx-enhanced-port, MIT): 3D na GPU, widescreen, até 8x de resolução, 60+ fps, terceira pessoa opcional, co-op online e fonte com acentos para a tradução PT-BR. Precisa da SUA ISO americana do PS2 (SLUS-20184).",
   "depois_de_baixar": "clique em Configurar, confirme o recvx.exe e escolha a sua ISO (PS2, NTSC-U, SLUS-20184). No jogo, F1 abre as configurações (terceira pessoa, widescreen, resolução) e F3 o co-op.",
   "projetos": [

@@ -1905,7 +1905,9 @@ class Hub(Screens, LoreScreens, tk.Tk):
         try:
             if g["tipo"] != "steam":  # a Steam já guarda quando você jogou; os outros, o app guarda
                 self.cfg.set(g["id"], ultima=int(time.time()))
-            launcher.play(g, self.cfg)
+            aviso = launcher.play(g, self.cfg)
+            if aviso:
+                messagebox.showinfo(FR["app"], aviso)
         except RuntimeError as e:
             messagebox.showerror(FR["app"], str(e))
 
