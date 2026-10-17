@@ -1,0 +1,36 @@
+{
+  "id": "cvx_enhanced",
+  "ordem": 62,
+  "nome": "Code: Veronica X — Port de PC (PT-BR)",
+  "tipo": "local",
+  "github": "DevFoxyApollyon/recvx-enhanced-port",
+  "asset": "recvx-enhanced-port-*-windows-x86.zip",
+  "exe": "recvx.exe",
+  "args": "\"{iso}\"",
+  "dica": "Versão própria do port nativo de PC (fork de aikatore/recvx-enhanced-port, MIT): 3D na GPU, widescreen, até 8x de resolução, 60+ fps, terceira pessoa opcional, co-op online e fonte com acentos para a tradução PT-BR. Precisa da SUA ISO americana do PS2 (SLUS-20184).",
+  "depois_de_baixar": "clique em Configurar, confirme o recvx.exe e escolha a sua ISO (PS2, NTSC-U, SLUS-20184). No jogo, F1 abre as configurações (terceira pessoa, widescreen, resolução) e F3 o co-op.",
+  "projetos": [
+    {
+      "nome": "recvx-enhanced-port (DevFoxyApollyon)",
+      "url": "https://github.com/DevFoxyApollyon/recvx-enhanced-port",
+      "status": "Port de PC usado por este hub: menus em português, fonte com acentos e ferramentas de tradução PT-BR."
+    }
+  ],
+  "capitulo": "veronica",
+  "versao": "Port de PC (PT-BR)",
+  "poster": {
+    "titulo": "CODE: VERONICA X",
+    "subtitulo": "Port de PC · 2026"
+  },
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Code%20-%20Veronica%20X%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/4/44/RECV_boxart.jpg"
+    ],
+    "fundo": [
+      "https://store-images.s-microsoft.com/image/apps.11096.68807907361639140.62f39784-d7f4-4d51-a6a9-eedeca31b04c.8bf5133b-628a-4aab-a0db-68fb235ba22c",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Code%20-%20Veronica%20X%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails (PS2) / Wikipedia; fundo: arte oficial de Code: Veronica X (sem marca de console)"
+  }
+}
