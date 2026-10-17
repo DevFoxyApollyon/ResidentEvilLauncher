@@ -287,7 +287,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
         self.c.bind("<Button-1>", self._canvas_click)
         self.c.bind("<Leave>", lambda e: self._set_hover(None))
         self.bind("<MouseWheel>", self._wheel)
-        self.protocol("WM_DELETE_WINDOW", self.quit_app)
+        self.protocol("WM_DELETE_WINDOW", self.ask_quit)
         for key, action in (("<Left>", "left"), ("<Right>", "right"), ("<Up>", "up"), ("<Down>", "down"),
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
@@ -556,6 +556,12 @@ class Hub(Screens, LoreScreens, tk.Tk):
             self._queue_music()
             self._kick()
         self.refresh()
+
+    def ask_quit(self):
+        """O X: pergunta antes de fechar (Cancelar volta para o hub)."""
+        if t.confirm(self, f"Sair do {FR['app']}?", "O hub fecha; os jogos abertos continuam rodando.",
+                     ok="Sair", danger=True):
+            self.quit_app()
 
     def quit_app(self):
         """Fecha de vez. Antes, o Tk era destruído com as threads (capas, troféus, áudio) ainda rodando,
@@ -1060,8 +1066,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
         right = W - MARGIN
         if self.attributes("-fullscreen"):  # sem barra de título: botão para fechar
             tag = "quit"
-            c.create_text(right, 38, anchor="e", text="✕", fill=MUTED, font=self.f["h"], tags=(tag,))
-            self._clickable(tag, self.quit_app)
+            x_item = c.create_text(right, 38, anchor="e", text="✕", fill=MUTED, font=self.f["h"], tags=(tag,))
+            self._clickable(tag, self.ask_quit, hover=[(x_item, MUTED, WHITE)])
             right -= 34
         c.create_text(right, 38, anchor="e", text=time.strftime("%H:%M"), fill=WHITE, font=self.f["clock"])
         right -= self.f["clock"].measure("00:00") + 28
@@ -1402,6 +1408,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
             right = x + w - (self.f["tiny"].measure("Atualizar") + 16 if self.panel_tab == "trofeus" else 0)
             c.create_text(right, y + 44, anchor="ne", text=f"de {g['versao']} (Steam)", fill=DIM, font=self.f["tiny"])
             body = (x, y + 68, w, y2 - 14)
+        if self.panel_tab == "trofeus":  # o "Atualizar" fica numa linha própria, embaixo das abas
+            body = (x, y + 68, w, y2 - 14)
         if self.panel_tab == "dlcs":
             self._draw_dlcs(g, *body)
         else:
@@ -1566,8 +1574,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
             return self._note(x, y, w, "Não encontrei sua conta Steam neste PC.")
         s = self.trophy_state.get(g["appid"])
         tag = "trophy_refresh"
-        c.create_text(x + w, y - 41, anchor="ne", text="Atualizar", fill=MUTED, font=self.f["tiny"], tags=(tag,))
-        self._clickable(tag, self.refresh_trophies)
+        txt = c.create_text(x + w, y - 24, anchor="ne", text="Atualizar", fill=MUTED, font=self.f["tiny"], tags=(tag,))
+        self._clickable(tag, self.refresh_trophies, hover=[(txt, MUTED, WHITE)])
         if s is None:
             return self._note(x, y, w, "Carregando troféus...")
         if "erro" in s:
