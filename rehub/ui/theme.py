@@ -2,9 +2,9 @@
 import threading
 import tkinter as tk
 
-BG, PANEL, PANEL_HI = "#0b0e14", "#161b25", "#232a37"
-RED, RED_DARK, TEXT, MUTED, GREEN = "#b3121b", "#7a0c12", "#e8e1e1", "#8f8585", "#5fbf6f"
-FONT = "Segoe UI"
+BG, PANEL, PANEL_HI = "#0b0a09", "#171513", "#26221f"
+RED, RED_DARK, TEXT, MUTED, GREEN = "#b3121b", "#7a0c12", "#ece6da", "#958c80", "#5fbf6f"
+FONT = "Bahnschrift"
 from ..franchise import FR, hex_rgb  # noqa: E402
 RED = FR["cor"]
 RED_DARK = "#%02x%02x%02x" % tuple(int(v * 0.65) for v in hex_rgb(RED))
@@ -86,7 +86,7 @@ def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary")
     txt = tk.Frame(body, bg=PANEL)
     txt.pack(side="left", fill="both")
     label(txt, title, 13, bold=True, wraplength=380).pack(fill="x")
-    label(txt, message, 10, fg="#c9c1c1", wraplength=380).pack(fill="x", pady=(6, 0))
+    label(txt, message, 10, fg="#c4bcae", wraplength=380).pack(fill="x", pady=(6, 0))
     for d in details:
         label(txt, "•  " + d, 9, fg=MUTED, wraplength=380).pack(fill="x", pady=(3, 0))
     bar = tk.Frame(top, bg=BG)
@@ -133,7 +133,7 @@ class Switch(tk.Canvas):
 
     def _draw(self):
         self.delete("all")
-        fill = GREEN if self.on else "#3a4150"
+        fill = GREEN if self.on else "#3f3830"
         self.create_oval(1, 1, 23, 23, fill=fill, outline="")
         self.create_oval(23, 1, 45, 23, fill=fill, outline="")
         self.create_rectangle(12, 1, 34, 23, fill=fill, outline="")

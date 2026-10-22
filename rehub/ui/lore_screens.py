@@ -208,7 +208,7 @@ class LoreScreens:
             if photo:
                 c.create_image(x, y, image=photo, anchor="nw")
             else:
-                self._round_rect(x, y, x + mw, y + mh, 14, fill="#0d1119", outline="#262d3a")
+                self._round_rect(x, y, x + mw, y + mh, 14, fill="#0d1119", outline="#2c2723")
                 c.create_text(x + mw / 2, y + mh / 2, text="Baixando o mapa...", fill=A.MUTED, font=self.f["body"])
 
             def pos(pl):
@@ -225,7 +225,7 @@ class LoreScreens:
             if on:
                 c.create_oval(px - 16, py - 16, px + 16, py + 16, outline=self.accent, width=2)
             r = 8 if on else 6
-            c.create_oval(px - r, py - r, px + r, py + r, fill=self.accent if on else A.WHITE, outline="#0b0e14", width=2, tags=(tag,))
+            c.create_oval(px - r, py - r, px + r, py + r, fill=self.accent if on else A.WHITE, outline="#0b0a09", width=2, tags=(tag,))
             if ov["aba"] == "cidade" or on:
                 c.create_text(px + 12, py, anchor="w", text=pl["nome"], fill=A.WHITE if on else A.MUTED,
                               font=self.f["small"], tags=(tag,))
@@ -240,7 +240,7 @@ class LoreScreens:
         wiki = self.wiki_page(pl.get("wiki"))
         summary = self.wiki_summary(wiki, 360)
         if summary:
-            t = c.create_text(dx, ay, anchor="nw", text=summary, fill="#d5d9e0", font=self.f["small"], width=dw)
+            t = c.create_text(dx, ay, anchor="nw", text=summary, fill="#d9d2c5", font=self.f["small"], width=dw)
             ay = c.bbox(t)[3] + 14
         titles = self._chapter_titles()
         for cid in pl.get("capitulos", []):
@@ -266,15 +266,15 @@ class LoreScreens:
     def _draw_city(self, x, y, w, h, name):
         """Planta da cidade desenhada pelo app (as cidades dos jogos são inventadas)."""
         c = self.c
-        self._round_rect(x, y, x + w, y + h, 16, fill="#10151f", outline="#262d3a")
+        self._round_rect(x, y, x + w, y + h, 16, fill="#10151f", outline="#2c2723")
         for k in range(1, 12):  # ruas
             gx = x + k * w / 12
-            c.create_line(gx, y + 8, gx, y + h - 8, fill="#18202c")
+            c.create_line(gx, y + 8, gx, y + h - 8, fill="#1a1816")
         for k in range(1, 6):
             gy = y + k * h / 6
-            c.create_line(x + 8, gy, x + w - 8, gy, fill="#18202c")
+            c.create_line(x + 8, gy, x + w - 8, gy, fill="#1a1816")
         c.create_line(x + w * 0.05, y + h * 0.9, x + w * 0.45, y + h * 0.35, x + w * 0.95, y + h * 0.2,
-                      fill="#1f2a3a", width=6, smooth=True)  # avenida principal
+                      fill="#24201d", width=6, smooth=True)  # avenida principal
         c.create_text(x + w - 20, y + h - 16, anchor="se", text=f"{name.upper()}  ·  planta ilustrativa",
                       fill=A.DIM, font=self.f["tiny"])
 
@@ -316,7 +316,7 @@ class LoreScreens:
             tag = f"ov_fc_{chp['id']}"
             on = i == ov["cap"]
             if on:
-                self._round_rect(x - 10, y + k * 30 - 4, x + cw1, y + k * 30 + 24, 10, fill="#1b2230", outline="")
+                self._round_rect(x - 10, y + k * 30 - 4, x + cw1, y + k * 30 + 24, 10, fill="#1d1a18", outline="")
             c.create_text(x, y + k * 30, anchor="nw", text=self._elide(chp["titulo"], self.f["small"], cw1 - 8),
                           fill=A.WHITE if on else A.MUTED, font=self.f["small"], tags=(tag,))
             self._clickable(tag, lambda i=i: (self.overlay.update(cap=i, sel=0, text_scroll=0), self._sound("tab"), self.refresh()))
@@ -350,7 +350,7 @@ class LoreScreens:
             on = i == ov["sel"]
             tag = f"ov_ff_{abs(hash(text)) % 10 ** 9}"
             if on:
-                self._round_rect(x2 - 10, ry - 3, x2 + cw2, ry + 22, 9, fill="#1b2230", outline="")
+                self._round_rect(x2 - 10, ry - 3, x2 + cw2, ry + 22, 9, fill="#1d1a18", outline="")
             c.create_text(x2, ry, anchor="nw", text=self._elide(text, self.f["small"], cw2 - 8),
                           fill=A.WHITE if on else A.MUTED, font=self.f["small"], tags=(tag,))
             self._clickable(tag, lambda i=i: (self.overlay.update(sel=i, text_scroll=0), self._sound("select"), self.refresh()))
@@ -358,7 +358,7 @@ class LoreScreens:
         x3 = x2 + cw2 + 30
         w3 = x + w - x3
         ov["reader_x"] = x3
-        self._round_rect(x3 - 20, y - 10, x + w + 20, bottom, 18, fill="#10141c", outline="#262d3a")
+        self._round_rect(x3 - 20, y - 10, x + w + 20, bottom, 18, fill="#110f0e", outline="#2c2723")
         pt = self.prefs.get("arquivos_pt", True)
         doc = self._async(self._file_texts, (title, pt), lambda: lore.read_file_pt(title) if pt else lore.read_file(title))
         c.create_text(x3, y + 4, anchor="nw", text=self._elide(title, self.f["h"], w3 - 290), fill=A.WHITE, font=self.f["h"])
@@ -381,7 +381,7 @@ class LoreScreens:
         fits = max(1, int((bottom - top - 30) // 20))
         ov["text_scroll"] = min(ov["text_scroll"], max(0, len(lines) - fits))
         for k, line in enumerate(lines[ov["text_scroll"]:ov["text_scroll"] + fits]):
-            c.create_text(x3, top + k * 20, anchor="nw", text=line, fill="#d5d9e0", font=self.f["body"])
+            c.create_text(x3, top + k * 20, anchor="nw", text=line, fill="#d9d2c5", font=self.f["body"])
         c.create_text(x3, bottom - 14, anchor="sw", fill=A.DIM, font=self.f["tiny"],
                       text=("Tradução automática (Google Tradutor) do texto da wiki" if pt else "Texto da wiki da franquia (em inglês)") + (f"  ·  linhas {ov['text_scroll'] + 1}–"
                                                                       f"{min(len(lines), ov['text_scroll'] + fits)} de {len(lines)}"
@@ -423,7 +423,7 @@ class LoreScreens:
             on = k == ov["sel"]
             tag = f"ov_rg_{k}"
             if on:
-                self._round_rect(x - 10, y + k * 34 - 5, x + lw, y + k * 34 + 25, 10, fill="#1b2230", outline="")
+                self._round_rect(x - 10, y + k * 34 - 5, x + lw, y + k * 34 + 25, 10, fill="#1d1a18", outline="")
             c.create_text(x, y + k * 34, anchor="nw", text=g["nome"], fill=A.WHITE if on else A.MUTED,
                           font=self.f["btn"], tags=(tag,))
             self._clickable(tag, lambda k=k: (self.overlay.__setitem__("sel", k), self._sound("select"), self.refresh()))
@@ -432,7 +432,7 @@ class LoreScreens:
         people = {p["id"]: p for p in characters.load()}
         members = [m for m in g["membros"] if m in people]
         gx, gw = x + lw + 30, w - lw - 30
-        self._round_rect(gx - 10, y - 10, gx + gw + 10, bottom, 18, fill="#10141c", outline="#262d3a")
+        self._round_rect(gx - 10, y - 10, gx + gw + 10, bottom, 18, fill="#110f0e", outline="#2c2723")
         cx, cy = gx + gw / 2, y + (bottom - y) / 2
         rx, ry = gw / 2 - 110, (bottom - y) / 2 - 90
         pos = {}
@@ -447,7 +447,7 @@ class LoreScreens:
             c.create_line(x1, y1, x2, y2, fill=color, width=2, dash=(6, 4) if kind == "inimigos" else None)
             mx, my = (x1 + x2) / 2, (y1 + y2) / 2
             tw = self.f["tiny"].measure(label) + 14
-            self._round_rect(mx - tw / 2, my - 10, mx + tw / 2, my + 10, 9, fill="#0b0e14", outline=color)
+            self._round_rect(mx - tw / 2, my - 10, mx + tw / 2, my + 10, 9, fill="#0b0a09", outline=color)
             c.create_text(mx, my, text=label, fill=A.WHITE, font=self.f["tiny"])
         size = (72, 72)
         for m in members:
@@ -459,7 +459,7 @@ class LoreScreens:
             if img:
                 c.create_image(px, py, image=img, tags=(tag,))
             else:
-                c.create_oval(px - 36, py - 36, px + 36, py + 36, fill="#1b2230", outline="", tags=(tag,))
+                c.create_oval(px - 36, py - 36, px + 36, py + 36, fill="#1d1a18", outline="", tags=(tag,))
             c.create_oval(px - 37, py - 37, px + 37, py + 37, outline=A.MUTED, width=2, tags=(tag,))
             c.create_text(px, py + 46, text=p["nome"], fill=A.WHITE, font=self.f["small"], tags=(tag,))
             self._clickable(tag, lambda m=m: self._open_person(m))
@@ -524,7 +524,7 @@ class LoreScreens:
             if ry + 30 > bottom:
                 break
             if on:
-                self._round_rect(x - 10, ry - 6, x + lw, ry + 30, 10, fill="#1b2230", outline="")
+                self._round_rect(x - 10, ry - 6, x + lw, ry + 30, 10, fill="#1d1a18", outline="")
             c.create_text(x, ry, anchor="nw", text=v["nome"], fill=A.WHITE if on else A.MUTED, font=self.f["btn"], tags=(tag,))
             if v.get("ano"):
                 c.create_text(x + lw - 14, ry + 2, anchor="ne", text=v["ano"], fill=A.DIM, font=self.f["small"], tags=(tag,))
@@ -532,7 +532,7 @@ class LoreScreens:
         v = items[ov["sel"]]
         self.stat_add("virus", v["id"])
         dx, right = x + lw + 40, x + w
-        self._round_rect(dx - 20, y - 10, right + 20, bottom, 18, fill="#10141c", outline="#262d3a")
+        self._round_rect(dx - 20, y - 10, right + 20, bottom, 18, fill="#110f0e", outline="#2c2723")
         path = characters.portrait_path({"id": "virus_" + v["id"]})
         big = (220, 220)
         img = self._photo_fit(path, big, self._portraits, ("virus", v["id"]), 14, contain=True, bg=(16, 20, 28)) if path else None
@@ -554,7 +554,7 @@ class LoreScreens:
         for label, text in fields:
             if text:
                 c.create_text(tx, ty, anchor="nw", text=label, fill=A.MUTED, font=self.f["tiny"])
-                t = c.create_text(tx, ty + 18, anchor="nw", text=text, fill="#d5d9e0", font=self.f["body"], width=tw)
+                t = c.create_text(tx, ty + 18, anchor="nw", text=text, fill="#d9d2c5", font=self.f["body"], width=tw)
                 ty = c.bbox(t)[3] + 14
         if wiki and wiki.get("link"):
             self._chip(tx, ty, "Ler na Resident Evil Wiki  ›", lambda u=wiki["link"]: webbrowser.open(u), "ov_vwiki")
@@ -658,8 +658,8 @@ class LoreScreens:
         for k, (aid, name, desc, cur, goal) in enumerate(items[ov["sel"] * cols:(ov["sel"] + rows_fit) * cols]):
             ax, ay = x + (k % cols) * (cw + gap), y + (k // cols) * (ch + gap)
             ok = cur >= goal
-            self._round_rect(ax, ay, ax + cw, ay + ch, 14, fill="#161c27" if ok else "#11151d",
-                             outline=self.accent if ok else "#232a36")
+            self._round_rect(ax, ay, ax + cw, ay + ch, 14, fill="#181614" if ok else "#11151d",
+                             outline=self.accent if ok else "#26221f")
             self._cup(ax + 30, ay + 36, 13, A.TIER_COLORS["ouro"] if ok else A.DIM, dim=not ok)
             c.create_text(ax + 58, ay + 12, anchor="nw", text=self._elide(name, self.f["btn"], cw - 70),
                           fill=A.WHITE if ok else A.MUTED, font=self.f["btn"])
@@ -695,13 +695,13 @@ class LoreScreens:
         self.panel_scroll = min(self.panel_scroll, max(0, len(lines) - fits))
         for k, line in enumerate(lines[self.panel_scroll:self.panel_scroll + fits]):
             head = line.isupper() and len(line) < 30
-            c.create_text(x, top + k * 18, anchor="nw", text=line, fill=self.accent if head else "#d5d9e0",
+            c.create_text(x, top + k * 18, anchor="nw", text=line, fill=self.accent if head else "#d9d2c5",
                           font=self.f["tiny"] if head else self.f["small"])
         if len(lines) > fits:
             track = bottom - top
             bh = max(24, track * fits / len(lines))
             by = top + (track - bh) * self.panel_scroll / max(1, len(lines) - fits)
-            c.create_rectangle(x + w + 12, top, x + w + 14, bottom, fill="#232a36", outline="")
+            c.create_rectangle(x + w + 12, top, x + w + 14, bottom, fill="#26221f", outline="")
             c.create_rectangle(x + w + 12, by, x + w + 14, by + bh, fill=A.MUTED, outline="")
 
     # ---------- aba Speedrun do painel ----------

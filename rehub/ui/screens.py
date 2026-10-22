@@ -233,8 +233,8 @@ class Screens:
             cy = y + (i // cols) * (ch + gap)
             on = i == ov["sel"]
             tag = f"ov_ex_{kind}"
-            self._round_rect(cx, cy, cx + cw, cy + ch, 18, fill=A.CHIP_HI if on else "#141922",
-                             outline=self.accent if on else "#262d3a", width=3 if on else 1, tags=(tag,))
+            self._round_rect(cx, cy, cx + cw, cy + ch, 18, fill=A.CHIP_HI if on else "#151311",
+                             outline=self.accent if on else "#2c2723", width=3 if on else 1, tags=(tag,))
             self._extra_icon(kind, cx + 28, cy + 34, A.WHITE if on else A.MUTED, tag)
             c.create_text(cx + 22, cy + 66, anchor="nw", text=title, fill=A.WHITE, font=self.f["h"], width=cw - 40, tags=(tag,))
             c.create_text(cx + 22, cy + 94, anchor="nw", text=desc, fill=A.MUTED, font=self.f["small"], width=cw - 40, tags=(tag,))
@@ -320,7 +320,7 @@ class Screens:
         sw = (w - 3 * 16) / 4
         for k, (big, small, color) in enumerate(stats):
             sx = x + k * (sw + 16)
-            self._round_rect(sx, y, sx + sw, y + 96, 16, fill="#141922", outline="#262d3a")
+            self._round_rect(sx, y, sx + sw, y + 96, 16, fill="#151311", outline="#2c2723")
             c.create_text(sx + 20, y + 14, anchor="nw", text=big, fill=color, font=self.f["big"])
             c.create_text(sx + 20, y + 66, anchor="nw", text=small, fill=A.MUTED, font=self.f["small"])
         by = y + 116
@@ -509,7 +509,7 @@ class Screens:
         where = "   ·   ".join(p for p in (ch.get("quando"), ch.get("onde")) if p)
         c.create_text(x, dy + 52, anchor="nw", text=where, fill=self.accent, font=self.f["small"], width=w)
         if ch.get("sinopse") and dy + 80 < bottom - 20:
-            c.create_text(x, dy + 80, anchor="nw", text=ch["sinopse"], fill="#d5d9e0", font=self.f["body"], width=min(w, 900))
+            c.create_text(x, dy + 80, anchor="nw", text=ch["sinopse"], fill="#d9d2c5", font=self.f["body"], width=min(w, 900))
         c.create_text(x + w, bottom, anchor="se", text="← →  andar na linha do tempo    Enter  abrir no hub",
                       fill=A.DIM, font=self.f["small"])
 
@@ -637,7 +637,7 @@ class Screens:
             if img:
                 c.create_image(px, py, image=img, anchor="nw", tags=(tag,))
             else:
-                self._round_rect(px, py, px + pw, py + ph, 10, fill="#141922", outline="#262d3a", tags=(tag,))
+                self._round_rect(px, py, px + pw, py + ph, 10, fill="#151311", outline="#2c2723", tags=(tag,))
                 c.create_text(px + pw / 2, py + ph / 2, text=p["nome"][:1], fill=A.DIM, font=self.f["big"], tags=(tag,))
             c.create_text(px + pw / 2, py + ph + 8, anchor="n", text=self._elide(p["nome"], self.f["small"], cell_w - 6),
                           fill=A.WHITE if on else A.MUTED, font=self.f["small"], tags=(tag,))
@@ -646,14 +646,14 @@ class Screens:
             track = rows_fit * cell_h - 30
             bh = max(24, track * rows_fit / total_rows)
             by = y + (track - bh) * ov["scroll"] / max(1, total_rows - rows_fit)
-            c.create_rectangle(x + cols * cell_w + 4, y, x + cols * cell_w + 6, y + track, fill="#232a36", outline="")
+            c.create_rectangle(x + cols * cell_w + 4, y, x + cols * cell_w + 6, y + track, fill="#26221f", outline="")
             c.create_rectangle(x + cols * cell_w + 4, by, x + cols * cell_w + 6, by + bh, fill=A.MUTED, outline="")
         self._draw_person(people[ov["sel"]], x + gw + 40, y, x + w, bottom)
 
     def _draw_person(self, p, dx, y, right, bottom):
         """Ficha do personagem: imagem da versão escolhida, texto, todas as versões e onde aparece."""
         c = self.c
-        self._round_rect(dx - 20, y - 10, right + 20, bottom, 18, fill="#10141c", outline="#262d3a")
+        self._round_rect(dx - 20, y - 10, right + 20, bottom, 18, fill="#110f0e", outline="#2c2723")
         dw = right - dx
         versions = self._versions_of(p)
         vi = self._version_index(p, versions) if versions else None
@@ -683,7 +683,7 @@ class Screens:
         text = self.wiki_summary(wiki, 520 if p.get("fraqueza") else 760) or p.get("descricao", "")
         if p.get("pt") and wiki is None:
             text = text or "Buscando na Resident Evil Wiki..."
-        desc = c.create_text(tx, ty, anchor="nw", text=text, fill="#d5d9e0", font=self.f["body"], width=tw)
+        desc = c.create_text(tx, ty, anchor="nw", text=text, fill="#d9d2c5", font=self.f["body"], width=tw)
         ty = c.bbox(desc)[3] + 8
         if wiki and wiki.get("link"):
             c.create_text(tx, ty, anchor="nw", text="Resident Evil Wiki (pt-br)  ›", fill=A.MUTED, font=self.f["tiny"],
@@ -721,7 +721,7 @@ class Screens:
                 if th:
                     c.create_image(vx, vy + 22, image=th, anchor="nw", tags=(tag,))
                 else:
-                    self._round_rect(vx, vy + 22, vx + tw_, vy + 22 + th_, 7, fill="#141922", outline="", tags=(tag,))
+                    self._round_rect(vx, vy + 22, vx + tw_, vy + 22 + th_, 7, fill="#151311", outline="", tags=(tag,))
                 self._clickable(tag, lambda j=j: (self.overlay.__setitem__("ver", j), self._sound("select"), self.refresh()))
             if start > 0:
                 c.create_text(dx - 12, vy + 22 + th_ / 2, text="‹", fill=A.WHITE, font=self.f["h"])
@@ -861,7 +861,7 @@ class Screens:
             for rel, ch, g in upcoming[:4]:
                 tag = f"ov_up_{ch['id']}"
                 cw = 300
-                self._round_rect(cx, cy + 22, cx + cw, cy + 92, 14, fill="#141922", outline="#262d3a", tags=(tag,))
+                self._round_rect(cx, cy + 22, cx + cw, cy + 92, 14, fill="#151311", outline="#2c2723", tags=(tag,))
                 c.create_text(cx + 18, cy + 34, anchor="nw", text=self._elide(ch["titulo"], self.f["btn"], cw - 36),
                               fill=A.WHITE, font=self.f["btn"], tags=(tag,))
                 c.create_text(cx + 18, cy + 58, anchor="nw", fill=self.accent, font=self.f["h"], tags=(tag,),
@@ -897,7 +897,7 @@ class Screens:
             ry = ly + k * row_h
             tag = f"ov_dl_{r['appid']}"
             if i == ov["sel"]:
-                self._round_rect(x - 12, ry - 6, x + w + 12, ry + row_h - 10, 12, fill="#18202c", outline="", tags=(tag,))
+                self._round_rect(x - 12, ry - 6, x + w + 12, ry + row_h - 10, 12, fill="#1a1816", outline="", tags=(tag,))
             mini = self._mini(g, (34, 50))
             if mini:
                 c.create_image(x, ry, image=mini, anchor="nw", tags=(tag,))
@@ -1074,7 +1074,7 @@ class Screens:
             if img:
                 c.create_image(tx, ty, image=img, anchor="nw", tags=(tag,))
             else:
-                self._round_rect(tx, ty, tx + tw, ty + th, 8, fill="#141922", outline="#262d3a", tags=(tag,))
+                self._round_rect(tx, ty, tx + tw, ty + th, 8, fill="#151311", outline="#2c2723", tags=(tag,))
             if m["video"]:
                 c.create_oval(tx + tw / 2 - 18, ty + th / 2 - 18, tx + tw / 2 + 18, ty + th / 2 + 18, fill="#000000",
                               outline=A.WHITE, width=2, tags=(tag,))
@@ -1085,7 +1085,7 @@ class Screens:
             track = bottom - top
             bh = max(24, track * rows_fit / total_rows)
             by = top + (track - bh) * self.panel_scroll / max(1, total_rows - rows_fit)
-            c.create_rectangle(x + w + 12, top, x + w + 14, bottom, fill="#232a36", outline="")
+            c.create_rectangle(x + w + 12, top, x + w + 14, bottom, fill="#26221f", outline="")
             c.create_rectangle(x + w + 12, by, x + w + 14, by + bh, fill=A.MUTED, outline="")
 
     # ---------- avisos (canto de cima, como as notificações da PS5) ----------
@@ -1106,7 +1106,7 @@ class Screens:
             tw = min(tw, 520)
             x2 = W - A.MARGIN
             tag = f"toast{tt['id']}"
-            self._round_rect(x2 - tw, y, x2, y + 60, 14, fill="#1b212c", outline=self.accent, tags=(tag, "toast"))
+            self._round_rect(x2 - tw, y, x2, y + 60, 14, fill="#1c1a18", outline=self.accent, tags=(tag, "toast"))
             self.c.create_text(x2 - tw + 22, y + 12, anchor="nw", text=self._elide(tt["text"], self.f["btn"], tw - 40),
                                fill=A.WHITE, font=self.f["btn"], tags=(tag, "toast"))
             self.c.create_text(x2 - tw + 22, y + 34, anchor="nw", text=self._elide(tt["sub"], self.f["small"], tw - 40),

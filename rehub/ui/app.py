@@ -26,10 +26,10 @@ from .manage import ManageWindow
 from .lore_screens import LoreScreens
 from .screens import Screens
 
-BG_RGB = (11, 14, 20)
-WHITE, MUTED, DIM = "#f2f4f8", "#a7adb8", "#5d6573"
+BG_RGB = (11, 10, 9)
+WHITE, MUTED, DIM = "#ece6da", "#a8a094", "#6b645b"
 RED = FR["cor"]  # cor de destaque da franquia (franquia.json)
-CHIP, CHIP_HI = "#262c38", "#343c4b"
+CHIP, CHIP_HI = "#29251f", "#3a332c"
 GREEN = "#7ad18a"
 TIER_COLORS = {"platina": "#a9c1e8", "ouro": "#e0b04a", "prata": "#c3c7cd", "bronze": "#c27a45"}
 TIER_NAMES = {"platina": "Platina", "ouro": "Ouro", "prata": "Prata", "bronze": "Bronze"}
@@ -79,6 +79,7 @@ def fit_cover(img, size, anchor_y=0.5):
 
 
 def rounded(img, radius):
+    radius = min(radius, 2)   # cantos retos: capas como fotos impressas, nao como icones de app
     mask = Image.new("L", img.size, 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, img.width - 1, img.height - 1), radius, fill=255)
     out = Image.new("RGBA", img.size, (0, 0, 0, 0))
@@ -160,7 +161,7 @@ def make_halo(size, color=(0, 0, 0), alpha=170, blur=12, dy=6):
     """Sombra (preta) ou brilho (colorido) atrás de um card. A imagem tem 'blur*2' de margem em volta."""
     W, H = size[0] + blur * 4, size[1] + blur * 4
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(img).rounded_rectangle((blur * 2, blur * 2 + dy, W - blur * 2, H - blur * 2 + dy), 14, fill=(*color, alpha))
+    ImageDraw.Draw(img).rounded_rectangle((blur * 2, blur * 2 + dy, W - blur * 2, H - blur * 2 + dy), 2, fill=(*color, alpha))
     return img.filter(ImageFilter.GaussianBlur(blur))
 
 
@@ -186,13 +187,14 @@ def compose_background(hero, W, H, panel_box):
 
     # vidro fosco: desfoca e escurece o que está atrás do painel
     x1, y1, x2, y2 = (int(v) for v in panel_box)
-    glass = base.crop((x1, y1, x2, y2)).filter(ImageFilter.GaussianBlur(22))
-    glass = Image.blend(glass, Image.new("RGB", glass.size, (14, 17, 24)), 0.55)
-    gmask = Image.new("L", glass.size, 0)
-    ImageDraw.Draw(gmask).rounded_rectangle((0, 0, glass.width - 1, glass.height - 1), 18, fill=255)
-    base.paste(glass, (x1, y1), gmask)
+    # painel: uma folha escura sobre a arte (sem vidro fosco), borda fina e um filete na cor da franquia
+    glass = base.crop((x1, y1, x2, y2)).filter(ImageFilter.GaussianBlur(6))
+    glass = Image.blend(glass, Image.new("RGB", glass.size, (13, 11, 10)), 0.82)
+    base.paste(glass, (x1, y1))
     over = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(over).rounded_rectangle(panel_box, 18, outline=(255, 255, 255, 34))
+    d = ImageDraw.Draw(over)
+    d.rectangle(panel_box, outline=(236, 230, 218, 30))
+    d.rectangle((x1, y1, x2, y1 + 2), fill=(*hex_rgb(RED), 200))
     return Image.alpha_composite(base.convert("RGBA"), over).convert("RGB")  # RGB: transição mais leve
 
 
@@ -274,11 +276,11 @@ class Hub(Screens, LoreScreens, tk.Tk):
         self.mod_busy = ""
         self._tfonts = {}
         self.f = {name: Font(family=fam, size=size, weight=w) for name, fam, size, w in (
-            ("title", "Segoe UI Semibold", 30, "normal"), ("h", "Segoe UI Semibold", 13, "normal"),
-            ("body", "Segoe UI", 11, "normal"), ("small", "Segoe UI", 9, "normal"),
-            ("btn", "Segoe UI Semibold", 11, "normal"), ("big", "Segoe UI Light", 34, "normal"),
-            ("logo", "Segoe UI", 15, "bold"), ("tiny", "Segoe UI Semibold", 9, "normal"),
-            ("nav", "Segoe UI Semibold", 11, "normal"), ("clock", "Segoe UI Light", 16, "normal"))}
+            ("title", "Bahnschrift SemiBold", 30, "normal"), ("h", "Bahnschrift SemiBold", 13, "normal"),
+            ("body", "Segoe UI", 11, "normal"), ("small", "Bahnschrift", 10, "normal"),
+            ("btn", "Bahnschrift SemiBold", 12, "normal"), ("big", "Bahnschrift Light", 34, "normal"),
+            ("logo", "Bahnschrift SemiBold", 15, "normal"), ("tiny", "Bahnschrift SemiBold", 9, "normal"),
+            ("nav", "Bahnschrift SemiBold", 11, "normal"), ("clock", "Bahnschrift Light", 16, "normal"))}
 
         self.c = tk.Canvas(self, bg=t.BG, highlightthickness=0)
         self.c.pack(fill="both", expand=True)
@@ -736,7 +738,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
             if row:
                 x1, y1, x2, y2 = row
                 self.c.create_rectangle(x1, y1 + 4, x1 + 3, y2 - 4, fill=self.accent, outline="", tags=("rowhover",))
-                self.c.create_line(x1 + 10, y2, x2, y2, fill="#323a4a", tags=("rowhover",))
+                self.c.create_line(x1 + 10, y2, x2, y2, fill="#38312b", tags=("rowhover",))
 
     def _set_hover(self, i):
         if i == self._hover:
@@ -1055,10 +1057,11 @@ class Hub(Screens, LoreScreens, tk.Tk):
         for key, label in SECTIONS:
             on = self.section == key
             tag = f"nav_{key}"
+            label = label.upper()
             w = self.f["nav"].measure(label)
             c.create_text(x, 38, anchor="w", text=label, fill=WHITE if on else MUTED, font=self.f["nav"], tags=(tag,))
             if on:
-                c.create_rectangle(x, 54, x + w, 57, fill=self.accent, outline="")
+                c.create_rectangle(x, 54, x + w, 56, fill=self.accent, outline="")
             self._clickable(tag, lambda k=key: (setattr(self, "overlay", None), self.set_section(k), self.refresh()))
             x += w + 28
         self._nav_end = x
@@ -1087,17 +1090,17 @@ class Hub(Screens, LoreScreens, tk.Tk):
         c, y = self.c, H - 32
         x = W - MARGIN
         order = {"historia": "História", "lancamento": "Lançamento", "recentes": "Recentes"}[self.order]
-        chips = [("⚙  Opções", self._options_menu, False), ("☰  Extras", lambda: self.open_overlay("extras"), False),
+        chips = [("Opções", self._options_menu, False), ("Extras", lambda: self.open_overlay("extras"), False),
                  ("Efeitos", self.toggle_effects, self.prefs["efeitos"]),
-                 ("♪  Trilha", self.toggle_music, self.prefs["trilha"]),
+                 ("Trilha", self.toggle_music, self.prefs["trilha"]),
                  ("Só instalados", self.toggle_installed, self.only_installed),
                  ("Ordem: " + order, self.toggle_order, False)]
         target = self.continue_target()
         if target:
-            chips.append(("▶  Continuar", self.continue_last, False))
+            chips.append(("Continuar", self.continue_last, False))
         for label, cmd, on in chips:
             w = self.f["small"].measure(label) + 28
-            tag = "opt_" + label.split()[-1].lower() if label.startswith(("⚙", "☰", "♪", "▶")) else "opt_" + label.split()[0].lower()
+            tag = "opt_" + label.split()[0].lower()
             shape = self._round_rect(x - w, y - 14, x, y + 14, 14, fill=WHITE if on else CHIP, outline="", tags=(tag,))
             c.create_text(x - w / 2, y, text=label, fill=t.BG if on else WHITE, font=self.f["small"], tags=(tag,))
             self._clickable(tag, cmd, shape=None if on else shape)
@@ -1112,7 +1115,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
             need = kw + 6 + lf.measure(label) + 18
             if hx + need > limit:
                 break
-            self._round_rect(hx, y - 11, hx + kw, y + 11, 6, fill="#1a1f29", outline="#353d4c")
+            self._round_rect(hx, y - 11, hx + kw, y + 11, 6, fill="#1b1917", outline="#3b342d")
             c.create_text(hx + kw / 2, y, text=key, fill=WHITE, font=kf)
             c.create_text(hx + kw + 6, y, anchor="w", text=label, fill=MUTED, font=lf)
             hx += need
@@ -1169,13 +1172,13 @@ class Hub(Screens, LoreScreens, tk.Tk):
         """Selos sobre o card: CONTINUAR (jogado por último), promoção da Steam e contagem regressiva."""
         c = self.c
         if ch["id"] == cont_id:
-            c.create_text(x + 2, y - 8, anchor="sw", text="▶ CONTINUAR", fill=self.accent if selected else MUTED,
+            c.create_text(x + 2, y - 8, anchor="sw", text="CONTINUAR", fill=self.accent if selected else MUTED,
                           font=self.f["tiny"])
         g = self.version_of(ch)
         badge = None
         rel = self.release(ch, g)
         if rel:
-            badge = (self.countdown(rel, short=True), "#1d3b66", "#cfe2ff")
+            badge = (self.countdown(rel, short=True), "#3a2a22", "#e9dfc9")
         else:
             sale = next(((v, p) for v in ch["versoes"] if (p := self.price_of(v)) and p["desconto"] and not self.owned(v)), None)
             if sale:
@@ -1318,7 +1321,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
         c.create_text(x, y, anchor="nw", text=where, fill=MUTED, font=self.f["small"], width=w)
         y += 26
         if ch.get("sinopse"):
-            syn = c.create_text(x, y, anchor="nw", text=ch["sinopse"], fill="#d5d9e0", font=self.f["body"], width=min(w, 640))
+            syn = c.create_text(x, y, anchor="nw", text=ch["sinopse"], fill="#d9d2c5", font=self.f["body"], width=min(w, 640))
             y = c.bbox(syn)[3] + 16
 
         if len(ch["versoes"]) > 1:  # pílulas de versão
@@ -1370,28 +1373,28 @@ class Hub(Screens, LoreScreens, tk.Tk):
         active = self.panel_tab if any(k == self.panel_tab for k, _ in tabs) else tabs[0][0]
         if active != "trailer":
             self._trailer_stop()
-        # abas em cápsula, sempre dentro do painel: a folga de cada aba encolhe para caberem todas;
-        # a ativa fica na cor do capítulo, as outras clareiam ao passar o mouse
+        # abas como fichas de arquivo: texto em maiusculas, a ativa sublinhada na cor do capitulo,
+        # todas dentro do painel (a folga encolhe para caberem)
         font = self.f["tiny"]
-        texts = [font.measure(label) for _, label in tabs]
-        gap, inner = 4, w - 12 - 4 * (len(tabs) - 1)
-        pad = max(10, min(28, (inner - sum(texts)) // len(tabs)))
+        labels = [label.upper() for _, label in tabs]
+        texts = [font.measure(label) for label in labels]
+        inner = w
+        pad = max(12, min(30, (inner - sum(texts)) // len(tabs)))
         widths = [tw + pad for tw in texts]
-        if sum(widths) > inner:  # nem com a folga mínima: divide o que sobrou igualmente
+        if sum(widths) > inner:
             widths = [inner / len(tabs)] * len(tabs)
-        total = sum(widths) + gap * (len(tabs) - 1) + 12
-        self._round_rect(x, y - 6, x + total, y + 30, 18, fill="#0d1118", outline="#2a3140")
-        tx = x + 6
-        for (key, label), tw in zip(tabs, widths):
+        c.create_line(x, y + 25, x + w, y + 25, fill="#2c2723")
+        tx = x
+        for (key, _), label, tw in zip(tabs, labels, widths):
             on = active == key
             tag = f"tab_{key}"
-            pill = self._round_rect(tx, y, tx + tw, y + 24, 12, fill=self.accent if on else "#0d1118",
-                                    outline="", tags=(tag,))
-            txt = c.create_text(tx + tw / 2, y + 12, text=self._elide(label, font, tw - 8),
+            hit = c.create_rectangle(tx, y - 4, tx + tw, y + 25, fill="", outline="", tags=(tag,))
+            txt = c.create_text(tx + tw / 2, y + 11, text=self._elide(label, font, tw - 6),
                                 fill=WHITE if on else MUTED, font=font, tags=(tag,))
-            self._clickable(tag, lambda k=key: self.set_tab(k),
-                            hover=None if on else [(pill, "#0d1118", "#1f2633"), (txt, MUTED, WHITE)])
-            tx += tw + gap
+            if on:
+                c.create_rectangle(tx + 4, y + 23, tx + tw - 4, y + 26, fill=self.accent, outline="")
+            self._clickable(tag, lambda k=key: self.set_tab(k), hover=None if on else [(txt, MUTED, WHITE)])
+            tx += tw
         body = (x, y + 44, w, y2 - 14)
         if active == "trailer":
             return self._draw_trailer(*body)
@@ -1532,7 +1535,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
             c.create_text(x + w, ry, anchor="ne", text=str(v["ano"]), fill=MUTED, font=self.f["btn"])
             c.create_text(x, ry + 21, anchor="nw", text=self._elide(v["plataformas"], self.f["small"], w), fill=MUTED, font=self.f["small"])
             c.create_oval(x, ry + 43, x + 6, ry + 49, fill=self.accent, outline="")
-            c.create_text(x + 12, ry + 38, anchor="nw", text=self._elide(v["onde"], self.f["small"], w - 12), fill="#d5d9e0",
+            c.create_text(x + 12, ry + 38, anchor="nw", text=self._elide(v["onde"], self.f["small"], w - 12), fill="#d9d2c5",
                           font=self.f["small"])
         self._list_window(items, x, y + 30, w, bottom, 68, row)
 
@@ -1540,12 +1543,14 @@ class Hub(Screens, LoreScreens, tk.Tk):
         """Botão pequeno arredondado. anchor='e' alinha pela direita. Retorna a outra ponta."""
         w = self.f["small"].measure(label) + 26
         x1 = x - w if anchor == "e" else x
-        shape = self._round_rect(x1, y, x1 + w, y + 28, 14, fill=WHITE if primary else CHIP, outline="", tags=(tag,))
-        self.c.create_text(x1 + w / 2, y + 14, text=label, fill=t.BG if primary else WHITE, font=self.f["small"], tags=(tag,))
         if primary:
-            self._clickable(tag, cmd, hover=[(shape, WHITE, "#d9dee8")])
+            shape = self.c.create_rectangle(x1, y, x1 + w, y + 28, fill=self.accent, outline="", tags=(tag,))
+            self.c.create_text(x1 + w / 2, y + 14, text=label, fill=WHITE, font=self.f["small"], tags=(tag,))
+            self._clickable(tag, cmd, hover=[(shape, self.accent, self._lighter(self.accent))])
         else:
-            self._clickable(tag, cmd, shape=shape)
+            shape = self.c.create_rectangle(x1, y, x1 + w, y + 28, fill=CHIP, outline="#3b342d", tags=(tag,))
+            self.c.create_text(x1 + w / 2, y + 14, text=label, fill=WHITE, font=self.f["small"], tags=(tag,))
+            self._clickable(tag, cmd, hover=[(shape, "#3b342d", MUTED)], outline=True)
         return x1 if anchor == "e" else x1 + w
 
     def _note(self, x, y, w, msg):
@@ -1563,7 +1568,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
             track_h = bottom - y
             bar_h = max(24, track_h * fits / len(items))
             by = y + (track_h - bar_h) * self.panel_scroll / max(1, len(items) - fits)
-            c.create_rectangle(x + w + 12, y, x + w + 14, bottom, fill="#232a36", outline="")
+            c.create_rectangle(x + w + 12, y, x + w + 14, bottom, fill="#26221f", outline="")
             c.create_rectangle(x + w + 12, by, x + w + 14, by + bar_h, fill=MUTED, outline="")
 
     def _draw_trophies(self, g, x, y, w, bottom):
@@ -1655,8 +1660,13 @@ class Hub(Screens, LoreScreens, tk.Tk):
         self._list_window(s, x, y + 30, w, bottom, 54, row)
 
     # ---------- primitivas ----------
+    @staticmethod
+    def _lighter(color, k=0.18):
+        r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
+        return "#%02x%02x%02x" % tuple(min(255, int(v + (255 - v) * k)) for v in (r, g, b))
+
     def _round_rect(self, x1, y1, x2, y2, r, **kw):
-        r = min(r, (x2 - x1) / 2, (y2 - y1) / 2)
+        r = min(r, 2, (x2 - x1) / 2, (y2 - y1) / 2)   # cantos retos: visual de ficha, nao de capsula
         pts = [x1 + r, y1, x2 - r, y1, x2, y1, x2, y1 + r, x2, y2 - r, x2, y2, x2 - r, y2,
                x1 + r, y2, x1, y2, x1, y2 - r, x1, y1 + r, x1, y1]
         return self.c.create_polygon(pts, smooth=True, **kw)
@@ -1671,31 +1681,40 @@ class Hub(Screens, LoreScreens, tk.Tk):
         c.create_rectangle(cx - s * 0.55, cy + s * 0.75, cx + s * 0.55, cy + s, fill=fill, outline="")
 
     def _button(self, x, y, text, cmd, primary, tag):
-        w, h = self.f["btn"].measure(text) + 48, 44
-        fill, fg = (WHITE, t.BG) if primary else (CHIP, WHITE)
-        shape = self._round_rect(x, y, x + w, y + h, 22, fill=fill, outline="", tags=(tag,))
-        self.c.create_text(x + w / 2, y + h / 2, text=text, fill=fg, font=self.f["btn"], tags=(tag,))
+        text = text.upper()
+        w, h = self.f["btn"].measure(text) + 48, 42
+        if primary:   # o principal: bloco na cor do capitulo
+            shape = self.c.create_rectangle(x, y, x + w, y + h, fill=self.accent, outline="", tags=(tag,))
+            hover = [(shape, self.accent, self._lighter(self.accent))]
+        else:         # os outros: so o contorno, que clareia com o mouse
+            shape = self.c.create_rectangle(x, y, x + w, y + h, fill="#141210", outline=DIM, tags=(tag,))
+            hover = [(shape, DIM, WHITE)]
+        self.c.create_text(x + w / 2, y + h / 2, text=text, fill=WHITE, font=self.f["btn"], tags=(tag,))
         self._clickable(tag, lambda: (self._sound("prompt_enter" if primary else "enter"), cmd()),
-                        shape=None if primary else shape, hover=[(shape, WHITE, "#d9dee8")] if primary else None)
+                        hover=hover, outline=not primary)
         return x + w
 
-    def _clickable(self, tag, cmd, shape=None, hover=None):
+    def _clickable(self, tag, cmd, shape=None, hover=None, outline=False):
         """Clique + cursor de mão + reação ao passar o mouse.
         shape: fundo de botão escuro (clareia). hover: [(item, cor normal, cor com o mouse)] para outros itens.
 
         Cada tag é ligada ao Tk uma vez só; nos redesenhos seguintes só troca a ação guardada.
         (Ligar de novo a cada quadro criava milhares de comandos no Tk e deixava tudo lento.)"""
         changes = list(hover or []) + ([(shape, CHIP, CHIP_HI)] if shape else [])
-        self._clicks[tag] = (cmd, changes)
+        self._clicks[tag] = (cmd, changes, outline)
         if tag in self._bound:
             return
         self._bound.add(tag)
         c = self.c
 
         def paint(on):
-            for item, normal, hi in self._clicks.get(tag, (None, []))[1]:
+            entry = self._clicks.get(tag, (None, [], False))
+            for item, normal, hi in entry[1]:
                 try:
-                    c.itemconfigure(item, fill=hi if on else normal)
+                    if entry[2] and c.type(item) == "rectangle":   # botao de contorno: muda a borda
+                        c.itemconfigure(item, outline=hi if on else normal)
+                    else:
+                        c.itemconfigure(item, fill=hi if on else normal)
                 except tk.TclError:  # item de um quadro antigo
                     pass
 

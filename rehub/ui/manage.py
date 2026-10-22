@@ -123,26 +123,26 @@ class ManageWindow(tk.Toplevel):
                       "desativa, mostra conflitos e faz backup sozinho. Coloque o .zip ou .rar do mod na pasta de mods "
                       "do jogo (botão abaixo) e ative no Fluffy.")
         if not fluffy.installed():
-            self._card("Fluffy Mod Manager", [("Não baixado", t.MUTED), ("Gratuito, de FluffyQuack (fluffyquack.com).", "#8a93a6")],
+            self._card("Fluffy Mod Manager", [("Não baixado", t.MUTED), ("Gratuito, de FluffyQuack (fluffyquack.com).", "#9a9186")],
                        [("Baixar", self._download_fluffy, "primary"), ("Site", lambda: webbrowser.open(fluffy.SITE), "plain")])
             return
         code = fluffy.CODES.get(g["id"])
         chosen = self._chosen()
         self._card("Fluffy Mod Manager", [(f"Instalado  ·  {fluffy.version() or 'versão ?'}", t.GREEN),
                                           ("Na primeira vez, escolha o jogo no Fluffy e confira se ele achou a pasta da Steam.",
-                                           "#8a93a6")],
+                                           "#9a9186")],
                    [("Abrir Fluffy", self._open_fluffy, "primary"), ("Atualizar", self._download_fluffy, "plain")])
         folder_note = (f"Games\\{code}\\Mods" if code else chosen or
                        "Escolha o jogo no Fluffy uma vez (ele cria a pasta) e depois indique a pasta Mods dele aqui")
         self._card("Mods deste jogo", [(folder_note, t.MUTED),
-                                      ("Aceita .zip, .rar, .7z ou pasta. Depois é só ativar no Fluffy.", "#8a93a6")],
+                                      ("Aceita .zip, .rar, .7z ou pasta. Depois é só ativar no Fluffy.", "#9a9186")],
                    [("+ Adicionar mod", self._add_mod, "primary"),
                     ("Abrir pasta de mods", lambda: fluffy.open_folder(fluffy.mods_dir(g["id"], self._chosen())), "plain")]
                    + ([] if code else [("Indicar pasta", self._pick_mods_dir, "plain")]))
         if g["id"] in fluffy.RE_ENGINE:
             self._card("REFramework (nightly)", [("Base para scripts e muitos mods. A versão nightly acompanha as "
                                                   "atualizações do jogo (a estável, de 2025, trava nos jogos atualizados).",
-                                                  "#8a93a6")],
+                                                  "#9a9186")],
                        [("Pôr no Fluffy", self._add_reframework, "plain"),
                         ("GitHub", lambda: webbrowser.open("https://github.com/praydog/REFramework-nightly/releases"), "plain")])
         self._links()
@@ -160,7 +160,7 @@ class ManageWindow(tk.Toplevel):
             links.insert(0, {"nome": "Nexus Mods", "url": f"https://www.nexusmods.com/{g['nexus']}/mods/",
                              "descricao": "O maior site de mods. Baixe o arquivo e use + Adicionar mod."})
         for s in links:
-            self._card(f"Onde achar mods: {s['nome']}", [(s.get("descricao", ""), "#8a93a6")],
+            self._card(f"Onde achar mods: {s['nome']}", [(s.get("descricao", ""), "#9a9186")],
                        [("Abrir página", lambda u=s["url"]: webbrowser.open(u), "plain")])
         return bool(links)
 
