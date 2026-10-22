@@ -773,6 +773,10 @@ class Hub(Screens, LoreScreens, tk.Tk):
 
     def _save_prefs(self, **values):
         self.prefs.update(values)
+        if os.environ.get("REHUB_TESTE"):  # o modo de teste desliga o som so na memoria: nao grava isso
+            saved = dict(self.cfg.get("_prefs"), **values)
+            self.cfg.set("_prefs", **saved)
+            return
         self.cfg.set("_prefs", **self.prefs)
 
     def toggle_music(self):

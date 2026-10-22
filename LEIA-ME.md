@@ -90,6 +90,15 @@ pasta de um jogo, cada visita sorteia uma. Uma versão pode ter música própria
 (ex.: `re4_2005` toca The Drive original e `re4` o Remake). Cada música começa onde o som aparece, sem o silêncio
 do início: depois de pôr músicas novas, rode `python tools/audio_inicio.py` (precisa de `pip install imageio-ffmpeg`).
 
+## Instalar
+
+Baixe **RE Hub - Instalar.exe** na página de releases do GitHub e abra: ele instala o app inteiro
+em `%LOCALAPPDATA%\Programs\RE Hub` (ou na pasta que você escolher), cria os atalhos na área de
+trabalho e no menu Iniciar e aparece em "Adicionar ou remover programas". Não pede administrador.
+Para atualizar, rode a versão nova por cima: seus dados (`data/`) ficam.
+
+Gerar o instalador: `python tools/build_installer.py --version 1.0.0` (sai em `build/installer`).
+
 ## Gerar o .exe de novo (depois de mudar o código)
 
 ```
