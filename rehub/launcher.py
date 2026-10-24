@@ -38,6 +38,8 @@ def is_ready(game, cfg, installed):
     if game["tipo"] == "steam":
         return game["appid"] in installed
     c = cfg.get(game["id"])
+    if game.get("url"):   # versao que abre um site (adicionada pela pessoa)
+        return True
     if game.get("emulador"):   # emulador baixado pelo hub: precisa tambem da ISO da pessoa
         return bool(c.get("exe") and c.get("iso"))
     return bool(c.get("exe"))

@@ -1,0 +1,36 @@
+{
+  "id": "outbreak_obsrv",
+  "ordem": 30.4,
+  "nome": "Resident Evil Outbreak — Online (obsrv)",
+  "tipo": "local",
+  "emulador": "pcsx2",
+  "iso_busca": [
+    "biohazard outbreak",
+    "outbreak"
+  ],
+  "capitulo": "outbreak",
+  "versao": "Online (obsrv)",
+  "dica": "Jogo online de verdade, nos servidores da comunidade Outbreak Server Resurrection (obsrv.org). Os servidores aceitam a versão JAPONESA do jogo (Biohazard Outbreak) e precisam da BIOS japonesa no PCSX2.",
+  "passos_extra": [
+    "No PCSX2: Configurações > Rede e HDD > ative o adaptador Ethernet, escolha a sua placa de rede e use DHCP.",
+    "Pegue o DNS atual no guia do obsrv.org (botão Abrir em Onde baixar) e coloque em DNS 1.",
+    "No jogo: NETWORK PLAY > crie uma conta no obsrv e entre: as salas aparecem como nos anos 2000."
+  ],
+  "projetos": [
+    {
+      "nome": "Outbreak Server Resurrection (obsrv)",
+      "url": "https://obsrv.org",
+      "status": "Servidores online da comunidade: guia, DNS e contas."
+    }
+  ],
+  "arte": {
+    "capa": [
+      "https://upload.wikimedia.org/wikipedia/en/a/ad/Re_outbreak_a.jpg",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

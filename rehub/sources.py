@@ -19,6 +19,8 @@ def sources(game):
     if game.get("andamento"):
         a = game["andamento"]
         return [("Em andamento", a["url"], f"{a['nome']}: {a['status']}")]
+    if game.get("meu"):
+        return [("Adicionado por você", game.get("url") or game.get("exe_fixo", ""), "site" if game.get("url") else "executável")]
     if game.get("emulador"):
         from .emulators import EMULATORS as EMU
         e = EMU[game["emulador"]]
@@ -48,6 +50,10 @@ def label(game):
 
 def steps(game):
     """Como instalar e jogar esta versão, passo a passo, no caminho qué ela usa."""
+    if game.get("meu"):
+        return ["Versão que você adicionou em Opções > Adicionar jogo ou site.",
+                "Clique em Jogar: abre " + ("o site no navegador." if game.get("url") else "o executável que você escolheu."),
+                "Para tirar, use Remover."]
     if game.get("andamento"):
         a = game["andamento"]
         return [f"Ainda não dá para jogar esta versão no PC. {a['status']}",
@@ -63,7 +69,7 @@ def steps(game):
         e = EMU[game["emulador"]]
         return [f"Clique em Instalar: o hub baixa o {e['nome']} ({e['sistema']}) sozinho, uma vez para todos os jogos dele.",
                 "O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.",
-                "Clique em Jogar: o jogo abre direto no emulador, em tela cheia."]
+                "Clique em Jogar: o jogo abre direto no emulador, em tela cheia."] + game.get("passos_extra", [])
     if game.get("instalador"):
         return ["Clique em Instalar: o hub baixa o instalador oficial do projeto e abre.",
                 "Termine a instalação (escolha a pasta que quiser).",

@@ -52,6 +52,15 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
   3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
 
+### Online (obsrv)
+- **Onde:** [Emulador: PCSX2](https://pcsx2.net), [Projeto: Outbreak Server Resurrection](https://obsrv.org)
+  1. Clique em Instalar: o hub baixa o PCSX2 (PS2) sozinho, uma vez para todos os jogos dele.
+  2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
+  3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
+  4. No PCSX2: Configurações > Rede e HDD > ative o adaptador Ethernet, escolha a sua placa de rede e use DHCP.
+  5. Pegue o DNS atual no guia do obsrv.org (botão Abrir em Onde baixar) e coloque em DNS 1.
+  6. No jogo: NETWORK PLAY > crie uma conta no obsrv e entre: as salas aparecem como nos anos 2000.
+
 ### Port de PC (File #1)
 - **Onde:** [GitHub](https://github.com/Ninjacornix/reo/releases/latest), [Projeto: ResidentEvilOutbreakRecompiled](https://github.com/RaccoonRecomp/ResidentEvilOutbreakRecompiled)
   1. Clique em Instalar: o hub baixa a versão mais nova do GitHub e ja configura o executável.
@@ -70,6 +79,15 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   1. Clique em Instalar: o hub baixa o PCSX2 (PS2) sozinho, uma vez para todos os jogos dele.
   2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
   3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
+
+### File #2 Online (obsrv)
+- **Onde:** [Emulador: PCSX2](https://pcsx2.net), [Projeto: Outbreak Server Resurrection](https://obsrv.org)
+  1. Clique em Instalar: o hub baixa o PCSX2 (PS2) sozinho, uma vez para todos os jogos dele.
+  2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
+  3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
+  4. No PCSX2: Configurações > Rede e HDD > ative o adaptador Ethernet, escolha a sua placa de rede e use DHCP.
+  5. Pegue o DNS atual no guia do obsrv.org (botão Abrir em Onde baixar) e coloque em DNS 1.
+  6. No jogo: NETWORK PLAY > crie uma conta no obsrv e entre: as salas aparecem como nos anos 2000.
 
 ### Port de PC (em andamento)
 - **Onde:** [Em andamento](https://github.com/caprado/REOF2)

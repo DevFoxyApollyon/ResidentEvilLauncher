@@ -88,7 +88,7 @@ class LoreScreens:
         if lore.load("mapa"):
             out.append(("mapa", "Mapa", "Onde cada capítulo acontece, no mundo e na cidade", "M"))
         if any(lore.has_files(ch["id"]) for ch in catalog.load_timeline(self.games, "canon")):
-            out.append(("arquivos", "Arquivos dos jogos", "Documentos e diários de cada jogo, para ler aqui", "A"))
+            out.append(("arquivos", "Arquivos dos jogos", "Documentos e diários de cada jogo, para ler aqui", "Q"))
         if lore.load("relacoes"):
             out.append(("relacoes", "Relações", "Famílias, parceiros e inimigos ligados por linhas", "R"))
         virus = lore.load("virus")

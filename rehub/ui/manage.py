@@ -26,6 +26,7 @@ class ManageWindow(tk.Toplevel):
         self._cover = None
 
         tk.Frame(self, bg=t.RED, height=3).pack(fill="x")
+        t.brand_row(self, t.BG, t.MUTED, "Gerenciar").pack(anchor="w", padx=26, pady=(14, 0))
         self.head = tk.Frame(self, bg=t.BG)
         self.head.pack(fill="x", padx=26, pady=(20, 4))
         self.busy = tk.Label(self, text="", fg=t.GREEN, bg=t.BG, font=(t.FONT, 9))

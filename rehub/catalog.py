@@ -13,7 +13,24 @@ def load_games():
         g = json.loads(f.read_text(encoding="utf-8"))
         g.setdefault("id", f.stem)
         games.append(g)
+    games += load_custom()
     return sorted(games, key=lambda g: (g.get("ordem", 999), g["nome"]))
+
+
+MINE = DATA / "meus_jogos.json"   # versoes que a pessoa adicionou (um site ou um .exe dela)
+
+
+def load_custom():
+    try:
+        items = json.loads(MINE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return [dict(g, tipo="local", meu=True) for g in items if g.get("id") and g.get("capitulo")]
+
+
+def save_custom(items):
+    DATA.mkdir(parents=True, exist_ok=True)
+    MINE.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 SECTIONS = {"canon": "capitulos", "spinoff": "nao_canonicos", "perdidos": "perdidos", "midia": "midia", "hqs": "hqs", "fas": "fas"}

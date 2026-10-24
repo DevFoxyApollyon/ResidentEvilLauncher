@@ -18,6 +18,31 @@ def button(parent, text, cmd, primary=False):
 
 
 LINE = "#2c2723"
+_logos = {}
+
+
+def umbrella(size=22):
+    """O simbolo da Umbrella (re_hub.png) no tamanho pedido, para cabecalhos de janelas e menus."""
+    if size not in _logos:
+        from PIL import Image, ImageTk
+        from ..paths import ROOT
+        try:
+            img = Image.open(ROOT / "re_hub.png").convert("RGBA")
+            img.thumbnail((size, size), Image.LANCZOS)
+            _logos[size] = ImageTk.PhotoImage(img)
+        except OSError:
+            _logos[size] = None
+    return _logos[size]
+
+
+def brand_row(parent, bg, color, text=None):
+    """Linha de marca: o simbolo da Umbrella e o nome do app (ou outro texto) em maiusculas."""
+    row = tk.Frame(parent, bg=bg)
+    logo = umbrella(20)
+    if logo:
+        tk.Label(row, image=logo, bg=bg).pack(side="left", padx=(0, 8))
+    tk.Label(row, text=(text or FR["app"]).upper(), fg=color, bg=bg, font=(FONT, 9, "bold")).pack(side="left")
+    return row
 STYLES = {  # fundo, texto, borda, fundo com o mouse
     "primary": (RED, TEXT, RED, "#d0343c"),
     "plain": (PANEL, TEXT, "#4a423a", PANEL_HI),
@@ -115,7 +140,7 @@ def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary")
     tk.Frame(card, bg=accent, height=3).pack(fill="x")
     body = tk.Frame(card, bg=PANEL)
     body.pack(fill="both", padx=30, pady=(22, 6))
-    tk.Label(body, text=FR["app"].upper(), fg=accent, bg=PANEL, font=(FONT, 9, "bold"), anchor="w").pack(fill="x")
+    brand_row(body, PANEL, accent).pack(fill="x")
     tk.Label(body, text=title, fg=TEXT, bg=PANEL, font=(FONT, 17, "bold"), anchor="w", justify="left",
              wraplength=440).pack(fill="x", pady=(4, 0))
     tk.Label(body, text=message, fg="#c4bcae", bg=PANEL, font=(FONT, 11), anchor="w", justify="left",

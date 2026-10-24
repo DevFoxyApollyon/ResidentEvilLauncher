@@ -295,7 +295,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
                             ("<e>", "extras"), ("<Prior>", "tab_prev"), ("<Next>", "tab_next"), ("<m>", "map"),
-                            ("<a>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements")):
+                            ("<a>", "left"), ("<d>", "right"), ("<q>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements")):
             self.bind(key, lambda e, a=action: self._press(a))
         self.bind("<F11>", lambda e: self.toggle_fullscreen())
         self.bind("<F5>", lambda e: self.rescan())
@@ -1111,7 +1111,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
             self._clickable(tag, cmd, shape=None if on else shape)
             x -= w + 8
         # atalhos como teclas: a tecla numa tampinha, o que ela faz ao lado; os que não cabem ficam de fora
-        hints = (("← →", "capítulos"), ("↑ ↓", "versões"), ("Enter", "jogar"), ("G", "gerenciar"), ("Tab", "seção"),
+        hints = (("A D  ← →", "capítulos"), ("↑ ↓", "versões"), ("Enter", "jogar"), ("G", "gerenciar"), ("Tab", "seção"),
                  ("E", "extras"), ("F", "foto"), ("F11", "tela cheia"))
         kf, lf = self.f["tiny"], self.f["small"]
         hx, limit = MARGIN, x - 16
@@ -1329,17 +1329,34 @@ class Hub(Screens, LoreScreens, tk.Tk):
             syn = c.create_text(x, y, anchor="nw", text=ch["sinopse"], fill="#d9d2c5", font=self.f["body"], width=min(w, 640))
             y = c.bbox(syn)[3] + 16
 
-        if len(ch["versoes"]) > 1:  # pílulas de versão
-            px = x
-            for j, v in enumerate(ch["versoes"]):
-                on = v is g
-                pw = self.f["small"].measure(v["versao"]) + 30
-                tag = f"ver{j}"
-                shape = self._round_rect(px, y, px + pw, y + 30, 15, fill=WHITE if on else CHIP, outline="", tags=(tag,))
-                c.create_text(px + pw / 2, y + 15, text=v["versao"], fill=t.BG if on else WHITE, font=self.f["small"], tags=(tag,))
-                self._clickable(tag, lambda j=j: self.pick_version(0, absolute=j), shape=None if on else shape)
-                px += pw + 8
-            y += 42
+        if len(ch["versoes"]) > 1:  # versoes: uma barra segmentada, a escolhida com filete na cor do capitulo
+            widths = [self.f["small"].measure(v["versao"]) + 34 for v in ch["versoes"]]
+            maxw = min(w, 760)
+            rows, cur, cw = [], [], 0
+            for j, pw in enumerate(widths):   # quebra em mais linhas se nao couber
+                if cur and cw + pw > maxw:
+                    rows.append(cur); cur, cw = [], 0
+                cur.append(j); cw += pw
+            rows.append(cur)
+            for r in rows:
+                total = sum(widths[j] for j in r)
+                c.create_rectangle(x, y, x + total, y + 34, fill="#0f0d0c", outline="#3b342d")
+                px = x
+                for n, j in enumerate(r):
+                    v, pw = ch["versoes"][j], widths[j]
+                    on = v is g
+                    tag = f"ver{j}"
+                    bg = c.create_rectangle(px + 1, y + 1, px + pw, y + 33, fill="#24201c" if on else "#0f0d0c", outline="", tags=(tag,))
+                    if n:
+                        c.create_line(px, y + 8, px, y + 26, fill="#3b342d")
+                    if on:
+                        c.create_rectangle(px + 1, y + 30, px + pw, y + 33, fill=self.accent, outline="")
+                    tx = c.create_text(px + pw / 2, y + 16, text=v["versao"], fill=WHITE if on else MUTED,
+                                       font=self.f["small"], tags=(tag,))
+                    self._clickable(tag, lambda j=j: self.pick_version(0, absolute=j),
+                                    hover=None if on else [(tx, MUTED, WHITE), (bg, "#0f0d0c", "#1a1715")])
+                    px += pw
+                y += 42
         elif g["tipo"] != "info":  # nos itens de informação o formato já aparece na linha de estado
             c.create_text(x, y, anchor="nw", text=g.get("versao", ""), fill=DIM, font=self.f["small"])
             y += 24
@@ -1684,6 +1701,11 @@ class Hub(Screens, LoreScreens, tk.Tk):
 
     # ---------- primitivas ----------
     @staticmethod
+    def _darker(color, k=0.35):
+        r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
+        return "#%02x%02x%02x" % tuple(int(v * (1 - k)) for v in (r, g, b))
+
+    @staticmethod
     def _lighter(color, k=0.18):
         r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
         return "#%02x%02x%02x" % tuple(min(255, int(v + (255 - v) * k)) for v in (r, g, b))
@@ -1704,15 +1726,31 @@ class Hub(Screens, LoreScreens, tk.Tk):
         c.create_rectangle(cx - s * 0.55, cy + s * 0.75, cx + s * 0.55, cy + s, fill=fill, outline="")
 
     def _button(self, x, y, text, cmd, primary, tag):
+        c = self.c
         text = text.upper()
-        w, h = self.f["btn"].measure(text) + 48, 42
-        if primary:   # o principal: bloco na cor do capitulo
-            shape = self.c.create_rectangle(x, y, x + w, y + h, fill=self.accent, outline="", tags=(tag,))
+        icon = {"JOGAR": "play", "INSTALAR": "down", "BAIXAR": "down", "ACOMPANHAR": "eye"}.get(text) if primary else None
+        pad = 26
+        w, h = self.f["btn"].measure(text) + pad * 2 + (22 if icon else 0), 46
+        if primary:   # o principal: bloco na cor do capitulo, com um "degrau" mais escuro embaixo
+            shape = c.create_rectangle(x, y, x + w, y + h - 3, fill=self.accent, outline="", tags=(tag,))
+            c.create_rectangle(x, y + h - 3, x + w, y + h, fill=self._darker(self.accent), outline="", tags=(tag,))
             hover = [(shape, self.accent, self._lighter(self.accent))]
-        else:         # os outros: so o contorno, que clareia com o mouse
-            shape = self.c.create_rectangle(x, y, x + w, y + h, fill="#141210", outline=DIM, tags=(tag,))
-            hover = [(shape, DIM, WHITE)]
-        self.c.create_text(x + w / 2, y + h / 2, text=text, fill=WHITE, font=self.f["btn"], tags=(tag,))
+            tx = x + pad
+            if icon:
+                cy = y + (h - 3) / 2
+                if icon == "play":
+                    c.create_polygon(tx, cy - 7, tx, cy + 7, tx + 11, cy, fill=WHITE, outline="", tags=(tag,))
+                elif icon == "down":
+                    c.create_polygon(tx, cy - 2, tx + 12, cy - 2, tx + 6, cy + 6, fill=WHITE, outline="", tags=(tag,))
+                    c.create_rectangle(tx + 4, cy - 8, tx + 8, cy - 2, fill=WHITE, outline="", tags=(tag,))
+                else:
+                    c.create_oval(tx, cy - 5, tx + 12, cy + 5, outline=WHITE, width=2, tags=(tag,))
+                tx += 22
+            c.create_text(tx, y + (h - 3) / 2, anchor="w", text=text, fill=WHITE, font=self.f["btn"], tags=(tag,))
+        else:         # os outros: contorno fino que acende com o mouse
+            shape = c.create_rectangle(x, y, x + w, y + h, fill="#12100f", outline="#4a423a", tags=(tag,))
+            hover = [(shape, "#4a423a", WHITE)]
+            c.create_text(x + w / 2, y + h / 2, text=text, fill="#d9d2c5", font=self.f["btn"], tags=(tag,))
         self._clickable(tag, lambda: (self._sound("prompt_enter" if primary else "enter"), cmd()),
                         hover=hover, outline=not primary)
         return x + w
@@ -1788,7 +1826,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
                                ("Pasta de músicas", "", lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True), os.startfile(audio.MUSIC)))]
              + ([(f"Sons de menu para {name}", "", lambda: os.startfile(audio.theme_folder(self.chapter["id"])))] if self.chapter else [])
              + [("Fluffy Mod Manager (mods)", "", self.open_fluffy)]),
-            ("Sistema", [("Tela cheia", "F11", self.toggle_fullscreen),
+            ("Sistema", [("Adicionar jogo ou site", "", self.add_custom), ("Tela cheia", "F11", self.toggle_fullscreen),
                          ("Pasta de dados", "", lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA))),
                          ("Pasta do catálogo", "", lambda: os.startfile(ROOT / "games")),
                          ("LEIA-ME", "", lambda: os.startfile(ROOT / "LEIA-ME.md")),
@@ -1802,6 +1840,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
         card = tk.Frame(pop, bg=t.PANEL)
         card.pack(fill="both", expand=True, padx=1, pady=1)
         tk.Frame(card, bg=self.accent, height=3).pack(fill="x")
+        t.brand_row(card, t.PANEL, WHITE, "Opções").pack(fill="x", padx=18, pady=(12, 2))
+        tk.Frame(card, bg="#2c2723", height=1).pack(fill="x", padx=18, pady=(8, 0))
         closed = {"v": False}
 
         def close(e=None):
@@ -1915,6 +1955,9 @@ class Hub(Screens, LoreScreens, tk.Tk):
             return acts
         if launcher.is_ready(g, self.cfg, self.installed):
             return [("Jogar", lambda: self.play(g), True), manage, ("Desinstalar", lambda: self.uninstall_game(g), False)]
+        if g.get("meu"):   # adicionado pela pessoa: um site ou um .exe dela
+            play = (lambda: webbrowser.open(g["url"])) if g.get("url") else (lambda: self.play(g))
+            return [("Jogar", play, True), manage, ("Remover", lambda: self.remove_custom(g), False)]
         if g.get("andamento"):   # port ainda em desenvolvimento: so acompanhar o projeto
             return [("Acompanhar", lambda: webbrowser.open(g["andamento"]["url"]), True), manage]
         if g.get("emulador"):
@@ -1922,6 +1965,89 @@ class Hub(Screens, LoreScreens, tk.Tk):
         if g.get("github"):
             return [("Instalar", lambda: self.download_game(g), True), manage]
         return [("Configurar", lambda: self.configure_local(g), True), manage]
+
+    def add_custom(self):
+        """Opcoes > Adicionar jogo ou site: uma versao sua (um site para abrir no navegador ou um .exe) num capitulo."""
+        chapters = [ch for sec in ("canon", "spinoff") for ch in catalog.load_timeline(self.games, sec)]
+        names = [ch["titulo"] for ch in chapters]
+        cur = self.chapter["titulo"] if self.chapter and self.chapter["titulo"] in names else names[0]
+        top = tk.Toplevel(self)
+        top.overrideredirect(True)
+        top.configure(bg="#3b342d")
+        top.attributes("-topmost", True)
+        card = tk.Frame(top, bg=t.PANEL)
+        card.pack(fill="both", expand=True, padx=1, pady=1)
+        tk.Frame(card, bg=self.accent, height=3).pack(fill="x")
+        body = tk.Frame(card, bg=t.PANEL)
+        body.pack(fill="both", padx=28, pady=(20, 8))
+        t.brand_row(body, t.PANEL, self.accent).pack(fill="x")
+        tk.Label(body, text="Adicionar jogo ou site", fg=WHITE, bg=t.PANEL, font=(t.FONT, 17, "bold"), anchor="w").pack(fill="x", pady=(4, 12))
+        fields = {}
+
+        def field(label, value=""):
+            tk.Label(body, text=label.upper(), fg=MUTED, bg=t.PANEL, font=(t.FONT, 9, "bold"), anchor="w").pack(fill="x", pady=(8, 2))
+            var = tk.StringVar(value=value)
+            tk.Entry(body, textvariable=var, bg="#0f0d0c", fg=WHITE, insertbackground=WHITE, relief="flat", font=(t.FONT, 11),
+                     highlightthickness=1, highlightbackground="#3b342d", highlightcolor=MUTED, width=52).pack(fill="x", ipady=6)
+            return var
+        fields["nome"] = field("Nome da versão (aparece nos botões)")
+        fields["alvo"] = field("Endereço do site (https://...) ou caminho do .exe")
+        pick = tk.Frame(body, bg=t.PANEL)
+        pick.pack(fill="x", pady=(6, 0))
+
+        def browse():
+            exe = filedialog.askopenfilename(parent=top, title="Escolha o executável", filetypes=[("Executável", "*.exe"), ("Todos", "*.*")])
+            if exe:
+                fields["alvo"].set(exe)
+        t.flat_button(pick, "Escolher .exe", browse).pack(side="left")
+        tk.Label(body, text="CAPÍTULO", fg=MUTED, bg=t.PANEL, font=(t.FONT, 9, "bold"), anchor="w").pack(fill="x", pady=(12, 2))
+        chv = tk.StringVar(value=cur)
+        om = tk.OptionMenu(body, chv, *names)
+        om.config(bg="#0f0d0c", fg=WHITE, activebackground=t.PANEL_HI, activeforeground=WHITE, relief="flat", font=(t.FONT, 11),
+                  highlightthickness=1, highlightbackground="#3b342d", anchor="w", indicatoron=False)
+        om["menu"].config(bg=t.PANEL, fg=WHITE, activebackground=t.PANEL_HI, activeforeground=WHITE, font=(t.FONT, 10))
+        om.pack(fill="x", ipady=4)
+        msg = tk.Label(body, text="", fg="#e0857f", bg=t.PANEL, font=(t.FONT, 10), anchor="w")
+        msg.pack(fill="x", pady=(8, 0))
+        bar = tk.Frame(card, bg=t.PANEL)
+        bar.pack(fill="x", padx=28, pady=(6, 22))
+
+        def save():
+            nome, alvo = fields["nome"].get().strip(), fields["alvo"].get().strip().strip('"')
+            if not nome or not alvo:
+                return msg.config(text="Preencha o nome e o site ou o executável.")
+            is_url = alvo.lower().startswith(("http://", "https://"))
+            if not is_url and not os.path.isfile(alvo):
+                return msg.config(text="O endereço precisa começar com https:// ou ser um .exe que existe.")
+            ch = chapters[names.index(chv.get())]
+            items = catalog.load_custom()
+            gid = "meu_" + re.sub(r"[^a-z0-9]+", "_", nome.lower()).strip("_")
+            entry = {"id": gid, "nome": f"{ch['titulo']} — {nome}", "capitulo": ch["id"], "versao": nome, "ordem": 9999}
+            if is_url:
+                entry["url"] = alvo
+            else:
+                entry["exe_fixo"] = alvo
+                self.cfg.set(gid, exe=alvo)
+            items = [i for i in items if i.get("id") != gid] + [entry]
+            catalog.save_custom([{k: v for k, v in i.items() if k not in ("tipo", "meu")} for i in items])
+            top.destroy()
+            self.rescan()
+            self.notify(f"{nome} adicionado em {ch['titulo']}.")
+        t.flat_button(bar, "Adicionar", save, "primary").pack(side="right")
+        t.flat_button(bar, "Cancelar", top.destroy).pack(side="right", padx=(0, 8))
+        top.bind("<Escape>", lambda e: top.destroy())
+        top.update_idletasks()
+        w, h = top.winfo_reqwidth(), top.winfo_reqheight()
+        top.geometry(f"+{self.winfo_rootx() + (self.winfo_width() - w) // 2}+{self.winfo_rooty() + (self.winfo_height() - h) // 3}")
+        top.grab_set()
+        top.focus_force()
+
+    def remove_custom(self, g):
+        if not t.confirm(self, f"Remover {g.get('versao', g['nome'])}?", "Sai só do hub: o site ou o .exe não são apagados.", ok="Remover", danger=True):
+            return
+        catalog.save_custom([{k: v for k, v in i.items() if k not in ("tipo", "meu")} for i in catalog.load_custom() if i["id"] != g["id"]])
+        self.cfg.clear(g["id"])
+        self.rescan()
 
     def ask_iso(self, g, parent=None):
         """Pede a ISO/imagem da pessoa (a unica coisa que o hub nao baixa) e guarda. True se escolheu."""
