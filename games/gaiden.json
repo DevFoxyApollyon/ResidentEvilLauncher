@@ -16,5 +16,12 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Titles/Resident%20Evil%20Gaiden%20%28USA%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "projetos": [
+    {
+      "nome": "mGBA",
+      "url": "https://github.com/mgba-emu/mgba",
+      "status": "Emulador de Game Boy Color (o port de PC fica na versão ao lado)."
+    }
+  ]
 }

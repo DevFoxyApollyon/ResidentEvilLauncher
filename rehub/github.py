@@ -21,8 +21,19 @@ def _open(url, timeout=30):
 
 
 def latest_release(repo):
-    with _open(f"https://api.github.com/repos/{repo}/releases/latest") as r:
-        return json.load(r)
+    """A release estavel mais nova; projetos que so publicam pre-releases (alfas) usam a mais nova delas."""
+    import urllib.error
+    try:
+        with _open(f"https://api.github.com/repos/{repo}/releases/latest") as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            raise
+    with _open(f"https://api.github.com/repos/{repo}/releases?per_page=5") as r:
+        releases = [x for x in json.load(r) if not x.get("draft")]
+    if not releases:
+        raise RuntimeError(f"{repo} ainda nao tem nenhuma release para baixar.")
+    return releases[0]
 
 
 def latest_tag(repo, max_age=6 * 3600):

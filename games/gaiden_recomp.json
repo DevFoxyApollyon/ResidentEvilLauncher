@@ -1,0 +1,30 @@
+{
+  "id": "gaiden_recomp",
+  "ordem": 1005.5,
+  "nome": "Resident Evil Gaiden — Port de PC (recomp)",
+  "tipo": "local",
+  "github": "sergiomanzur/regaiden-recomp",
+  "asset": "Resident_Evil_Gaiden_Recomp_*_Windows.zip",
+  "exe": "Resident_Evil_Gaiden__USA_.exe",
+  "dica": "Recompilação nativa do Gaiden (Game Boy Color) para PC: widescreen, lanterna dinâmica, corrida e pacote HD opcionais (F10). Precisa da SUA ROM americana.",
+  "depois_de_baixar": "coloque a sua ROM (.gbc, USA) na pasta do jogo, como o README pede, e clique em Configurar.",
+  "projetos": [
+    {
+      "nome": "regaiden-recomp (sergiomanzur)",
+      "url": "https://github.com/sergiomanzur/regaiden-recomp",
+      "status": "Completo (0.4.1)."
+    }
+  ],
+  "capitulo": "gaiden",
+  "versao": "Port de PC (recomp)",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Boxarts/Resident%20Evil%20Gaiden%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/d/dd/Resident_Evil_Gaiden_Boxart.gif"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Titles/Resident%20Evil%20Gaiden%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

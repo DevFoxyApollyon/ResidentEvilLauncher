@@ -20,5 +20,12 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Survivor%202%20-%20Code%20-%20Veronica%20%28Europe%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "projetos": [
+    {
+      "nome": "PCSX2",
+      "url": "https://github.com/PCSX2/pcsx2",
+      "status": "Sem port de PC ainda: emulador de PS2 com a sua ISO."
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "id": "re3_recomp",
+  "ordem": 41.5,
+  "nome": "Resident Evil 3: Nemesis — Port de PC (recomp)",
+  "tipo": "local",
+  "github": "alexbeavs-ps1-ports/resident-evil-3-recomp",
+  "asset": "resident-evil-3-*-windows-x64.zip",
+  "exe": "Resident_Evil_3__Nemesis_Recompiled.exe",
+  "dica": "Recompilação estática do RE3 de PS1 para PC (PSXRecomp). Experimental: jogável, ainda em versão 0.1. Precisa do SEU disco (Redump .cue/.bin, versão europeia) e da BIOS SCPH-5502/5552.",
+  "depois_de_baixar": "abra pelo Jogar: o assistente pede o .cue e a BIOS e gera o jogo nativo (na primeira vez demora; precisa do Python 3 instalado).",
+  "projetos": [
+    {
+      "nome": "resident-evil-3-recomp (alexbeavs)",
+      "url": "https://github.com/alexbeavs-ps1-ports/resident-evil-3-recomp",
+      "status": "Experimental (0.1.1): jogável no Windows."
+    },
+    {
+      "nome": "Project RE: Visited (BrazilianHobbyist)",
+      "url": "https://github.com/BrazilianHobbyist/Project-RE-Visited-RE3",
+      "status": "Outro port experimental do RE3 de PS1."
+    }
+  ],
+  "capitulo": "re3",
+  "versao": "Port de PC (recomp)",
+  "arte": {
+    "capa": "https://images.gog-statics.com/e751c5a8f087878bfa6867a734ada47057c37c5e1b1f4109cc0ab7136e3cdace.jpg",
+    "fundo": "https://images-1.gog-statics.com/4400bc14ab4a580ddd6033b14461cc5d88a558caff4365ec0598f09e6eac038d.jpg"
+  }
+}

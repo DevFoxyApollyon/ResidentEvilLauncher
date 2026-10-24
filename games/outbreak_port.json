@@ -1,0 +1,35 @@
+{
+  "id": "outbreak_port",
+  "ordem": 30.5,
+  "nome": "Resident Evil Outbreak — Port de PC (recomp)",
+  "tipo": "local",
+  "github": "Ninjacornix/reo",
+  "asset": "RE-Outbreak-*-Windows-x64.zip",
+  "exe": "Outbreak.Launcher.exe",
+  "dica": "Port nativo de Windows do Outbreak File #1 (recompilação estática), com co-op online. Alfa: jogável, ainda com falhas. Precisa do .NET 8 Desktop Runtime, Vulkan e da SUA ISO americana (SLUS-20765).",
+  "depois_de_baixar": "abra pelo Jogar, escolha a sua ISO no launcher do port e clique em Build game (precisa de uns 10 GB livres na primeira vez).",
+  "projetos": [
+    {
+      "nome": "reo (Ninjacornix)",
+      "url": "https://github.com/Ninjacornix/reo",
+      "status": "Alfa ativo, co-op online. Usado por este hub."
+    },
+    {
+      "nome": "ResidentEvilOutbreakRecompiled (RaccoonRecomp)",
+      "url": "https://github.com/RaccoonRecomp/ResidentEvilOutbreakRecompiled",
+      "status": "Outro port do File #1, com instalador próprio (Setup.exe)."
+    }
+  ],
+  "capitulo": "outbreak",
+  "versao": "Port de PC (File #1)",
+  "arte": {
+    "capa": [
+      "https://upload.wikimedia.org/wikipedia/en/a/ad/Re_outbreak_a.jpg",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

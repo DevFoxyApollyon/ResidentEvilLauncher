@@ -16,5 +16,12 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Snaps/Resident%20Evil%20-%20The%20Darkside%20Chronicles%20%28USA%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "projetos": [
+    {
+      "nome": "Dolphin",
+      "url": "https://github.com/dolphin-emu/dolphin",
+      "status": "Sem port de PC ainda: emulador de Wii com a sua ISO."
+    }
+  ]
 }

@@ -10,6 +10,11 @@
       "nome": "Bullseye",
       "url": "https://github.com/cakehonolulu/Bullseye",
       "status": "Decomp da versão de PS2 em andamento."
+    },
+    {
+      "nome": "PCSX2",
+      "url": "https://github.com/PCSX2/pcsx2",
+      "status": "Sem port de PC ainda: emulador de PS2 com a sua ISO."
     }
   ],
   "capitulo": "dead_aim",

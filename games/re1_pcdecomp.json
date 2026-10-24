@@ -1,0 +1,24 @@
+{
+  "id": "re1_pcdecomp",
+  "ordem": 22.5,
+  "nome": "Resident Evil (1996) — Port de PC (decomp)",
+  "tipo": "local",
+  "github": "ecruells/resident-evil-pc-decomp",
+  "asset": "residentevil-*-windows-x86.zip",
+  "exe": "residentevil.exe",
+  "dica": "Decompilação completa do Resident Evil de PC (1997) refeita em Direct3D 11: o jogo inteiro jogável, widescreen e texturas HD opcionais. Precisa dos arquivos do SEU jogo (o clássico da Steam/GOG serve).",
+  "depois_de_baixar": "copie a pasta USA/ do seu Resident Evil clássico para a pasta do jogo (o asset-migrator do mesmo GitHub converte se precisar) e clique em Configurar para confirmar o residentevil.exe.",
+  "projetos": [
+    {
+      "nome": "resident-evil-pc-decomp (ecruells)",
+      "url": "https://github.com/ecruells/resident-evil-pc-decomp",
+      "status": "Completo: 1716 de 1717 funções do jogo, o jogo inteiro jogável."
+    }
+  ],
+  "capitulo": "re1",
+  "versao": "Port de PC (decomp)",
+  "arte": {
+    "capa": "https://images.gog-statics.com/1dccf8539e8f271aa17a6cb0ee102374e7f58adf7aba0b132029aed5a114b53c.jpg",
+    "fundo": "https://images-3.gog-statics.com/52f4f1f6ef95238b8e7b9b144b9ea8fbe880cf33cdfd31340ae30d163e205606.jpg"
+  }
+}

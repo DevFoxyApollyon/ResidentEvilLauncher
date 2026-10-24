@@ -20,5 +20,12 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation/master/Named_Titles/Resident%20Evil%20-%20Survivor%20%28USA%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "projetos": [
+    {
+      "nome": "DuckStation",
+      "url": "https://github.com/stenzek/duckstation",
+      "status": "Sem port de PC ainda: emulador de PS1 com a sua ISO."
+    }
+  ]
 }

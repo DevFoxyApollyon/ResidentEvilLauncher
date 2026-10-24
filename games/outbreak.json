@@ -20,5 +20,12 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Biohazard%20-%20Outbreak%20%28Japan%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "projetos": [
+    {
+      "nome": "PCSX2",
+      "url": "https://github.com/PCSX2/pcsx2",
+      "status": "Emulador de PS2 (o port de PC fica na versão ao lado)."
+    }
+  ]
 }

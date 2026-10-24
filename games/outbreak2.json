@@ -10,6 +10,16 @@
       "nome": "REOF2",
       "url": "https://github.com/caprado/REOF2",
       "status": "Decomp com port para Windows em andamento: já abre o menu com vídeo, áudio e controle. Sem versão para baixar."
+    },
+    {
+      "nome": "reo (sp00nznet)",
+      "url": "https://github.com/sp00nznet/reo",
+      "status": "Recompilação dos dois Outbreak; o File #2 ainda sem release."
+    },
+    {
+      "nome": "PCSX2",
+      "url": "https://github.com/PCSX2/pcsx2",
+      "status": "Enquanto isso: emulador de PS2 com a sua ISO."
     }
   ],
   "capitulo": "outbreak",
