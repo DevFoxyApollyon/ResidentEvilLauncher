@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 from PIL import Image, ImageTk
 
-from .. import fluffy, github, launcher, steam, store
+from .. import fluffy, github, launcher, sources, steam, store
 from ..mods import ModManager
 from . import theme as t
 
@@ -42,13 +42,13 @@ class ManageWindow(tk.Toplevel):
         self.gdir = launcher.game_dir(self.g, self.hub.cfg, self.hub.installed)
         self._header()
         self.body.clear()
+        self._sources_section()
         if self.g.get("github"):
             self._project_download()
         self._fluffy_section()
         if fluffy.old_mods(self.g["id"]):
             self._old_mods_section()
-        if self.g.get("projetos"):
-            self._projects_section()
+
 
     def _header(self):
         for w in self.head.winfo_children():
@@ -179,6 +179,16 @@ class ManageWindow(tk.Toplevel):
                    [(f"github.com/{g['github']}  ·  não apaga saves nem assets já colocados", t.MUTED)],
                    [("Atualizar" if exists else "Baixar", self._download_game, "plain" if exists else "primary"),
                     ("GitHub", lambda: webbrowser.open(f"https://github.com/{g['github']}"), "plain")])
+
+    def _sources_section(self):
+        """Onde conseguir esta versao: loja oficial, GitHub do port, projeto ou emulador indicado."""
+        src = sources.sources(self.g)
+        if not src:
+            return
+        self._section("Onde baixar", "De onde vem esta versao. O hub nunca traz o jogo: compre na loja ou use a sua copia.")
+        for name, url, detail in src:
+            self._card(name, [(url.replace("https://", ""), t.MUTED)] + ([(detail, "#9a9186")] if detail else []),
+                       [("Abrir", lambda u=url: webbrowser.open(u), "plain")])
 
     def _projects_section(self):
         self._section("Projetos da comunidade", "Decomps, recomps e ports em andamento. Os que não têm download pronto "

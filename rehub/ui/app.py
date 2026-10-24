@@ -18,6 +18,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFo
 
 from .. import audio, catalog, fluffy, fonts, gamepad, github, library, news, trailer, launcher, steam, store, trophies
 from ..mods import ModManager
+from .. import sources
 from ..franchise import FR, hex_rgb
 from ..paths import COVERS, DATA, ROOT
 from . import theme as t
@@ -1526,6 +1527,24 @@ class Hub(Screens, LoreScreens, tk.Tk):
     def _draw_versions(self, ch, x, y, w, bottom):
         """Todas as edições já lançadas do jogo, com plataformas e onde dá para jogar hoje."""
         c, items = self.c, ch.get("lancamentos", [])
+        hub = [v for v in ch.get("versoes", []) if v.get("tipo") in ("steam", "local")]
+        if hub:   # as versoes deste hub e de onde vem cada uma (clique abre a loja ou o GitHub)
+            c.create_text(x, y - 4, anchor="nw", text="NO RE HUB", fill=WHITE, font=self.f["tiny"])
+            yy = y + 16
+            for k, v in enumerate(hub):
+                src = sources.sources(v)
+                tag = f"src_{v['id']}"
+                name = v.get("versao") or v["nome"]
+                where = " / ".join(s[0].split(":")[0] for s in src[:2]) or "Seu arquivo"
+                c.create_rectangle(x - 4, yy - 2, x + w, yy + 20, fill="", outline="", tags=(tag,))
+                t1 = c.create_text(x, yy, anchor="nw", text=self._elide(name, self.f["small"], w - 120), fill="#d9d2c5",
+                                   font=self.f["small"], tags=(tag,))
+                c.create_text(x + w, yy, anchor="ne", text=where, fill=self.accent if src else DIM, font=self.f["small"], tags=(tag,))
+                if src:
+                    self._clickable(tag, lambda u=src[0][1]: webbrowser.open(u), hover=[(t1, "#d9d2c5", WHITE)])
+                yy += 22
+            c.create_line(x, yy + 4, x + w, yy + 4, fill="#2c2723")
+            y = yy + 20
         if not items:
             return self._note(x, y, w, "Ainda não há lista de versões para este jogo.")
         n = len(items)
