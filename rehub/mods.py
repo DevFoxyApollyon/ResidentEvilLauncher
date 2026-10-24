@@ -7,7 +7,6 @@ desativar apaga o que foi copiado e devolve os originais. Assim nada se perde.
 import json
 import re
 import shutil
-import time
 from pathlib import Path
 
 from . import github
@@ -31,17 +30,6 @@ CATEGORIES = {
     "Gameplay": ("weapon", "arma", "gun", "ammo", "difficulty", "dificuldade", "inventory", "inventario", "cheat",
                  "trainer", "infinite", "enemy", "inimigo", "randomizer", "rebalance", "camera", "dodge", "vr"),
 }
-CATEGORY_ORDER = list(CATEGORIES) + ["Outros"]
-
-
-def pretty_version(tag):
-    """'nightly-01432-d052e8f...' vira 'nightly 01432'; o resto fica como está."""
-    tag = tag or ""
-    if tag.startswith("nightly-"):
-        return "nightly " + tag.split("-")[1]
-    return tag
-
-
 def guess_category(name, files=()):
     """Adivinha pelo nome do mod e, se não der, pelos nomes dos arquivos."""
     for text in (name.lower(), " ".join(files).lower()):
@@ -88,25 +76,6 @@ class ModManager:
 
     add_zip = add_archive
 
-    def add_folder(self, folder):
-        p = Path(folder)
-
-        def fill(d):
-            shutil.copytree(p, d)
-            github.unwrap(d)
-        return self._store(p.name, str(p), fill)
-
-    def add_github(self, nome, repo, asset, mod_id):
-        """Baixa (ou atualiza) um mod de uma release do GitHub."""
-        return self._store(nome, f"github.com/{repo}",
-                           lambda d: github.download_release(repo, asset, d), mod_id=mod_id)
-
-    def set_category(self, mod_id, categoria):
-        meta = self.base / mod_id / "mod.json"
-        info = json.loads(meta.read_text(encoding="utf-8"))
-        info["categoria"] = categoria
-        meta.write_text(json.dumps(info, indent=2, ensure_ascii=False), encoding="utf-8")
-
     def folder(self, mod_id):
         """Onde o mod está: no jogo (se ativo e tiver pasta própria) ou na biblioteca."""
         k = KNOWN.get(mod_id)
@@ -115,32 +84,6 @@ class ModManager:
         return self.base / mod_id / "files"
 
     # ---------- mods instalados fora do app ----------
-    def external(self):
-        """Mods conhecidos (ex.: REFramework) que estão na pasta do jogo mas não foram ativados pelo app."""
-        out = []
-        if not self.game_dir or not self.game_dir.is_dir():
-            return out
-        for mod_id, k in KNOWN.items():
-            if mod_id in self.state["ativos"]:
-                continue
-            if all((self.game_dir / f).exists() for f in k["arquivos"]):
-                rev = self.game_dir / k["versao"]
-                out.append({"id": mod_id, "nome": k["nome"], "fora": True,
-                            "revisao": rev.read_text(errors="ignore").strip()[:12] if rev.exists() else ""})
-        return out
-
-    def uninstall_external(self, mod_id):
-        """Tira da pasta do jogo um mod instalado fora do app. Guarda os arquivos em _removidos (dá para voltar)
-        e mantém a pasta de configurações (ex.: reframework/), que não atrapalha o jogo."""
-        k = KNOWN[mod_id]
-        keep = self.base / "_removidos" / f"{mod_id}-{time.strftime('%Y%m%d-%H%M%S')}"
-        keep.mkdir(parents=True, exist_ok=True)
-        for f in (*k["arquivos"], k["versao"]):
-            src = self.game_dir / f
-            if src.exists():
-                shutil.move(str(src), str(keep / f))
-        return keep
-
     def revision(self, mod_id):
         """Revisão do mod guardado na biblioteca (para comparar com o que está no jogo)."""
         k = KNOWN.get(mod_id)

@@ -5,7 +5,6 @@ import os
 import subprocess
 import shutil
 import tempfile
-import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -34,22 +33,6 @@ def latest_release(repo):
     if not releases:
         raise RuntimeError(f"{repo} ainda nao tem nenhuma release para baixar.")
     return releases[0]
-
-
-def latest_tag(repo, max_age=6 * 3600):
-    """Versão mais nova publicada (tag da última release), com cache de 6 horas em data/loja."""
-    from .paths import DATA
-    cache = DATA / "loja" / f"gh_{repo.replace('/', '_')}.json"
-    try:
-        c = json.loads(cache.read_text(encoding="utf-8"))
-        if time.time() - c["quando"] < max_age:
-            return c["tag"]
-    except (OSError, ValueError, KeyError):
-        pass
-    tag = latest_release(repo).get("tag_name", "")
-    cache.parent.mkdir(parents=True, exist_ok=True)
-    cache.write_text(json.dumps({"quando": time.time(), "tag": tag}), encoding="utf-8")
-    return tag
 
 
 def download_release(repo, pattern, dest, merge=False):

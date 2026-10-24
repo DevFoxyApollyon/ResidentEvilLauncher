@@ -1,0 +1,35 @@
+{
+  "id": "re2_trial_ps1",
+  "ordem": 900.3,
+  "nome": "Biohazard 2 Trial Edition",
+  "tipo": "local",
+  "emulador": "duckstation",
+  "capitulo": "re2_trial",
+  "versao": "Trial Edition (DuckStation)",
+  "iso_busca": [
+    "trial",
+    "biohazard 2 trial",
+    "体験版"
+  ],
+  "dica": "A demo oficial japonesa do RE2 (1997), com diferenças da versão final. Roda no emulador de PS1 que o hub baixa; você precisa da imagem do disco.",
+  "projetos": [
+    {
+      "nome": "TCRF",
+      "url": "https://tcrf.net/Proto:Resident_Evil_2_(PlayStation)",
+      "status": "Diferenças da Trial Edition e dos protótipos."
+    }
+  ],
+  "passos_extra": [
+    "Use a imagem do SEU disco da Trial Edition (.cue/.bin)."
+  ],
+  "poster": {
+    "titulo": "BIOHAZARD 2",
+    "subtitulo": "TRIAL EDITION · PS1 · 1997"
+  },
+  "arte": {
+    "capa": [
+      "https://residentevil.com.br/wp-content/uploads/2015/06/BetaRE2-D3.jpg"
+    ],
+    "fonte": "capa: REVIL (residentevil.com.br)"
+  }
+}

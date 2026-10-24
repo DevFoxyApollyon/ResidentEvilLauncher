@@ -1,0 +1,50 @@
+{
+  "id": "re1_5_proto",
+  "ordem": 900.1,
+  "nome": "Resident Evil 1.5 — protótipo jogável",
+  "tipo": "local",
+  "emulador": "duckstation",
+  "capitulo": "re1_5",
+  "versao": "Protótipo nov/1996 (DuckStation)",
+  "iso_busca": [
+    "1.5",
+    "biohazard 2 (nov",
+    "prototype",
+    "re15",
+    "igas"
+  ],
+  "dica": "O RE2 que a Capcom jogou fora. O protótipo de novembro de 1996 e a restauração dos fãs (Team IGAS) rodam num emulador de PS1. O hub baixa o DuckStation; a imagem do jogo você pega nas páginas de preservação abaixo.",
+  "projetos": [
+    {
+      "nome": "Hidden Palace",
+      "url": "https://hiddenpalace.org/Biohazard_2_(Nov_6,_1996_prototype)",
+      "status": "Página de preservação do protótipo de 6/11/1996 (o build original que vazou)."
+    },
+    {
+      "nome": "Restauração Team IGAS",
+      "url": "https://residentevil15.fandom.com/wiki/Team_IGAS",
+      "status": "Projeto de fãs que completa o protótipo; jogável, mas ainda instável."
+    },
+    {
+      "nome": "TCRF",
+      "url": "https://tcrf.net/Proto:Resident_Evil_2_(PlayStation)",
+      "status": "O que existe em cada build do RE2 cancelado."
+    }
+  ],
+  "passos_extra": [
+    "A imagem não vem com o hub: baixe nas páginas de Onde baixar e escolha o .cue/.bin quando o hub pedir.",
+    "É um protótipo: pode travar em áreas inacabadas. Salve sempre que puder."
+  ],
+  "poster": {
+    "titulo": "RESIDENT EVIL 1.5",
+    "subtitulo": "PROTÓTIPO · PS1 · 1996",
+    "carimbo": "BETA"
+  },
+  "arte": {
+    "capa": [
+      "https://residentevil.com.br/wp-content/uploads/2015/06/BetaRE1meio0D3.jpg",
+      "https://static.wikia.nocookie.net/residentevil/images/f/f9/BH2_1.5_TITLEJ.png/revision/latest?cb=20150830170807"
+    ],
+    "fonte": "capa: REVIL (residentevil.com.br)"
+  }
+}

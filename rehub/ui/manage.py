@@ -212,12 +212,6 @@ class ManageWindow(tk.Toplevel):
             self._card(name, [(url.replace("https://", ""), t.MUTED)] + ([(detail, "#9a9186")] if detail else []),
                        [("Abrir", lambda u=url: webbrowser.open(u), "plain")])
 
-    def _projects_section(self):
-        self._section("Projetos da comunidade", "Decomps, recomps e ports em andamento. Os que não têm download pronto "
-                                                 "precisam ser compilados a partir do código-fonte.")
-        for p in self.g["projetos"]:
-            self._card(p["nome"], [(p.get("status", ""), t.MUTED)], [("Abrir no GitHub", lambda u=p["url"]: webbrowser.open(u), "plain")])
-
     # ---------- ações ----------
     def _open_fluffy(self):
         self.hub._sound("prompt_enter")

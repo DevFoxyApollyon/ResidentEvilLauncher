@@ -69,7 +69,3 @@ def ensure(key):
         pass
     return _loaded[key]
 
-
-def ensure_all():
-    for k in FILES:
-        ensure(k)

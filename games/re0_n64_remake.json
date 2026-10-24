@@ -1,0 +1,33 @@
+{
+  "id": "re0_n64_remake",
+  "ordem": 900.5,
+  "nome": "Resident Evil Zero N64 — demo E3/TGS 2000 refeita",
+  "tipo": "local",
+  "capitulo": "re0_n64",
+  "versao": "Demo de 2000 refeita (PC, fã)",
+  "dica": "Não existe ROM do protótipo de N64. Esta é uma reconstrução para Windows (Jayjay-1992, 2026) do trecho mostrado na E3 e na TGS de 2000: Rebecca no trem e o encontro com o Billy. Baixe no itch.io e aponte o .exe em Configurar.",
+  "projetos": [
+    {
+      "nome": "itch.io",
+      "url": "https://itch.io/search?q=resident+evil+0+n64",
+      "status": "\"Resident evil 0 N64 - E3/TGS 2000 demo remake\", grátis."
+    },
+    {
+      "nome": "Notícia",
+      "url": "https://www.generationamiga.com/2026/08/02/resident-evil-0-n64-demo-remake-brings-the-cancelled-prototype-to-pc/",
+      "status": "Como a demo foi refeita a partir de vídeos e revistas da época."
+    }
+  ],
+  "poster": {
+    "titulo": "RESIDENT EVIL ZERO",
+    "subtitulo": "N64 · DEMO 2000",
+    "carimbo": "REFEITO"
+  },
+  "arte": {
+    "capa": [
+      "https://residentevil.com.br/wp-content/uploads/2023/05/Beta_RE0-360x300.jpg",
+      "https://static.wikia.nocookie.net/residentevil/images/9/9d/RebeccaN64.jpg/revision/latest?cb=20100826021016"
+    ],
+    "fonte": "capa: REVIL (residentevil.com.br)"
+  }
+}

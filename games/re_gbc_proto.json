@@ -1,0 +1,41 @@
+{
+  "id": "re_gbc_proto",
+  "ordem": 900.4,
+  "nome": "Resident Evil (Game Boy Color) — build 98%",
+  "tipo": "local",
+  "emulador": "mgba",
+  "capitulo": "re_gbc",
+  "versao": "Build quase final (mGBA)",
+  "iso_busca": [
+    "resident evil",
+    "biohazard",
+    "re gbc"
+  ],
+  "dica": "O porte da HotGen cancelado em 2000. Em dezembro de 2025 o Games That Weren't publicou um build ~98% completo: a campanha da Jill vai do começo ao fim. O hub baixa o mGBA; a ROM você pega na página do Games That Weren't.",
+  "projetos": [
+    {
+      "nome": "Games That Weren't",
+      "url": "https://www.gamesthatwerent.com/?s=resident+evil",
+      "status": "Arquivo de preservação que publicou o build de 2025 (procure Resident Evil GBC)."
+    },
+    {
+      "nome": "Notícia (VGC)",
+      "url": "https://www.videogameschronicle.com/news/a-98-complete-version-of-the-cancelled-game-boy-color-resident-evil-port-has-been-shared-online",
+      "status": "O que funciona: Jill completa; o Chris trava numa porta do lança-chamas."
+    }
+  ],
+  "passos_extra": [
+    "A ROM não vem com o hub: baixe na página de Onde baixar e escolha o .gbc quando o hub pedir."
+  ],
+  "poster": {
+    "titulo": "RESIDENT EVIL",
+    "subtitulo": "GAME BOY COLOR · 2000",
+    "carimbo": "BETA"
+  },
+  "arte": {
+    "capa": [
+      "https://static.wikia.nocookie.net/residentevil/images/f/f4/REGBC_Titlescreen.png/revision/latest?cb=20120206054217"
+    ],
+    "fonte": "imagem: Resident Evil Wiki (fãs)"
+  }
+}

@@ -10,13 +10,6 @@ RED = FR["cor"]
 RED_DARK = "#%02x%02x%02x" % tuple(int(v * 0.65) for v in hex_rgb(RED))
 
 
-def button(parent, text, cmd, primary=False):
-    return tk.Button(parent, text=text, command=cmd, bd=0, cursor="hand2",
-                     font=(FONT, 10, "bold" if primary else "normal"),
-                     bg=RED if primary else PANEL_HI, fg=TEXT,
-                     activebackground=RED_DARK, activeforeground=TEXT, padx=14, pady=6)
-
-
 LINE = "#2c2723"
 _logos = {}
 
@@ -43,34 +36,10 @@ def brand_row(parent, bg, color, text=None):
         tk.Label(row, image=logo, bg=bg).pack(side="left", padx=(0, 8))
     tk.Label(row, text=(text or FR["app"]).upper(), fg=color, bg=bg, font=(FONT, 9, "bold")).pack(side="left")
     return row
-STYLES = {  # fundo, texto, borda, fundo com o mouse, fundo ao apertar
-    "primary": (RED, "#ffffff", "#e0454c", "#e0353e", RED_DARK),
-    "plain": ("#1d1a17", TEXT, "#3d3630", "#2b2622", "#141210"),
-    "ghost": (PANEL, "#c4bcae", PANEL, "#221f1c", "#141210"),
-    "danger": ("#241312", "#ff9a8a", "#5c2622", "#3d1a1a", "#1a0d0d"),
-    "alert": ("#b8322a", "#ffffff", "#e05a4c", "#d4433a", "#7e221c"),   # confirmar algo que apaga ou tira
-}
-
-
 def mix(a, b, k):
     """Cor entre a e b (k de 0 a 1), para as transições suaves."""
     ra, rb = hex_rgb(a), hex_rgb(b)
     return "#%02x%02x%02x" % tuple(int(x + (y - x) * k) for x, y in zip(ra, rb))
-
-
-def fade(widget, option, start, end, steps=6, ms=16):
-    """Troca a cor de um widget aos poucos (~100 ms) em vez de pular de uma vez."""
-    job = getattr(widget, "_fade_job", None)
-    if job:
-        widget.after_cancel(job)
-
-    def step(k):
-        try:
-            widget.config(**{option: mix(start, end, k / steps)})
-        except tk.TclError:   # o widget fechou no meio
-            return
-        widget._fade_job = widget.after(ms, step, k + 1) if k < steps else None
-    step(1)
 
 
 ICONS = {"REMOVER": "trash", "DESINSTALAR": "trash", "EXCLUIR": "trash", "EDITAR": "edit", "ABRIR": "link",

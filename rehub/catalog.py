@@ -78,6 +78,9 @@ def load_timeline(games, section="canon"):
     for c in chapters.values():
         if not c["versoes"] and section != "canon":  # sem executável: item só de informação
             c["versoes"].append(_info_item(c))
+        elif section == "perdidos" and not any(v["tipo"] == "info" for v in c["versoes"]):
+            # perdido que dá para jogar: a história dele continua como uma "versão" a mais
+            c["versoes"].append(dict(_info_item(c), versao="Sobre o jogo"))
     return [chapters[c] for c in order if chapters[c]["versoes"]]
 
 

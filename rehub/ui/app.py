@@ -171,10 +171,6 @@ def make_halo(size, color=(0, 0, 0), alpha=170, blur=12, dy=6):
     return img.filter(ImageFilter.GaussianBlur(blur))
 
 
-def hex_rgb(color):
-    return tuple(int(color[i:i + 2], 16) for i in (1, 3, 5))
-
-
 def compose_background(hero, W, H, panel_box):
     """Arte grande escurecida (estilo PS5) e o painel da direita em vidro fosco."""
     if hero is not None:
@@ -394,6 +390,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         return self.chapters[self.sel] if self.chapters else None
 
     def version_of(self, ch):
+        if self.version_idx.get(ch["id"], 0) >= len(ch["versoes"]):   # a versão escolhida saiu (ex.: removida)
+            self.version_idx.pop(ch["id"], None)
         if ch["id"] not in self.version_idx:  # começa pela versão pronta para jogar, senão pela da Steam
             vs = ch["versoes"]
             ready = [i for i, g in enumerate(vs) if launcher.is_ready(g, self.cfg, self.installed)]
@@ -1439,7 +1437,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         for (key, _), label, tw in zip(tabs, labels, widths):
             on = active == key
             tag = f"tab_{key}"
-            hit = c.create_rectangle(tx, y - 4, tx + tw, y + 25, fill="", outline="", tags=(tag,))
+            c.create_rectangle(tx, y - 4, tx + tw, y + 25, fill="", outline="", tags=(tag,))   # área do clique
             txt = c.create_text(tx + tw / 2, y + 11, text=self._elide(label, font, tw - 6),
                                 fill=WHITE if on else MUTED, font=font, tags=(tag,))
             if on:
@@ -1730,16 +1728,6 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self._list_window(s, x, y + 30, w, bottom, 54, row)
 
     # ---------- primitivas ----------
-    @staticmethod
-    def _darker(color, k=0.35):
-        r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
-        return "#%02x%02x%02x" % tuple(int(v * (1 - k)) for v in (r, g, b))
-
-    @staticmethod
-    def _lighter(color, k=0.18):
-        r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
-        return "#%02x%02x%02x" % tuple(min(255, int(v + (255 - v) * k)) for v in (r, g, b))
-
     def _round_rect(self, x1, y1, x2, y2, r, **kw):
         r = min(r, 2, (x2 - x1) / 2, (y2 - y1) / 2)   # cantos retos: visual de ficha, nao de capsula
         pts = [x1 + r, y1, x2 - r, y1, x2, y1, x2, y1 + r, x2, y2 - r, x2, y2, x2 - r, y2,
@@ -1759,7 +1747,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
     ACTION_ICONS = {"JOGAR": "play", "INSTALAR": "down", "BAIXAR": "down", "ACOMPANHAR": "eye", "ABRIR SITE": "link",
                     "GERENCIAR": "gear", "LOJA": "bag", "DESINSTALAR": "trash", "REMOVER": "trash", "EDITAR": "edit",
                     "CONFIGURAR": "gear", "CANAL": "tv", "ASSISTIR AO VIVO": "live", "ASSISTIR NO YOUTUBE": "play",
-                    "LER NOTÍCIA": "doc", "PESQUISAR": "eye"}
+                    "LER NOTÍCIA": "doc", "PESQUISAR": "eye", "ONDE BAIXAR": "down"}
 
     def _button(self, x, y, text, cmd, primary, tag):
         """Botao desenhado (skin.py): o principal na cor do capitulo com brilho, os outros em vidro escuro;
@@ -1946,11 +1934,12 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             return [("Jogar", lambda: self.play(g), True), manage, ("Desinstalar", lambda: self.uninstall_game(g), False)]
         if g.get("andamento"):   # port ainda em desenvolvimento: so acompanhar o projeto
             return [("Acompanhar", lambda: webbrowser.open(g["andamento"]["url"]), True), manage]
+        where = [("Onde baixar", lambda: webbrowser.open(g["projetos"][0]["url"]), False)] if g.get("projetos") and not g.get("github") else []
         if g.get("emulador"):
-            return [("Instalar", lambda: self.install_emulated(g), True), manage]
+            return [("Instalar", lambda: self.install_emulated(g), True), *where, manage]
         if g.get("github"):
             return [("Instalar", lambda: self.download_game(g), True), manage]
-        return [("Configurar", lambda: self.configure_local(g), True), manage]
+        return [("Configurar", lambda: self.configure_local(g), True), *where, manage]
 
     def _custom_chapters(self):
         chapters = [ch for sec in ("canon", "spinoff") for ch in catalog.load_timeline(self.games, sec)]
@@ -2104,7 +2093,10 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             return False
         catalog.save_custom([{k: v for k, v in i.items() if k not in ("tipo", "meu")} for i in catalog.load_custom() if i["id"] != g["id"]])
         self.cfg.clear(g["id"])
+        self.version_idx.pop(g.get("capitulo"), None)   # volta para a versão padrão do capítulo
+        cid = self.chapter["id"] if self.chapter else None
         self.rescan()
+        self.sel = next((i for i, ch in enumerate(self.chapters) if ch["id"] == cid), self.sel)
         self.notify(f"{g.get('versao', g['nome'])} removido.")
         return True
 

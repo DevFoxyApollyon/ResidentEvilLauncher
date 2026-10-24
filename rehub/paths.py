@@ -12,4 +12,3 @@ CONFIG = DATA / "config.json"   # executáveis, ISOs e preferências escolhidos 
 COVERS = DATA / "covers"
 RECOMPS = DATA / "recomps"      # recomps/decomps e ferramentas baixados
 MODS = DATA / "mods"            # biblioteca de mods, uma pasta por jogo
-ICON = ROOT / "re_hub.ico"
