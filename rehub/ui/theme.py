@@ -43,22 +43,149 @@ def brand_row(parent, bg, color, text=None):
         tk.Label(row, image=logo, bg=bg).pack(side="left", padx=(0, 8))
     tk.Label(row, text=(text or FR["app"]).upper(), fg=color, bg=bg, font=(FONT, 9, "bold")).pack(side="left")
     return row
-STYLES = {  # fundo, texto, borda, fundo com o mouse
-    "primary": (RED, TEXT, RED, "#d0343c"),
-    "plain": (PANEL, TEXT, "#4a423a", PANEL_HI),
-    "danger": ("#2a1414", "#ff9a8a", "#6b2a24", "#4a1d22"),
+STYLES = {  # fundo, texto, borda, fundo com o mouse, fundo ao apertar
+    "primary": (RED, "#ffffff", "#e0454c", "#e0353e", RED_DARK),
+    "plain": ("#1d1a17", TEXT, "#3d3630", "#2b2622", "#141210"),
+    "ghost": (PANEL, "#c4bcae", PANEL, "#221f1c", "#141210"),
+    "danger": ("#241312", "#ff9a8a", "#5c2622", "#3d1a1a", "#1a0d0d"),
+    "alert": ("#b8322a", "#ffffff", "#e05a4c", "#d4433a", "#7e221c"),   # confirmar algo que apaga ou tira
 }
 
 
-def flat_button(parent, text, cmd, style="plain"):
-    """Botao reto no visual do app (maiusculas, borda fina, clareia com o mouse)."""
-    bg, fg, border, hover = STYLES.get(style, STYLES["plain"])
-    b = tk.Label(parent, text=text.upper(), bg=bg, fg=fg, font=(FONT, 9, "bold"), padx=16, pady=8, cursor="hand2",
-                 highlightthickness=1, highlightbackground=border)
-    b.bind("<Button-1>", lambda e: cmd())
-    b.bind("<Enter>", lambda e: b.config(bg=hover))
-    b.bind("<Leave>", lambda e: b.config(bg=bg))
+def mix(a, b, k):
+    """Cor entre a e b (k de 0 a 1), para as transições suaves."""
+    ra, rb = hex_rgb(a), hex_rgb(b)
+    return "#%02x%02x%02x" % tuple(int(x + (y - x) * k) for x, y in zip(ra, rb))
+
+
+def fade(widget, option, start, end, steps=6, ms=16):
+    """Troca a cor de um widget aos poucos (~100 ms) em vez de pular de uma vez."""
+    job = getattr(widget, "_fade_job", None)
+    if job:
+        widget.after_cancel(job)
+
+    def step(k):
+        try:
+            widget.config(**{option: mix(start, end, k / steps)})
+        except tk.TclError:   # o widget fechou no meio
+            return
+        widget._fade_job = widget.after(ms, step, k + 1) if k < steps else None
+    step(1)
+
+
+def flat_button(parent, text, cmd, style="plain", icon=None):
+    """Botao reto no visual do app: maiusculas espacadas, borda fina, acende aos poucos com o mouse e afunda ao
+    apertar. icon: um simbolo curto antes do texto (ex.: '+', '✕', '▶')."""
+    bg, fg, border, hover, press = STYLES.get(style, STYLES["plain"])
+    label_text = text.upper()
+    if icon:
+        label_text = f"{icon}   {label_text}"
+    b = tk.Label(parent, text=label_text, bg=bg, fg=fg, font=(FONT, 9, "bold"), padx=18, pady=8, cursor="hand2",
+                 highlightthickness=1, highlightbackground=border, highlightcolor=border)
+    state = {"in": False}
+
+    def enter(e):
+        state["in"] = True
+        fade(b, "bg", b.cget("bg"), hover)
+        b.config(highlightbackground=mix(border, "#ffffff", 0.25))
+
+    def leave(e):
+        state["in"] = False
+        fade(b, "bg", b.cget("bg"), bg)
+        b.config(highlightbackground=border)
+
+    def down(e):
+        b.config(bg=press)
+
+    def up(e):
+        b.config(bg=hover if state["in"] else bg)
+        if state["in"]:
+            cmd()
+    b.bind("<Enter>", enter)
+    b.bind("<Leave>", leave)
+    b.bind("<ButtonPress-1>", down)
+    b.bind("<ButtonRelease-1>", up)
     return b
+
+
+def section_title(parent, text, bg=PANEL, color=None):
+    """Titulo de grupo: texto pequeno em maiusculas com um filete que vai ate a borda."""
+    row = tk.Frame(parent, bg=bg)
+    tk.Label(row, text=text.upper(), fg=color or MUTED, bg=bg, font=(FONT, 8, "bold")).pack(side="left")
+    tk.Frame(row, bg=LINE, height=1).pack(side="left", fill="x", expand=True, padx=(10, 0), pady=(2, 0))
+    return row
+
+
+def entry(parent, var, width=52, bg=PANEL):
+    """Campo de texto escuro com filete que acende na cor da franquia quando esta em uso."""
+    e = tk.Entry(parent, textvariable=var, bg="#0f0d0c", fg=TEXT, insertbackground=TEXT, relief="flat", font=(FONT, 11),
+                 highlightthickness=1, highlightbackground="#3b342d", highlightcolor=RED, width=width)
+    return e
+
+
+def modal(parent, title, subtitle="", width=560, accent=None):
+    """Janela por cima no visual do app (sem a moldura do Windows): o hub escurece atras, cartao reto com filete
+    na cor da franquia, titulo, subtitulo e uma barra de botoes embaixo. Devolve (top, body, bar, close)."""
+    p = parent.winfo_toplevel()
+    shade = tk.Toplevel(p)
+    shade.overrideredirect(True)
+    shade.configure(bg="#000000")
+    shade.geometry(f"{p.winfo_width()}x{p.winfo_height()}+{p.winfo_rootx()}+{p.winfo_rooty()}")
+    shade.attributes("-alpha", 0.0)
+    shade.attributes("-topmost", True)
+    top = tk.Toplevel(p)
+    top.withdraw()
+    top.overrideredirect(True)
+    top.configure(bg="#3b342d")
+    top.attributes("-topmost", True)
+    card = tk.Frame(top, bg=PANEL)
+    card.pack(fill="both", expand=True, padx=1, pady=1)
+    tk.Frame(card, bg=accent or RED, height=3).pack(fill="x")
+    head = tk.Frame(card, bg=PANEL)
+    head.pack(fill="x", padx=30, pady=(22, 0))
+    brand_row(head, PANEL, accent or RED).pack(side="left")
+    closed = {"v": False}
+
+    def close(e=None):
+        if closed["v"]:
+            return
+        closed["v"] = True
+        top.destroy()
+        shade.destroy()
+    x_btn = tk.Label(head, text="✕", fg=MUTED, bg=PANEL, font=(FONT, 12), cursor="hand2", padx=4)
+    x_btn.pack(side="right")
+    x_btn.bind("<Button-1>", close)
+    x_btn.bind("<Enter>", lambda e: x_btn.config(fg=TEXT))
+    x_btn.bind("<Leave>", lambda e: x_btn.config(fg=MUTED))
+    tk.Label(card, text=title, fg=TEXT, bg=PANEL, font=(FONT, 18, "bold"), anchor="w").pack(fill="x", padx=30, pady=(6, 0))
+    if subtitle:
+        tk.Label(card, text=subtitle, fg=MUTED, bg=PANEL, font=(FONT, 10), anchor="w", justify="left",
+                 wraplength=width - 60).pack(fill="x", padx=30, pady=(4, 0))
+    body = tk.Frame(card, bg=PANEL)
+    body.pack(fill="both", expand=True, padx=30, pady=(16, 0))
+    tk.Frame(card, bg=LINE, height=1).pack(fill="x", padx=30, pady=(18, 0))
+    bar = tk.Frame(card, bg=PANEL)
+    bar.pack(fill="x", padx=30, pady=(14, 22))
+    top.bind("<Escape>", close)
+
+    def place():
+        top.update_idletasks()
+        w, h = max(width, top.winfo_reqwidth()), top.winfo_reqheight()
+        x = p.winfo_rootx() + (p.winfo_width() - w) // 2
+        y = p.winfo_rooty() + max(20, (p.winfo_height() - h) // 3)
+        top.geometry(f"{w}x{h}+{max(0, x)}+{max(0, y)}")
+
+    def show():   # o fundo escurece aos poucos e o cartao aparece
+        place()
+        top.deiconify()
+        top.lift()
+        top.grab_set()
+        top.focus_force()
+        for k in range(1, 7):
+            top.after(k * 18, lambda a=k * 0.09: shade.winfo_exists() and shade.attributes("-alpha", a))
+    top.after(1, show)
+    top.place_again = place   # quando o conteudo muda de tamanho
+    return top, body, bar, close
 
 
 def label(parent, text, size=10, bold=False, fg=TEXT, bg=PANEL, **kw):
@@ -150,16 +277,10 @@ def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary")
                  wraplength=440).pack(fill="x", pady=(3, 0))
     bar = tk.Frame(card, bg=PANEL)
     bar.pack(fill="x", padx=30, pady=(18, 24))
-    styles = {"primary": (accent, TEXT, accent), "danger": ("#c0392b", TEXT, "#c0392b"), "plain": (PANEL, TEXT, "#4a423a")}
     for text, value, style in reversed(buttons):
-        bg, fg, border = styles.get(style, styles["plain"])
-        hover = "#e04a3c" if style == "danger" else ("#d0343c" if style == "primary" else PANEL_HI)
-        b = tk.Label(bar, text=text.upper(), bg=bg, fg=fg, font=(FONT, 10, "bold"), padx=22, pady=9, cursor="hand2",
-                     highlightthickness=1, highlightbackground=border)
+        b = flat_button(bar, text, lambda v=value: close(v), style)
+        b.config(font=(FONT, 10, "bold"), padx=22, pady=9)
         b.pack(side="right", padx=(10, 0))
-        b.bind("<Button-1>", lambda e, v=value: close(v))
-        b.bind("<Enter>", lambda e, w=b, h=hover: w.config(bg=h))
-        b.bind("<Leave>", lambda e, w=b, c=bg: w.config(bg=c))
     top.bind("<Escape>", lambda e: close(None))
     top.bind("<Return>", lambda e: close(buttons[-1][1]))
     top.protocol("WM_DELETE_WINDOW", lambda: close(None))
@@ -178,7 +299,7 @@ def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary")
 
 
 def confirm(parent, title, message, details=(), ok="Confirmar", danger=False):
-    return bool(_dialog(parent, title, message, details, (("Cancelar", False, "plain"), (ok, True, "danger" if danger else "primary")),
+    return bool(_dialog(parent, title, message, details, (("Cancelar", False, "plain"), (ok, True, "alert" if danger else "primary")),
                         icon="?" if not danger else "!", accent="#c0392b" if danger else RED))
 
 

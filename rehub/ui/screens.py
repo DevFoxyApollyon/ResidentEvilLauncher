@@ -129,7 +129,7 @@ class Screens:
     def goto_chapter(self, cid, version_id=None):
         """Fecha a tela por cima e abre o capítulo (em qualquer seção) no hub."""
         for sec, _ in A.SECTIONS:
-            if sec == "noticias":
+            if sec in ("noticias", "canais"):
                 continue
             chs = catalog.load_timeline(self.games, sec)
             if self.only_installed and sec in ("canon", "spinoff"):
@@ -840,7 +840,7 @@ class Screens:
     def _upcoming(self):
         out = []
         for sec, _ in A.SECTIONS:
-            if sec == "noticias":
+            if sec in ("noticias", "canais"):
                 continue
             for ch in catalog.load_timeline(self.games, sec):
                 for g in ch["versoes"]:

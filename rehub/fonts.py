@@ -39,7 +39,7 @@ CHAPTERS = {
     "orc": "militar", "umbrella_corps": "militar", "resistance": "condensada", "reverse": "bloco",
     "survival_unit": "condensada", "outros_jogos": "pixel", "re_gbc": "pixel", "re_dash": "maquina",
 }
-SECTIONS = {"perdidos": "maquina", "midia": "cartaz", "hqs": "gibi", "fas": "terror", "noticias": "condensada"}
+SECTIONS = {"perdidos": "maquina", "midia": "cartaz", "hqs": "gibi", "fas": "terror", "noticias": "condensada", "canais": "condensada"}
 FR_PRIVATE = 0x10
 _loaded = {}  # chave: (arquivo, nome da família) ou None
 

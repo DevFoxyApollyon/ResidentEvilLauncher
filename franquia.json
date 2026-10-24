@@ -26,5 +26,13 @@
     "site": "residentevil.com.br"
   },
   "fontes": {},
-  "temas": {}
+  "temas": {},
+  "canais": {
+    "youtube": [
+      "@ResidentEvil"
+    ],
+    "twitch": [
+      "residentevil"
+    ]
+  }
 }

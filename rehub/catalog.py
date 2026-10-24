@@ -1,7 +1,7 @@
 """Catálogo de jogos: lê games/*.json e guarda as escolhas do usuário."""
 import json
 
-from . import news
+from . import channels, news
 from .paths import CONFIG, DATA, GAMES_DIR
 
 
@@ -60,8 +60,9 @@ def load_timeline(games, section="canon"):
 
     Jogo sem capítulo conhecido vira um capítulo próprio no fim da história oficial, para nada sumir.
     """
-    if section == "noticias":  # vem do feed do REVIL, não do catálogo
-        return [dict(c, versoes=[_info_item(c)], secao=section) for c in news.chapters()]
+    if section in ("noticias", "canais"):  # vêm de fora (feed do REVIL; YouTube e Twitch), não do catálogo
+        feed = news.chapters() if section == "noticias" else channels.chapters()
+        return [dict(c, versoes=[_info_item(c)], secao=section) for c in feed]
     data = _timeline_data()
     known = {c["id"] for key in SECTIONS.values() for c in data.get(key, [])}
     chapters = {c["id"]: dict(c, versoes=[], secao=section) for c in data.get(SECTIONS[section], [])}

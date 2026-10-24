@@ -23,6 +23,7 @@ DEFAULTS = {
     "mensagens": ["Iniciando sistema Umbrella...", "Carregando arquivos dos S.T.A.R.S....",
                   "Lendo a biblioteca da Steam...", "Preparando a linha do tempo...", "Abrindo a mansão Spencer..."],
     "noticias": {"feed": "https://residentevil.com.br/feed/", "fonte": "REVIL", "site": "residentevil.com.br"},
+    "canais": {"youtube": ["@ResidentEvil"], "twitch": ["residentevil"]},  # vídeos novos e lives (Opções > Canais)
     "fontes": {},                     # capítulo -> fonte do título (chaves em rehub/fonts.py)
     "temas": {},                      # clima do tema composto -> lista de capítulos (rehub/compose.py)
     "rotulo_criaturas": "Armas biológicas",  # nome do filtro de criaturas na tela Personagens

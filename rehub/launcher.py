@@ -4,6 +4,7 @@ import shlex
 import shutil
 import subprocess
 import threading
+import webbrowser
 from pathlib import Path
 
 from . import emulators, steam
@@ -50,6 +51,9 @@ def play(game, cfg):
     quando o jogo só abre depois do passo 'preparar' (que roda em segundo plano)."""
     if game["tipo"] == "steam":
         steam.run(game["appid"])
+        return None
+    if game.get("url"):   # versao adicionada pela pessoa que e um site: abre direto no navegador
+        webbrowser.open(game["url"])
         return None
     c = cfg.get(game["id"])
     exe = Path(c.get("exe", ""))
