@@ -80,6 +80,20 @@ def download_release(repo, pattern, dest, merge=False):
     return release.get("tag_name", "?")
 
 
+def download_asset(repo, pattern, dest_dir):
+    """Baixa so o arquivo da release (ex.: o instalador .exe de um projeto) para dest_dir. Devolve (tag, caminho)."""
+    release = latest_release(repo)
+    asset = next((a for a in release.get("assets", []) if fnmatch.fnmatch(a["name"].lower(), pattern.lower())), None)
+    if not asset:
+        raise RuntimeError(f"Nenhum arquivo '{pattern}' na ultima release de {repo}.")
+    dest_dir = Path(dest_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    path = dest_dir / asset["name"]
+    with _open(asset["browser_download_url"], timeout=600) as r, open(path, "wb") as f:
+        shutil.copyfileobj(r, f, 1 << 20)
+    return release.get("tag_name", "?"), path
+
+
 def extract_zip(zip_path, dest):
     """Extrai em dest (recriando a pasta) e recusa zips que tentam escrever fora dela."""
     dest = Path(dest)

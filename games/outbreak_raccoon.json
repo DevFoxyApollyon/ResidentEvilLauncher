@@ -1,0 +1,31 @@
+{
+  "id": "outbreak_raccoon",
+  "ordem": 30.6,
+  "nome": "Resident Evil Outbreak — Port de PC (RaccoonRecomp)",
+  "tipo": "local",
+  "github": "RaccoonRecomp/ResidentEvilOutbreakRecompiled",
+  "asset": "ResidentEvilOutbreakRecompiled-*-Setup.exe",
+  "instalador": true,
+  "exe": "ResidentEvilOutbreakRecompiled.exe",
+  "dica": "Outro port nativo de Windows do Outbreak File #1 (recompilação estatica), com instalador próprio. Na primeira vez ele gera o jogo a partir da SUA ISO americana (3 a 6 minutos).",
+  "depois_de_baixar": "abra pelo Jogar e escolha a sua ISO do File #1 (USA) quando ele pedir.",
+  "projetos": [
+    {
+      "nome": "ResidentEvilOutbreakRecompiled (RaccoonRecomp)",
+      "url": "https://github.com/RaccoonRecomp/ResidentEvilOutbreakRecompiled",
+      "status": "Port de PC com instalador (1.5.x)."
+    }
+  ],
+  "capitulo": "outbreak",
+  "versao": "Port de PC (RaccoonRecomp)",
+  "arte": {
+    "capa": [
+      "https://upload.wikimedia.org/wikipedia/en/a/ad/Re_outbreak_a.jpg",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Biohazard%20-%20Outbreak%20%28Japan%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

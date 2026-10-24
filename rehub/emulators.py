@@ -56,7 +56,7 @@ def find(key):
 
 
 def _dolphin_url():
-    """O Dolphin publica no proprio site (dl.dolphin-emu.org/releases/AAMM): a mais nova que existir."""
+    """O Dolphin publica no próprio site (dl.dolphin-emu.org/releases/AAMM): a mais nova que existir."""
     today = datetime.date.today()
     y, m = today.year % 100, today.month
     for _ in range(24):
@@ -71,11 +71,11 @@ def _dolphin_url():
         m -= 1
         if m == 0:
             y, m = y - 1, 12
-    raise RuntimeError("Nao achei a versao mais nova do Dolphin em dl.dolphin-emu.org.")
+    raise RuntimeError("Não achei a versão mais nova do Dolphin em dl.dolphin-emu.org.")
 
 
 def install(key):
-    """Baixa (ou atualiza) o emulador e devolve (versao, caminho do .exe)."""
+    """Baixa (ou atualiza) o emulador e devolve (versão, caminho do .exe)."""
     e = EMULATORS[key]
     if e.get("repo"):
         rel = github.latest_release(e["repo"])
@@ -97,5 +97,5 @@ def install(key):
         github.extract_archive(pkg, folder(key))
     exe = find(key)
     if not exe:
-        raise RuntimeError(f"{e['nome']} baixado, mas {e['exe']} nao apareceu na pasta.")
+        raise RuntimeError(f"{e['nome']} baixado, mas {e['exe']} não apareceu na pasta.")
     return tag, exe

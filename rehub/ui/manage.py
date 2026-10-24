@@ -25,12 +25,13 @@ class ManageWindow(tk.Toplevel):
         self.bind("<Destroy>", lambda e: e.widget is self and hub._sound("prompt_back"))
         self._cover = None
 
+        tk.Frame(self, bg=t.RED, height=3).pack(fill="x")
         self.head = tk.Frame(self, bg=t.BG)
-        self.head.pack(fill="x", padx=22, pady=(18, 0))
+        self.head.pack(fill="x", padx=26, pady=(20, 4))
         self.busy = tk.Label(self, text="", fg=t.GREEN, bg=t.BG, font=(t.FONT, 9))
         self.busy.pack(anchor="w", padx=24)
         self.body = t.ScrollFrame(self)
-        self.body.pack(fill="both", expand=True, padx=(22, 6), pady=(4, 16))
+        self.body.pack(fill="both", expand=True, padx=(26, 10), pady=(4, 18))
         self.refresh()
         self.lift()
         self.focus_force()  # na frente da tela cheia
@@ -42,6 +43,7 @@ class ManageWindow(tk.Toplevel):
         self.gdir = launcher.game_dir(self.g, self.hub.cfg, self.hub.installed)
         self._header()
         self.body.clear()
+        self._steps_section()
         self._sources_section()
         if self.g.get("github"):
             self._project_download()
@@ -58,56 +60,61 @@ class ManageWindow(tk.Toplevel):
         if p:
             try:
                 img = Image.open(p).convert("RGB")
-                img.thumbnail((76, 114), Image.LANCZOS)
+                img.thumbnail((96, 144), Image.LANCZOS)
                 self._cover = ImageTk.PhotoImage(img)
-                tk.Label(self.head, image=self._cover, bg=t.BG).pack(side="left", padx=(0, 16))
+                tk.Label(self.head, image=self._cover, bg=t.BG, highlightthickness=1,
+                         highlightbackground=t.LINE).pack(side="left", anchor="n", padx=(0, 20))
             except OSError:
                 pass
         info = tk.Frame(self.head, bg=t.BG)
         info.pack(side="left", fill="both", expand=True)
-        t.label(info, g["nome"], 18, bold=True, bg=t.BG).pack(fill="x")
+        tk.Label(info, text=(g.get("versão") or "").upper(), fg=t.RED, bg=t.BG, font=(t.FONT, 9, "bold"),
+                 anchor="w").pack(fill="x")
+        t.label(info, g["nome"], 19, bold=True, bg=t.BG, wraplength=600).pack(fill="x", pady=(2, 0))
         ready = bool(self.gdir and self.gdir.is_dir())
         row = tk.Frame(info, bg=t.BG)
-        row.pack(fill="x", pady=(6, 2))
-        tk.Label(row, text="  Instalado  " if ready else "  Não instalado  ", font=(t.FONT, 9, "bold"),
-                 bg="#1f4d2b" if ready else "#4a1d22", fg=t.GREEN if ready else "#ff8a8a").pack(side="left")
-        if g.get("versao"):
-            t.label(row, "   " + g["versao"], 9, fg=t.MUTED, bg=t.BG).pack(side="left")
-        where = str(self.gdir) if ready else ("Instale pela Steam." if g["tipo"] == "steam" else "Configure o executável.")
-        t.label(info, where, 9, fg=t.MUTED, bg=t.BG, wraplength=520).pack(fill="x")
+        row.pack(fill="x", pady=(8, 2))
+        dot = tk.Canvas(row, width=10, height=10, bg=t.BG, highlightthickness=0)
+        dot.create_rectangle(1, 1, 9, 9, fill=t.GREEN if ready else "#8a4a44", outline="")
+        dot.pack(side="left", padx=(0, 8))
+        t.label(row, "Instalado" if ready else "Não instalado", 10, fg=t.TEXT, bg=t.BG).pack(side="left")
+        where = str(self.gdir) if ready else ("Instale pela Steam." if g["tipo"] == "steam" else "Use Instalar na tela principal.")
+        t.label(info, where, 9, fg=t.MUTED, bg=t.BG, wraplength=600).pack(fill="x")
         btns = tk.Frame(info, bg=t.BG)
-        btns.pack(fill="x", pady=(8, 0))
+        btns.pack(fill="x", pady=(12, 0))
+
+        def add(text, cmd, style="plain"):
+            t.flat_button(btns, text, cmd, style).pack(side="left", padx=(0, 8))
         if ready:
-            t.button(btns, "Abrir pasta do jogo", lambda: os.startfile(self.gdir)).pack(side="left", padx=(0, 6))
+            add("Abrir pasta do jogo", lambda: os.startfile(self.gdir))
         if g["tipo"] == "steam":
             if not ready:
-                t.button(btns, "Instalar pela Steam", lambda: steam.install(g["appid"]), True).pack(side="left", padx=(0, 6))
-            t.button(btns, "Loja", lambda: steam.store(g["appid"])).pack(side="left", padx=(0, 6))
-        else:
-            t.button(btns, "Configurar", self._choose_exe, not self.hub.cfg.get(g["id"]).get("exe")).pack(side="left", padx=(0, 6))
+                add("Instalar pela Steam", lambda: steam.install(g["appid"]), "primary")
+            add("Loja", lambda: steam.store(g["appid"]))
+        elif not g.get("andamento"):
+            add("Configurar", self._choose_exe, "primary" if not self.hub.cfg.get(g["id"]).get("exe") else "plain")
         if ready or (g["tipo"] != "steam" and self.hub.cfg.get(g["id"])):
-            b = t.button(btns, "Desinstalar jogo", self._uninstall_game)
-            b.config(bg="#4a1d22", fg="#ffb3b3", activebackground="#c0392b")
-            b.pack(side="left")
+            add("Desinstalar", self._uninstall_game, "danger")
 
     def _section(self, title, hint=None):
-        tk.Label(self.body.inner, text=title.upper(), fg=t.RED, bg=t.BG, font=(t.FONT, 10, "bold")).pack(anchor="w", pady=(16, 2))
+        top = tk.Frame(self.body.inner, bg=t.BG)
+        top.pack(fill="x", pady=(20, 4))
+        tk.Label(top, text=title.upper(), fg=t.TEXT, bg=t.BG, font=(t.FONT, 11, "bold")).pack(side="left")
+        tk.Frame(top, bg=t.LINE, height=1).pack(side="left", fill="x", expand=True, padx=(12, 0), pady=(4, 0))
         if hint:
-            t.label(self.body.inner, hint, 9, fg=t.MUTED, bg=t.BG, wraplength=760).pack(fill="x", pady=(0, 6))
+            t.label(self.body.inner, hint, 9, fg=t.MUTED, bg=t.BG, wraplength=760).pack(fill="x", pady=(0, 8))
 
     def _card(self, title, lines, actions=()):
         """lines: [(texto, cor)]. actions: [(texto, comando, 'primary'|'plain'|'danger')]."""
-        card = tk.Frame(self.body.inner, bg=CARD)
+        card = tk.Frame(self.body.inner, bg=CARD, highlightthickness=1, highlightbackground=t.LINE)
         card.pack(fill="x", pady=4)
+        tk.Frame(card, bg=t.RED if any(s == "primary" for _, _, s in actions) else t.LINE, width=3).pack(side="left", fill="y")
         btns = tk.Frame(card, bg=CARD)
-        btns.pack(side="right", padx=10, pady=10)
+        btns.pack(side="right", padx=14, pady=12)
         for text, cmd, style in actions:
-            b = t.button(btns, text, cmd, style == "primary")
-            if style == "danger":
-                b.config(bg="#4a1d22", fg="#ffb3b3", activebackground="#c0392b")
-            b.pack(side="left", padx=3)
+            t.flat_button(btns, text, cmd, style).pack(side="left", padx=(6, 0))
         info = tk.Frame(card, bg=CARD)
-        info.pack(side="left", fill="x", expand=True, padx=12, pady=10)
+        info.pack(side="left", fill="x", expand=True, padx=14, pady=12)
         t.label(info, title, 11, bold=True, bg=CARD).pack(fill="x")
         for text, color in lines:
             if text:
@@ -180,12 +187,26 @@ class ManageWindow(tk.Toplevel):
                    [("Atualizar" if exists else "Baixar", self._download_game, "plain" if exists else "primary"),
                     ("GitHub", lambda: webbrowser.open(f"https://github.com/{g['github']}"), "plain")])
 
+    def _steps_section(self):
+        """Como instalar e jogar esta versão, passo a passo (cada tipo de versão tem o seu caminho)."""
+        steps = sources.steps(self.g)
+        if not steps:
+            return
+        self._section("Como instalar")
+        box = tk.Frame(self.body.inner, bg=CARD, highlightthickness=1, highlightbackground=t.LINE)
+        box.pack(fill="x", pady=4)
+        for k, text in enumerate(steps, 1):
+            row = tk.Frame(box, bg=CARD)
+            row.pack(fill="x", padx=14, pady=(10 if k == 1 else 3, 10 if k == len(steps) else 3))
+            tk.Label(row, text=f"{k:02d}", fg=t.RED, bg=CARD, font=(t.FONT, 11, "bold"), width=3, anchor="nw").pack(side="left", anchor="n")
+            t.label(row, text, 10, fg=t.TEXT, bg=CARD, wraplength=640).pack(side="left", fill="x", expand=True)
+
     def _sources_section(self):
-        """Onde conseguir esta versao: loja oficial, GitHub do port, projeto ou emulador indicado."""
+        """Onde conseguir esta versão: loja oficial, GitHub do port, projeto ou emulador indicado."""
         src = sources.sources(self.g)
         if not src:
             return
-        self._section("Onde baixar", "De onde vem esta versao. O hub nunca traz o jogo: compre na loja ou use a sua copia.")
+        self._section("Onde baixar", "De onde vem esta versão. O hub nunca traz o jogo: compre na loja ou use a sua cópia.")
         for name, url, detail in src:
             self._card(name, [(url.replace("https://", ""), t.MUTED)] + ([(detail, "#9a9186")] if detail else []),
                        [("Abrir", lambda u=url: webbrowser.open(u), "plain")])

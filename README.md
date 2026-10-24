@@ -1,5 +1,8 @@
 # Resident Evil Launcher (RE Hub)
 
+
+**[Todas as versões jogáveis e como instalar cada uma](VERSOES.md)**
+
 Todos os Resident Evil em um lugar só, no estilo da tela inicial do PS5, para Windows.
 
 - Linha do tempo em ordem da história, spin-offs, versões perdidas e betas, filmes, HQs e livros, projetos de fãs e notícias (REVIL).

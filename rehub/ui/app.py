@@ -2099,6 +2099,10 @@ class Hub(Screens, LoreScreens, tk.Tk):
         self.refresh()
 
         def work():
+            if g.get("instalador"):   # o projeto tem instalador proprio: baixa e abre ele
+                tag, setup = github.download_asset(g["github"], g.get("asset"), launcher.download_dir(g))
+                os.startfile(setup)
+                return tag, None
             tag = github.download_release(g["github"], g.get("asset"), launcher.download_dir(g), merge=True)
             return tag, launcher.find_exe(g)
 
@@ -2114,7 +2118,8 @@ class Hub(Screens, LoreScreens, tk.Tk):
                 self.cfg.set(g["id"], exe=str(exe))
                 if "{iso}" in g.get("args", "") and not self.cfg.get(g["id"]).get("iso"):
                     self.ask_iso(g)   # o port abre a ISO da pessoa: ja pede agora
-            msg = f"{g['nome']} {tag} instalado."
+            msg = (f"O instalador de {g['nome']} {tag} foi aberto. Termine a instalacao e depois clique em Configurar."
+                   if g.get("instalador") else f"{g['nome']} {tag} instalado.")
             if g.get("depois_de_baixar"):
                 msg += "\n\nPróximo passo: " + g["depois_de_baixar"]
             elif not exe:

@@ -22,11 +22,11 @@ def sources(game):
     if game.get("emulador"):
         from .emulators import EMULATORS as EMU
         e = EMU[game["emulador"]]
-        out.append((f"Emulador: {e['nome']}", e["site"], f"{e['sistema']}: o hub baixa sozinho, voce so precisa da ISO"))
+        out.append((f"Emulador: {e['nome']}", e["site"], f"{e['sistema']}: o hub baixa sozinho, você só precisa da ISO"))
     if game.get("tipo") == "steam" and game.get("appid"):
-        out.append(("Steam", f"https://store.steampowered.com/app/{game['appid']}", "versao oficial de PC"))
+        out.append(("Steam", f"https://store.steampowered.com/app/{game['appid']}", "versão oficial de PC"))
     if game["id"] in GOG:
-        out.append(("GOG", GOG[game["id"]], "versao oficial de PC, sem DRM"))
+        out.append(("GOG", GOG[game["id"]], "versão oficial de PC, sem DRM"))
     if game.get("github"):
         out.append(("GitHub", f"https://github.com/{game['github']}/releases/latest", "port de PC, baixa pelo hub"))
     for p in game.get("projetos", []):
@@ -44,3 +44,36 @@ def label(game):
     """Rotulo curto da fonte principal, para listas."""
     s = sources(game)
     return " / ".join(x[0].split(":")[0] for x in s[:2]) if s else "Seu arquivo"
+
+
+def steps(game):
+    """Como instalar e jogar esta versão, passo a passo, no caminho qué ela usa."""
+    if game.get("andamento"):
+        a = game["andamento"]
+        return [f"Ainda não dá para jogar esta versão no PC. {a['status']}",
+                "Clique em Acompanhar para ver o projeto; quando sair uma versão jogável, ela entra aqui."]
+    if game.get("tipo") == "steam":
+        free = "demo" in game.get("versão", "").lower() or "grátis" in game.get("versão", "").lower()
+        out = ["Clique em Instalar: a Steam abre e baixa o jogo" + (" (é de graça)." if free else " (o jogo precisa estar na sua conta Steam).")]
+        if game["id"] in GOG:
+            out.append("Comprou na GOG? Instale pelo GOG Galaxy e use Configurar para apontar o .exe.")
+        return out + ["Quando terminar, o botão vira Jogar."]
+    if game.get("emulador"):
+        from .emulators import EMULATORS as EMU
+        e = EMU[game["emulador"]]
+        return [f"Clique em Instalar: o hub baixa o {e['nome']} ({e['sistema']}) sozinho, uma vez para todos os jogos dele.",
+                "O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.",
+                "Clique em Jogar: o jogo abre direto no emulador, em tela cheia."]
+    if game.get("instalador"):
+        return ["Clique em Instalar: o hub baixa o instalador oficial do projeto e abre.",
+                "Termine a instalação (escolha a pasta que quiser).",
+                f"No hub, clique em Configurar e escolha o {game.get('exe', '.exe')} instalado.",
+                (game.get("depois_de_baixar") or "clique em Jogar.")[0].upper() + (game.get("depois_de_baixar") or "clique em Jogar.")[1:]]
+    if game.get("github"):
+        out = ["Clique em Instalar: o hub baixa a versão mais nova do GitHub e ja configura o executável."]
+        if "{iso}" in game.get("args", ""):
+            out.append("O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.")
+        if game.get("depois_de_baixar"):
+            out.append(game["depois_de_baixar"][0].upper() + game["depois_de_baixar"][1:])
+        return out + ["Clique em Jogar."]
+    return ["Clique em Configurar e escolha o executável do jogo."]

@@ -5,7 +5,7 @@
   "capitulo": "gaiden",
   "versao": "Game Boy Color (mGBA)",
   "tipo": "local",
-  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se não achar, você escolhe o arquivo. O jogo não e baixado.",
   "arte": {
     "capa": [
       "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Boxarts/Resident%20Evil%20Gaiden%20%28USA%29.png",

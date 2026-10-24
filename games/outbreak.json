@@ -3,7 +3,7 @@
   "ordem": 30,
   "nome": "Resident Evil Outbreak",
   "tipo": "local",
-  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se não achar, você escolhe o arquivo. O jogo não e baixado.",
   "capitulo": "outbreak",
   "versao": "PS2 (PCSX2)",
   "poster": {

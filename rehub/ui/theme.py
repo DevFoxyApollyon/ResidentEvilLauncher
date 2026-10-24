@@ -17,6 +17,25 @@ def button(parent, text, cmd, primary=False):
                      activebackground=RED_DARK, activeforeground=TEXT, padx=14, pady=6)
 
 
+LINE = "#2c2723"
+STYLES = {  # fundo, texto, borda, fundo com o mouse
+    "primary": (RED, TEXT, RED, "#d0343c"),
+    "plain": (PANEL, TEXT, "#4a423a", PANEL_HI),
+    "danger": ("#2a1414", "#ff9a8a", "#6b2a24", "#4a1d22"),
+}
+
+
+def flat_button(parent, text, cmd, style="plain"):
+    """Botao reto no visual do app (maiusculas, borda fina, clareia com o mouse)."""
+    bg, fg, border, hover = STYLES.get(style, STYLES["plain"])
+    b = tk.Label(parent, text=text.upper(), bg=bg, fg=fg, font=(FONT, 9, "bold"), padx=16, pady=8, cursor="hand2",
+                 highlightthickness=1, highlightbackground=border)
+    b.bind("<Button-1>", lambda e: cmd())
+    b.bind("<Enter>", lambda e: b.config(bg=hover))
+    b.bind("<Leave>", lambda e: b.config(bg=bg))
+    return b
+
+
 def label(parent, text, size=10, bold=False, fg=TEXT, bg=PANEL, **kw):
     return tk.Label(parent, text=text, fg=fg, bg=bg, font=(FONT, size, "bold" if bold else "normal"),
                     anchor="w", justify="left", **kw)
@@ -40,9 +59,16 @@ class ScrollFrame(tk.Frame):
     def __init__(self, parent, bg=BG):
         super().__init__(parent, bg=bg)
         self.canvas = tk.Canvas(self, bg=bg, highlightthickness=0)
-        sb = tk.Scrollbar(self, command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=sb.set)
-        sb.pack(side="right", fill="y")
+        sb = tk.Canvas(self, width=6, bg=bg, highlightthickness=0)   # barra fina no lugar da do Windows
+        sb.pack(side="right", fill="y", padx=(6, 0))
+        thumb = sb.create_rectangle(0, 0, 6, 0, fill="#4a423a", outline="")
+
+        def moved(first, last):
+            h = sb.winfo_height()
+            f, l = float(first), float(last)
+            sb.coords(thumb, 0, f * h, 6, l * h)
+            sb.itemconfigure(thumb, state="hidden" if f <= 0 and l >= 1 else "normal")
+        self.canvas.configure(yscrollcommand=moved)
         self.canvas.pack(side="left", fill="both", expand=True)
         self.inner = tk.Frame(self.canvas, bg=bg)
         win = self.canvas.create_window((0, 0), window=self.inner, anchor="nw")
