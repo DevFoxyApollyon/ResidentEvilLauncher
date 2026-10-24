@@ -73,59 +73,104 @@ def fade(widget, option, start, end, steps=6, ms=16):
     step(1)
 
 
-def flat_button(parent, text, cmd, style="plain", icon=None):
-    """Botao reto no visual do app: maiusculas espacadas, borda fina, acende aos poucos com o mouse e afunda ao
-    apertar. icon: um simbolo curto antes do texto (ex.: '+', '✕', '▶')."""
-    bg, fg, border, hover, press = STYLES.get(style, STYLES["plain"])
-    label_text = text.upper()
-    if icon:
-        label_text = f"{icon}   {label_text}"
-    b = tk.Label(parent, text=label_text, bg=bg, fg=fg, font=(FONT, 9, "bold"), padx=18, pady=8, cursor="hand2",
-                 highlightthickness=1, highlightbackground=border, highlightcolor=border)
+ICONS = {"REMOVER": "trash", "DESINSTALAR": "trash", "EXCLUIR": "trash", "EDITAR": "edit", "ABRIR": "link",
+         "ADICIONAR": "plus", "BAIXAR": "down", "INSTALAR": "down", "SITE": "link", "PROCURAR .EXE": "folder",
+         "JOGAR": "play", "ATUALIZAR": "refresh", "CONFIGURAR": "gear"}
+
+
+def flat_button(parent, text, cmd, style="plain", icon=None, accent=None, height=36, size=10):
+    """Botao desenhado (cantos suaves, gradiente, brilho no hover, afunda ao apertar). O icone sai do texto
+    quando nao e dado (Remover = lixeira, Editar = lapis...); '+' vira o icone de mais."""
+    from . import skin
+    icon = {"+": "plus", "✕": "x", "▶": "play"}.get(icon, icon) or ICONS.get(text.upper())
+    try:
+        bg = parent.cget("bg")
+    except tk.TclError:
+        bg = PANEL
+    opts = dict(style=style, accent=accent or RED, icon=icon, height=height, size=size, glow=4)
+    imgs = {st: skin.button_photo(text, state=st, **opts) for st in ("normal", "hover", "press")}
+    b = tk.Label(parent, image=imgs["normal"], bg=bg, bd=0, cursor="hand2", takefocus=0)
+    b._imgs = imgs
     state = {"in": False}
 
     def enter(e):
         state["in"] = True
-        fade(b, "bg", b.cget("bg"), hover)
-        b.config(highlightbackground=mix(border, "#ffffff", 0.25))
+        b.config(image=imgs["hover"])
 
     def leave(e):
         state["in"] = False
-        fade(b, "bg", b.cget("bg"), bg)
-        b.config(highlightbackground=border)
-
-    def down(e):
-        b.config(bg=press)
+        b.config(image=imgs["normal"])
 
     def up(e):
-        b.config(bg=hover if state["in"] else bg)
+        b.config(image=imgs["hover"] if state["in"] else imgs["normal"])
         if state["in"]:
             cmd()
     b.bind("<Enter>", enter)
     b.bind("<Leave>", leave)
-    b.bind("<ButtonPress-1>", down)
+    b.bind("<ButtonPress-1>", lambda e: b.config(image=imgs["press"]))
     b.bind("<ButtonRelease-1>", up)
     return b
 
 
 def section_title(parent, text, bg=PANEL, color=None):
-    """Titulo de grupo: texto pequeno em maiusculas com um filete que vai ate a borda."""
+    """Titulo de grupo: ponto e texto pequeno em maiusculas com um filete que vai ate a borda."""
     row = tk.Frame(parent, bg=bg)
-    tk.Label(row, text=text.upper(), fg=color or MUTED, bg=bg, font=(FONT, 8, "bold")).pack(side="left")
+    c = color or MUTED
+    dot = tk.Canvas(row, width=6, height=6, bg=bg, highlightthickness=0)
+    dot.create_oval(0, 0, 5, 5, fill=c, outline="")
+    dot.pack(side="left", padx=(0, 7))
+    tk.Label(row, text=" ".join(text.upper()) if len(text) < 14 else text.upper(), fg=c, bg=bg,
+             font=(FONT, 8, "bold")).pack(side="left")
     tk.Frame(row, bg=LINE, height=1).pack(side="left", fill="x", expand=True, padx=(10, 0), pady=(2, 0))
     return row
 
 
 def entry(parent, var, width=52, bg=PANEL):
-    """Campo de texto escuro com filete que acende na cor da franquia quando esta em uso."""
-    e = tk.Entry(parent, textvariable=var, bg="#0f0d0c", fg=TEXT, insertbackground=TEXT, relief="flat", font=(FONT, 11),
-                 highlightthickness=1, highlightbackground="#3b342d", highlightcolor=RED, width=width)
-    return e
+    """Campo de texto escuro com moldura que acende na cor da franquia quando esta em uso."""
+    box = tk.Frame(parent, bg="#3b342d", padx=1, pady=1)
+    e = tk.Entry(box, textvariable=var, bg="#100e0d", fg=TEXT, insertbackground=TEXT, relief="flat", font=(FONT, 11),
+                 highlightthickness=0, width=width, selectbackground=RED, selectforeground="#ffffff")
+    e.pack(fill="both", expand=True, ipadx=10, ipady=7)
+    e.bind("<FocusIn>", lambda ev: box.config(bg=RED))
+    e.bind("<FocusOut>", lambda ev: box.config(bg="#3b342d"))
+    box.focus_set = e.focus_set
+    return box
 
 
-def modal(parent, title, subtitle="", width=560, accent=None):
-    """Janela por cima no visual do app (sem a moldura do Windows): o hub escurece atras, cartao reto com filete
-    na cor da franquia, titulo, subtitulo e uma barra de botoes embaixo. Devolve (top, body, bar, close)."""
+def dropdown(parent, var, options, accent=None):
+    """Caixa de escolha no visual do app (no lugar do OptionMenu do Windows): abre um menu desenhado com rolagem."""
+    from . import skin
+    box = tk.Frame(parent, bg="#3b342d", padx=1, pady=1, cursor="hand2")
+    inner = tk.Frame(box, bg="#100e0d")
+    inner.pack(fill="both", expand=True)
+    lab = tk.Label(inner, textvariable=var, bg="#100e0d", fg=TEXT, font=(FONT, 11), anchor="w", padx=10, pady=7)
+    lab.pack(side="left", fill="x", expand=True)
+    arrow = tk.Label(inner, image=skin.icon_photo("chevron", 14, MUTED), bg="#100e0d", padx=10)
+    arrow.pack(side="right")
+
+    def pick(v):
+        var.set(v)
+
+    def open_menu(e=None):
+        sel = options.index(var.get()) if var.get() in options else 0
+        box.config(bg=accent or RED)
+        skin.Menu(parent.winfo_toplevel(), [(None, [(o, "", lambda o=o: pick(o), "dot") for o in options])],
+                  box.winfo_rootx() - 14, box.winfo_rooty() + box.winfo_height() + 2, accent or RED,
+                  width=max(260, box.winfo_width() + 28 - 28), max_height=360, selected=sel,
+                  on_close=lambda: box.winfo_exists() and box.config(bg="#3b342d"))
+    for w in (box, inner, lab, arrow):
+        w.bind("<Button-1>", open_menu)
+        w.bind("<Enter>", lambda e: box.config(bg="#6b6158") if box.cget("bg") == "#3b342d" else None)
+        w.bind("<Leave>", lambda e: box.config(bg="#3b342d") if box.cget("bg") == "#6b6158" else None)
+    return box
+
+
+def modal(parent, title, subtitle="", width=560, accent=None, badge=None):
+    """Janela por cima no visual do app: o hub escurece atras e um cartao de cantos arredondados (desenhado) aparece
+    com um leve deslize. badge: (icone, cor) num circulo ao lado do titulo. Devolve (top, body, bar, close)."""
+    from PIL import ImageTk
+    from . import skin
+    accent = accent or RED
     p = parent.winfo_toplevel()
     shade = tk.Toplevel(p)
     shade.overrideredirect(True)
@@ -136,15 +181,22 @@ def modal(parent, title, subtitle="", width=560, accent=None):
     top = tk.Toplevel(p)
     top.withdraw()
     top.overrideredirect(True)
-    top.configure(bg="#3b342d")
+    top.configure(bg=skin.KEY)
     top.attributes("-topmost", True)
-    card = tk.Frame(top, bg=PANEL)
-    card.pack(fill="both", expand=True, padx=1, pady=1)
-    tk.Frame(card, bg=accent or RED, height=3).pack(fill="x")
-    head = tk.Frame(card, bg=PANEL)
-    head.pack(fill="x", padx=30, pady=(22, 0))
-    brand_row(head, PANEL, accent or RED).pack(side="left")
+    try:
+        top.attributes("-transparentcolor", skin.KEY)
+    except tk.TclError:
+        pass
+    c = tk.Canvas(top, bg=skin.KEY, highlightthickness=0)
+    c.pack(fill="both", expand=True)
+    inner = tk.Frame(c, bg=PANEL)
+    body = tk.Frame(inner, bg=PANEL)
+    body.pack(fill="both", expand=True)
+    tk.Frame(inner, bg=LINE, height=1).pack(fill="x", pady=(20, 0))
+    bar = tk.Frame(inner, bg=PANEL)
+    bar.pack(fill="x", pady=(14, 0))
     closed = {"v": False}
+    PADX, PADB = 30, 22
 
     def close(e=None):
         if closed["v"]:
@@ -152,39 +204,65 @@ def modal(parent, title, subtitle="", width=560, accent=None):
         closed["v"] = True
         top.destroy()
         shade.destroy()
-    x_btn = tk.Label(head, text="✕", fg=MUTED, bg=PANEL, font=(FONT, 12), cursor="hand2", padx=4)
-    x_btn.pack(side="right")
-    x_btn.bind("<Button-1>", close)
-    x_btn.bind("<Enter>", lambda e: x_btn.config(fg=TEXT))
-    x_btn.bind("<Leave>", lambda e: x_btn.config(fg=MUTED))
-    tk.Label(card, text=title, fg=TEXT, bg=PANEL, font=(FONT, 18, "bold"), anchor="w").pack(fill="x", padx=30, pady=(6, 0))
-    if subtitle:
-        tk.Label(card, text=subtitle, fg=MUTED, bg=PANEL, font=(FONT, 10), anchor="w", justify="left",
-                 wraplength=width - 60).pack(fill="x", padx=30, pady=(4, 0))
-    body = tk.Frame(card, bg=PANEL)
-    body.pack(fill="both", expand=True, padx=30, pady=(16, 0))
-    tk.Frame(card, bg=LINE, height=1).pack(fill="x", padx=30, pady=(18, 0))
-    bar = tk.Frame(card, bg=PANEL)
-    bar.pack(fill="x", padx=30, pady=(14, 22))
-    top.bind("<Escape>", close)
+    top.close = close
+    win = c.create_window(PADX, 0, window=inner, anchor="nw")
 
     def place():
-        top.update_idletasks()
-        w, h = max(width, top.winfo_reqwidth()), top.winfo_reqheight()
-        x = p.winfo_rootx() + (p.winfo_width() - w) // 2
-        y = p.winfo_rooty() + max(20, (p.winfo_height() - h) // 3)
-        top.geometry(f"{w}x{h}+{max(0, x)}+{max(0, y)}")
+        if not top.winfo_exists():
+            return
+        inner.update_idletasks()
+        W = max(width, inner.winfo_reqwidth() + 2 * PADX)
+        c.delete("head")
+        x = PADX
+        logo = umbrella(18)
+        if logo:
+            c.create_image(x, 32, image=logo, anchor="w", tags=("head",))
+        c.create_text(x + (26 if logo else 0), 32, anchor="w", text=FR["app"].upper(), fill=accent, font=(FONT, 9, "bold"), tags=("head",))
+        xb = c.create_image(W - PADX + 6, 32, image=skin.icon_photo("x", 16, MUTED), anchor="e", tags=("head", "xbtn"))
+        c.tag_bind("xbtn", "<Button-1>", close)
+        c.tag_bind("xbtn", "<Enter>", lambda e: (c.itemconfigure(xb, image=skin.icon_photo("x", 16, TEXT)), c.config(cursor="hand2")))
+        c.tag_bind("xbtn", "<Leave>", lambda e: (c.itemconfigure(xb, image=skin.icon_photo("x", 16, MUTED)), c.config(cursor="")))
+        tx, y = x, 56
+        if badge:
+            c.create_image(x, y + 2, image=skin.badge_photo(badge[0], badge[1], 44), anchor="nw", tags=("head",))
+            tx += 58
+        t1 = c.create_text(tx, y, anchor="nw", text=title, fill=TEXT, font=(FONT, 18, "bold"), width=W - tx - PADX, tags=("head",))
+        y = c.bbox(t1)[3] + 4
+        if subtitle:
+            t2 = c.create_text(tx, y, anchor="nw", text=subtitle, fill="#b3aa9d", font=(FONT, 10), width=W - tx - PADX, tags=("head",))
+            y = c.bbox(t2)[3]
+        if badge:
+            y = max(y, 56 + 50)
+        y += 18
+        c.coords(win, PADX, y)
+        c.itemconfigure(win, width=W - 2 * PADX)
+        inner.update_idletasks()
+        H = y + inner.winfo_reqheight() + PADB
+        top._bg = ImageTk.PhotoImage(skin.panel_image(W, H, accent, radius=14, header=y))
+        c.delete("bg")
+        c.create_image(0, 0, image=top._bg, anchor="nw", tags=("bg",))
+        c.tag_lower("bg")
+        c.config(width=W, height=H)
+        X = p.winfo_rootx() + (p.winfo_width() - W) // 2
+        Y = p.winfo_rooty() + max(20, (p.winfo_height() - H) // 3)
+        top._xy = (max(0, X), max(0, Y))
+        top.geometry(f"{W}x{H}+{top._xy[0]}+{top._xy[1]}")
 
-    def show():   # o fundo escurece aos poucos e o cartao aparece
+    def show():   # o fundo escurece e o cartao sobe um pouco enquanto aparece
         place()
         top.deiconify()
         top.lift()
         top.grab_set()
         top.focus_force()
-        for k in range(1, 7):
-            top.after(k * 18, lambda a=k * 0.09: shade.winfo_exists() and shade.attributes("-alpha", a))
+        for k in range(1, 8):
+            e = 1 - (1 - k / 7) ** 3
+            top.after(k * 16, lambda a=e: shade.winfo_exists() and shade.attributes("-alpha", 0.6 * a))
+            top.after(k * 16, lambda a=e: top.winfo_exists() and (top.attributes("-alpha", a),
+                                                                  top.geometry(f"+{top._xy[0]}+{int(top._xy[1] + 10 * (1 - a))}")))
+    top.attributes("-alpha", 0.0)
+    top.bind("<Escape>", close)
     top.after(1, show)
-    top.place_again = place   # quando o conteudo muda de tamanho
+    top.place_again = place
     return top, body, bar, close
 
 
@@ -240,72 +318,39 @@ class ScrollFrame(tk.Frame):
 
 
 # ---------- caixas de diálogo e interruptor no visual do app (no lugar das caixas brancas do Windows) ----------
-def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary"),), icon="!", accent=RED):
-    """Janela modal no visual do app: a tela escurece atras, um cartao reto com filete na cor do aviso.
-    buttons: (texto, valor devolvido, estilo 'primary'|'danger'|'plain'). Enter = ultimo botao, Esc = fechar."""
-    p = parent.winfo_toplevel()
-    shade = tk.Toplevel(p)   # escurece o hub atras do aviso
-    shade.overrideredirect(True)
-    shade.configure(bg="#000000")
-    shade.geometry(f"{p.winfo_width()}x{p.winfo_height()}+{p.winfo_rootx()}+{p.winfo_rooty()}")
-    shade.attributes("-alpha", 0.55)
-    shade.attributes("-topmost", True)
-    top = tk.Toplevel(p)
-    top.withdraw()
-    top.overrideredirect(True)
-    top.title(FR["app"])
-    top.configure(bg="#3b342d")   # a borda de 1 px
+def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary"),), icon="alert", accent=RED):
+    """Aviso no visual do app (cartao desenhado com icone num circulo). buttons: (texto, valor devolvido, estilo).
+    Enter = ultimo botao, Esc = fechar."""
     result = {"v": None}
-
-    def close(v):
-        result["v"] = v
-        top.destroy()
-        shade.destroy()
-
-    card = tk.Frame(top, bg=PANEL)
-    card.pack(fill="both", expand=True, padx=1, pady=1)
-    tk.Frame(card, bg=accent, height=3).pack(fill="x")
-    body = tk.Frame(card, bg=PANEL)
-    body.pack(fill="both", padx=30, pady=(22, 6))
-    brand_row(body, PANEL, accent).pack(fill="x")
-    tk.Label(body, text=title, fg=TEXT, bg=PANEL, font=(FONT, 17, "bold"), anchor="w", justify="left",
-             wraplength=440).pack(fill="x", pady=(4, 0))
-    tk.Label(body, text=message, fg="#c4bcae", bg=PANEL, font=(FONT, 11), anchor="w", justify="left",
-             wraplength=440).pack(fill="x", pady=(8, 0))
+    top, body, bar, close = modal(parent, title, message, width=520, accent=accent, badge=(icon, accent))
     for d in details:
-        tk.Label(body, text="—  " + d, fg=MUTED, bg=PANEL, font=(FONT, 10), anchor="w", justify="left",
-                 wraplength=440).pack(fill="x", pady=(3, 0))
-    bar = tk.Frame(card, bg=PANEL)
-    bar.pack(fill="x", padx=30, pady=(18, 24))
+        row = tk.Frame(body, bg=PANEL)
+        row.pack(fill="x", pady=(0, 5))
+        tk.Frame(row, bg=accent, width=2).pack(side="left", fill="y", padx=(58, 10))
+        tk.Label(row, text=d, fg=MUTED, bg=PANEL, font=(FONT, 10), anchor="w", justify="left", wraplength=400).pack(side="left", fill="x")
+    if not details:
+        body.config(height=1)
+
+    def done(v):
+        result["v"] = v
+        close()
     for text, value, style in reversed(buttons):
-        b = flat_button(bar, text, lambda v=value: close(v), style)
-        b.config(font=(FONT, 10, "bold"), padx=22, pady=9)
-        b.pack(side="right", padx=(10, 0))
-    top.bind("<Escape>", lambda e: close(None))
-    top.bind("<Return>", lambda e: close(buttons[-1][1]))
-    top.protocol("WM_DELETE_WINDOW", lambda: close(None))
-    top.update_idletasks()
-    w = max(top.winfo_reqwidth(), 500)
-    x = p.winfo_rootx() + (p.winfo_width() - w) // 2
-    y = p.winfo_rooty() + (p.winfo_height() - top.winfo_reqheight()) // 3
-    top.geometry(f"{w}x{top.winfo_reqheight()}+{max(0, x)}+{max(0, y)}")
-    top.deiconify()
-    top.attributes("-topmost", True)  # sempre na frente, inclusive da tela cheia (atras dela o app parecia travado)
-    top.lift()
-    top.grab_set()
-    top.focus_force()
+        flat_button(bar, text, lambda v=value: done(v), style, height=38, size=10).pack(side="right", padx=(8, 0))
+    top.bind("<Return>", lambda e: done(buttons[-1][1]))
+    top.protocol("WM_DELETE_WINDOW", close)
     parent.wait_window(top)
     return result["v"]
 
 
 def confirm(parent, title, message, details=(), ok="Confirmar", danger=False):
-    return bool(_dialog(parent, title, message, details, (("Cancelar", False, "plain"), (ok, True, "alert" if danger else "primary")),
-                        icon="?" if not danger else "!", accent="#c0392b" if danger else RED))
+    return bool(_dialog(parent, title, message, details, (("Cancelar", False, "ghost"), (ok, True, "alert" if danger else "primary")),
+                        icon="trash" if danger and ok.lower() in ("remover", "excluir", "desinstalar") else ("alert" if danger else "question"),
+                        accent="#d63a30" if danger else RED))
 
 
 def notice(parent, title, message, details=(), error=False):
-    _dialog(parent, title, message, details, (("OK", True, "primary"),), icon="!" if error else "✓",
-            accent="#c0392b" if error else GREEN)
+    _dialog(parent, title, message, details, (("OK", True, "primary"),), icon="alert" if error else "check",
+            accent="#d63a30" if error else GREEN)
 
 
 class Switch(tk.Canvas):

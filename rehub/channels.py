@@ -191,9 +191,16 @@ def twitch_live(login):
 
 
 # ---------- estado e atualização ----------
+_memo = {"mtime": None, "data": None}
+
+
 def cached():
+    """O último resultado (lido do disco só quando o arquivo muda: a tela pergunta a cada quadro)."""
     try:
-        return json.loads(STATE.read_text(encoding="utf-8"))
+        m = STATE.stat().st_mtime
+        if _memo["mtime"] != m:
+            _memo["data"], _memo["mtime"] = json.loads(STATE.read_text(encoding="utf-8")), m
+        return _memo["data"]
     except (OSError, ValueError):
         return {"quando": 0, "videos": [], "lives": [], "vistos": None, "avisadas": []}
 

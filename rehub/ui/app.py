@@ -21,7 +21,7 @@ from ..mods import ModManager
 from .. import emulators, isofind, sources
 from ..franchise import FR, hex_rgb
 from ..paths import COVERS, DATA, ROOT
-from . import theme as t
+from . import skin, theme as t
 from .splash import Splash
 from .manage import ManageWindow
 from .lore_screens import LoreScreens
@@ -58,6 +58,9 @@ class Font(tkfont.Font):
                 self._sizes.clear()
             w = self._sizes[text] = super().measure(text)
         return w
+
+
+DIM_LUT = [int(v * 0.62) for v in range(256)] * 3 + list(range(256))
 
 
 def ease(t):
@@ -980,6 +983,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
     def _preload(self):
         """Em segundo plano: abre do disco as artes e monta as capas grandes, para a troca de capítulo não travar."""
+        skin.warm()
         sections = [catalog.load_timeline(self.games, s) for s, _ in SECTIONS]
         for chapters in sections:
             for ch in chapters:
@@ -995,6 +999,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
                         self._ensure_tile_base(ch, g, art)
                     except Exception:
                         pass
+                    self._logo_pil_of(key)   # logo já recortado e reduzido: na troca só vira PhotoImage
 
     # ---------- fundo com transição ----------
     def _start_bg_change(self, hero, key):
@@ -1111,16 +1116,14 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         if target:
             chips.append(("Continuar", self.continue_last, False))
         for label, cmd, on in chips:
-            dot = 14 if on else 0
-            w = self.f["small"].measure(label) + 28 + dot
             tag = "opt_" + label.split()[0].lower()
-            shape = c.create_rectangle(x - w, y - 14, x, y + 14, fill="#221d19" if on else "#141210",
-                                       outline=self.accent if on else "#3d3630", tags=(tag,))
-            if on:   # ligado: um ponto aceso na cor do capitulo antes do nome
-                c.create_oval(x - w + 12, y - 3, x - w + 18, y + 3, fill=self.accent, outline="", tags=(tag,))
-            txt = c.create_text(x - (w - dot) / 2, y, text=label, fill=WHITE if on else "#d9d2c5", font=self.f["small"], tags=(tag,))
-            self._clickable(tag, cmd, hover=[(shape, self.accent if on else "#3d3630", self._lighter(self.accent) if on else "#8a8074"),
-                                             (txt, WHITE if on else "#d9d2c5", WHITE)], outline=True)
+            opts = dict(style="plain", accent=self.accent, icon="dot" if on else None, height=28, size=9, glow=6, pad=13,
+                        radius=14, track=0.4)
+            normal = skin.button_photo(label, state="hover" if on else "normal", **opts)
+            hot = lambda label=label, opts=opts: skin.button_photo(label, state="hover", **opts)
+            w = normal.width() - 12
+            item = c.create_image(x - w - 6, y - 20, image=normal, anchor="nw", tags=(tag,))
+            self._clickable(tag, cmd, hover=[(item, normal, hot)])
             x -= w + 8
         # atalhos como teclas: a tecla numa tampinha, o que ela faz ao lado; os que não cabem ficam de fora
         hints = (("A D  ← →", "capítulos"), ("↑ ↓", "versões"), ("Enter", "jogar"), ("G", "gerenciar"), ("Tab", "seção"),
@@ -1164,7 +1167,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             w2, h2 = int(size[0] * scale), int(size[1] * scale)
             dx, dy = x - (w2 - size[0]) / 2, TILES_Y - (h2 - size[1]) / 2 - HOVER_LIFT * h
             if i == self.sel:  # destaque: brilho forte na cor do jogo (no lugar da borda branca)
-                c.create_image(dx - 24, dy - 24, image=self._halo((w2, h2), hex_rgb(self.accent), int(225 * g), 0), anchor="nw")
+                glow = tuple(v // 16 * 16 for v in hex_rgb(self.accent))
+                c.create_image(dx - 24, dy - 24, image=self._halo((w2, h2), glow, int(225 * g), 0), anchor="nw")
             c.create_image(dx - 24, dy - 24 + 4 * h, image=self._halo((w2, h2), (0, 0, 0), 150 + int(60 * h), 6), anchor="nw")
             dim = i != self.sel and h < 0.5  # os outros cards ficam um pouco apagados
             c.create_image(dx, dy, image=self._tile(ch, (w2, h2), dim), anchor="nw", tags=(f"tile{i}",))
@@ -1209,7 +1213,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
     def _halo(self, size, color, alpha, dy):
         """Sombra/brilho de card. Desfoca UMA vez no tamanho grande e só redimensiona depois
         (desfocar de novo para cada tamanho da animação era o que mais pesava)."""
-        size = (size[0] // 4 * 4, size[1] // 4 * 4)
+        size = (size[0] // 8 * 8, size[1] // 8 * 8)
+        alpha = alpha if alpha >= 200 else (alpha // 60 * 60 or (15 if alpha else 0))
         key = (size, color, alpha // 15, dy)
         if key not in self._halos:
             if len(self._halos) > 300:
@@ -1242,9 +1247,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             if len(self._tiles) > 400:
                 self._tiles.clear()
             img = self._tile_base[base_key].resize(size, Image.BILINEAR)
-            if dim:
-                r, g, b, a = img.split()
-                img = Image.merge("RGBA", [band.point(lambda v: int(v * 0.62)) for band in (r, g, b)] + [a])
+            if dim:   # escurece RGB e mantém a transparência numa passada só (separar os canais pesava)
+                img = img.point(DIM_LUT)
             self._tiles[key] = ImageTk.PhotoImage(img)
         return self._tiles[key]
 
@@ -1286,22 +1290,35 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self._tile_base[base_key] = img
         return base_key
 
+    def _logo_pil_of(self, key, max_size=(400, 84)):
+        """Logo recortado e reduzido (PIL). Pode rodar fora da interface (pré-carga)."""
+        if not hasattr(self, "_logo_pil"):
+            self._logo_pil = {}
+        if key not in self._logo_pil:
+            p = store.art_path(key, "logo") if key else None
+            img = None
+            if p:
+                try:
+                    img = Image.open(p).convert("RGBA")
+                    bbox = img.getbbox()  # corta a margem transparente
+                    img = img.crop(bbox) if bbox else img
+                    img.thumbnail(max_size, Image.LANCZOS)
+                except OSError:
+                    img = None
+            if img is None:
+                return None   # sem logo ainda: tenta de novo quando a arte chegar
+            self._logo_pil[key] = img
+        return self._logo_pil[key]
+
     def _logo(self, g, max_size=(400, 84)):
         if g is None:
             return None
         key = store.art_key(g)
         if key not in self._logos:
-            p = store.art_path(key, "logo")
-            if not p:
+            img = self._logo_pil_of(key, max_size)
+            if img is None:
                 return None
-            try:
-                img = Image.open(p).convert("RGBA")
-                bbox = img.getbbox()  # corta a margem transparente
-                img = img.crop(bbox) if bbox else img
-                img.thumbnail(max_size, Image.LANCZOS)
-                self._logos[key] = ImageTk.PhotoImage(img)
-            except OSError:
-                return None
+            self._logos[key] = ImageTk.PhotoImage(img)
         return self._logos[key]
 
     def _title_font(self, ch):
@@ -1593,19 +1610,17 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self._list_window(items, x, y + 30, w, bottom, 68, row)
 
     def _chip(self, x, y, label, cmd, tag, primary=False, anchor="w"):
-        """Botão pequeno reto. anchor='e' alinha pela direita. Retorna a outra ponta."""
-        w = self.f["small"].measure(label) + 28
+        """Botão pequeno desenhado. anchor='e' alinha pela direita. Retorna a outra ponta."""
+        icon = "x" if label.startswith("✕") else None
+        text = label.lstrip("✕ ").strip() if icon else label
+        opts = dict(style="primary" if primary else "plain", accent=self.accent, icon=icon, height=28, size=9, glow=6,
+                    pad=12, radius=6, track=0.6)
+        normal = skin.button_photo(text, state="normal", **opts)
+        hot = lambda: skin.button_photo(text, state="hover", **opts)
+        w = normal.width() - 12
         x1 = x - w if anchor == "e" else x
-        if primary:
-            shape = self.c.create_rectangle(x1, y, x1 + w, y + 28, fill=self.accent, outline="", tags=(tag,))
-            self.c.create_text(x1 + w / 2, y + 14, text=label, fill=WHITE, font=self.f["small"], tags=(tag,))
-            self._clickable(tag, cmd, hover=[(shape, self.accent, self._lighter(self.accent))])
-        else:
-            shape = self.c.create_rectangle(x1, y, x1 + w, y + 28, fill="#141210", outline="#3d3630", tags=(tag,))
-            under = self.c.create_line(x1 + 1, y + 27, x1 + w, y + 27, fill="#141210", width=2, tags=(tag,))
-            txt = self.c.create_text(x1 + w / 2, y + 14, text=label, fill="#d9d2c5", font=self.f["small"], tags=(tag,))
-            self._clickable(tag, cmd, hover=[(shape, "#3d3630", "#8a8074"), (under, "#141210", self.accent), (txt, "#d9d2c5", WHITE)],
-                            outline=True)
+        item = self.c.create_image(x1 - 6, y - 6, image=normal, anchor="nw", tags=(tag,))
+        self._clickable(tag, cmd, hover=[(item, normal, hot)])
         return x1 if anchor == "e" else x1 + w
 
     def _note(self, x, y, w, msg):
@@ -1741,47 +1756,23 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         c.create_rectangle(cx - s * 0.55, cy + s * 0.75, cx + s * 0.55, cy + s, fill=fill, outline="")
 
     DANGER_ACTIONS = ("DESINSTALAR", "REMOVER")
+    ACTION_ICONS = {"JOGAR": "play", "INSTALAR": "down", "BAIXAR": "down", "ACOMPANHAR": "eye", "ABRIR SITE": "link",
+                    "GERENCIAR": "gear", "LOJA": "bag", "DESINSTALAR": "trash", "REMOVER": "trash", "EDITAR": "edit",
+                    "CONFIGURAR": "gear", "CANAL": "tv", "ASSISTIR AO VIVO": "live", "ASSISTIR NO YOUTUBE": "play",
+                    "LER NOTÍCIA": "doc", "PESQUISAR": "eye"}
 
     def _button(self, x, y, text, cmd, primary, tag):
-        c = self.c
-        text = text.upper()
-        icon = {"JOGAR": "play", "INSTALAR": "down", "BAIXAR": "down", "ACOMPANHAR": "eye", "ABRIR SITE": "link"}.get(text) if primary else None
-        pad = 28 if primary else 22
-        w, h = self.f["btn"].measure(text) + pad * 2 + (24 if icon else 0), 46
-        if primary:   # o principal: bloco na cor do capitulo, brilho fino em cima e "degrau" mais escuro embaixo
-            shape = c.create_rectangle(x, y, x + w, y + h - 3, fill=self.accent, outline="", tags=(tag,))
-            shine = c.create_line(x, y, x + w, y, fill=self._lighter(self.accent, 0.35), tags=(tag,))
-            c.create_rectangle(x, y + h - 3, x + w, y + h, fill=self._darker(self.accent), outline="", tags=(tag,))
-            hover = [(shape, self.accent, self._lighter(self.accent)), (shine, self._lighter(self.accent, 0.35), "#ffffff")]
-            tx = x + pad
-            if icon:
-                cy = y + (h - 3) / 2
-                if icon == "play":
-                    c.create_polygon(tx, cy - 7, tx, cy + 7, tx + 12, cy, fill=WHITE, outline="", tags=(tag,))
-                elif icon == "down":
-                    c.create_polygon(tx, cy - 1, tx + 12, cy - 1, tx + 6, cy + 6, fill=WHITE, outline="", tags=(tag,))
-                    c.create_rectangle(tx + 4, cy - 8, tx + 8, cy - 1, fill=WHITE, outline="", tags=(tag,))
-                    c.create_line(tx, cy + 9, tx + 12, cy + 9, fill=WHITE, width=2, tags=(tag,))
-                elif icon == "link":
-                    c.create_rectangle(tx, cy - 5, tx + 9, cy + 6, outline=WHITE, width=2, tags=(tag,))
-                    c.create_line(tx + 5, cy + 1, tx + 13, cy - 7, fill=WHITE, width=2, tags=(tag,))
-                    c.create_line(tx + 8, cy - 7, tx + 13, cy - 7, tx + 13, cy - 2, fill=WHITE, width=2, tags=(tag,))
-                else:
-                    c.create_oval(tx, cy - 5, tx + 12, cy + 5, outline=WHITE, width=2, tags=(tag,))
-                    c.create_oval(tx + 4, cy - 1.5, tx + 8, cy + 2.5, fill=WHITE, outline="", tags=(tag,))
-                tx += 24
-            c.create_text(tx, y + (h - 3) / 2, anchor="w", text=text, fill=WHITE, font=self.f["btn"], tags=(tag,))
-        else:         # os outros: vidro escuro com contorno fino; com o mouse a borda clareia e um filete acende embaixo
-            danger = text in self.DANGER_ACTIONS
-            col = "#e0857f" if danger else "#d9d2c5"
-            line = "#e0857f" if danger else self.accent
-            shape = c.create_rectangle(x, y, x + w, y + h, fill="#121010", outline="#3d3630", tags=(tag,))
-            under = c.create_line(x + 1, y + h - 1, x + w, y + h - 1, fill="#121010", width=2, tags=(tag,))
-            label = c.create_text(x + w / 2, y + h / 2, text=text, fill=col, font=self.f["btn"], tags=(tag,))
-            hover = [(shape, "#3d3630", "#8a8074"), (under, "#121010", line), (label, col, "#ffb0a8" if danger else WHITE)]
-        self._clickable(tag, lambda: (self._sound("prompt_enter" if primary else "enter"), cmd()),
-                        hover=hover, outline=not primary)
-        return x + w
+        """Botao desenhado (skin.py): o principal na cor do capitulo com brilho, os outros em vidro escuro;
+        Desinstalar/Remover em vermelho. Com o mouse troca para a versao acesa."""
+        c, up = self.c, text.upper()
+        style = "primary" if primary else ("danger" if up in self.DANGER_ACTIONS else "plain")
+        opts = dict(style=style, accent=self.accent, icon=self.ACTION_ICONS.get(up), height=44, size=12, glow=8,
+                    pad=24 if primary else 18)
+        normal = skin.button_photo(text, state="normal", **opts)
+        hot = lambda: skin.button_photo(text, state="hover", **opts)   # a versao acesa so e desenhada no primeiro hover
+        item = c.create_image(x - 8, y - 8, image=normal, anchor="nw", tags=(tag,))
+        self._clickable(tag, lambda: (self._sound("prompt_enter" if primary else "enter"), cmd()), hover=[(item, normal, hot)])
+        return x + normal.width() - 16
 
     def _clickable(self, tag, cmd, shape=None, hover=None, outline=False):
         """Clique + cursor de mão + reação ao passar o mouse.
@@ -1800,7 +1791,9 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             entry = self._clicks.get(tag, (None, [], False))
             for item, normal, hi in entry[1]:
                 try:
-                    if entry[2] and c.type(item) == "rectangle":   # botao de contorno: muda a borda
+                    if not isinstance(normal, str):   # botao desenhado: troca a imagem (a acesa pode vir de uma funcao)
+                        c.itemconfigure(item, image=(hi() if callable(hi) else hi) if on else normal)
+                    elif entry[2] and c.type(item) == "rectangle":   # botao de contorno: muda a borda
                         c.itemconfigure(item, outline=hi if on else normal)
                     else:
                         c.itemconfigure(item, fill=hi if on else normal)
@@ -1841,101 +1834,35 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         return text.rstrip() + "…"
 
     def _options_menu(self):
-        """Menu de Opcoes no visual do app: grupos com titulo, atalho a direita, fecha com Esc ou clique fora."""
+        """Menu de Opcoes desenhado (cantos suaves, icones, teclas de atalho): abre na hora e fecha com Esc ou clique fora."""
         name = self.chapter["titulo"] if self.chapter else "este capítulo"
         groups = [
-            ("Telas", [("Extras", "E", lambda: self.open_overlay("extras")), ("Perfil", "P", lambda: self.open_overlay("perfil")),
-                       ("Linha da história", "H", lambda: self.open_overlay("historia")),
-                       ("Personagens", "C", lambda: self.open_overlay("personagens")),
-                       ("Ofertas e lançamentos", "L", lambda: self.open_overlay("ofertas")), ("Foto do card", "F", self.photo_card)]),
-            ("Atualizar", [("Troféus de todos os jogos", "", self.refresh_all_trophies), ("Baixar as artes de novo", "", self.reload_art),
-                           ("Recarregar catálogo e jogos", "F5", self.rescan)]),
-            ("Música e sons", [(f"Música para {name}", "", self.pick_music),
-                               ("Pasta de músicas", "", lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True), os.startfile(audio.MUSIC)))]
-             + ([(f"Sons de menu para {name}", "", lambda: os.startfile(audio.theme_folder(self.chapter["id"])))] if self.chapter else [])
-             + [("Fluffy Mod Manager (mods)", "", self.open_fluffy)]),
-            ("Meus jogos e sites", [("Adicionar jogo ou site", "", self.add_custom),
-                                    ("Gerenciar e remover", "", self.manage_custom)]),
-            ("Canais", [("Ver vídeos e lives", "", lambda: (self.set_section("canais"), self.refresh())),
-                        ("YouTube e Twitch que o hub acompanha", "", self.channels_menu)]),
-            ("Sistema", [("Tela cheia", "F11", self.toggle_fullscreen),
-                         ("Pasta de dados", "", lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA))),
-                         ("Pasta do catálogo", "", lambda: os.startfile(ROOT / "games")),
-                         ("LEIA-ME", "", lambda: os.startfile(ROOT / "LEIA-ME.md")),
-                         (f"Sair do {FR['app']}", "", self.ask_quit)]),
+            ("Telas", [("Extras", "E", lambda: self.open_overlay("extras"), "grid"),
+                       ("Perfil", "P", lambda: self.open_overlay("perfil"), "user"),
+                       ("Linha da história", "H", lambda: self.open_overlay("historia"), "timeline"),
+                       ("Personagens", "C", lambda: self.open_overlay("personagens"), "users"),
+                       ("Ofertas e lançamentos", "L", lambda: self.open_overlay("ofertas"), "tag"),
+                       ("Foto do card", "F", self.photo_card, "image")]),
+            ("Meus jogos e sites", [("Adicionar jogo ou site", "", self.add_custom, "plus"),
+                                    ("Gerenciar e remover", "", self.manage_custom, "edit")]),
+            ("Canais", [("Vídeos e lives", "", lambda: (self.set_section("canais"), self.refresh()), "live"),
+                        ("Escolher canais do YouTube e Twitch", "", self.channels_menu, "tv")]),
+            ("Atualizar", [("Troféus de todos os jogos", "", self.refresh_all_trophies, "trophy"),
+                           ("Baixar as artes de novo", "", self.reload_art, "image"),
+                           ("Recarregar catálogo e jogos", "F5", self.rescan, "refresh")]),
+            ("Música e sons", [(f"Música para {name}", "", self.pick_music, "music"),
+                               ("Pasta de músicas", "", lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True), os.startfile(audio.MUSIC)), "folder")]
+             + ([(f"Sons de menu para {name}", "", lambda: os.startfile(audio.theme_folder(self.chapter["id"])), "folder")] if self.chapter else [])
+             + [("Fluffy Mod Manager (mods)", "", self.open_fluffy, "puzzle")]),
+            ("Sistema", [("Tela cheia", "F11", self.toggle_fullscreen, "screen"),
+                         ("Pasta de dados", "", lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA)), "folder"),
+                         ("Pasta do catálogo", "", lambda: os.startfile(ROOT / "games"), "folder"),
+                         ("LEIA-ME", "", lambda: os.startfile(ROOT / "LEIA-ME.md"), "doc"),
+                         (f"Sair do {FR['app']}", "", self.ask_quit, "power")]),
         ]
         self._sound("menu_on")
-        pop = tk.Toplevel(self)
-        pop.overrideredirect(True)
-        pop.configure(bg="#3b342d")
-        pop.attributes("-topmost", True)
-        card = tk.Frame(pop, bg=t.PANEL)
-        card.pack(fill="both", expand=True, padx=1, pady=1)
-        tk.Frame(card, bg=self.accent, height=3).pack(fill="x")
-        t.brand_row(card, t.PANEL, WHITE, "Opções").pack(fill="x", padx=18, pady=(12, 2))
-        tk.Frame(card, bg="#2c2723", height=1).pack(fill="x", padx=18, pady=(8, 0))
-        closed = {"v": False}
-
-        def close(e=None):
-            if closed["v"]:
-                return
-            closed["v"] = True
-            pop.destroy()
-            self._sound("menu_off")
-
-        def run(cmd):
-            close()
-            self.after(10, cmd)
-
-        cols = tk.Frame(card, bg=t.PANEL)   # duas colunas: o menu cabe na tela sem rolar
-        cols.pack(fill="both", padx=6)
-        half = (len(groups) + 1) // 2
-        for k, (title, items) in enumerate(groups):
-            if k == 0 or k == half:
-                colf = tk.Frame(cols, bg=t.PANEL, width=290)
-                colf.pack(side="left", fill="y", anchor="n", padx=(0, 4))
-                first = True
-            else:
-                first = False
-            t.section_title(colf, title, color=self.accent).pack(fill="x", padx=12, pady=(14 if first else 12, 4))
-            for label, key, cmd in items:
-                row = tk.Frame(colf, bg=t.PANEL, cursor="hand2")
-                row.pack(fill="x")
-                bar = tk.Frame(row, bg=t.PANEL, width=2)   # filete na cor do capitulo com o mouse
-                bar.pack(side="left", fill="y")
-                l1 = tk.Label(row, text=label, fg="#d9d2c5", bg=t.PANEL, font=(t.FONT, 10), anchor="w", padx=12, pady=5)
-                l1.pack(side="left", fill="x", expand=True)
-                l2 = tk.Label(row, text=key, fg=DIM, bg=t.PANEL, font=(t.FONT, 8, "bold"), padx=12)
-                if key:
-                    l2.config(text=f" {key} ", bg="#1d1a17", highlightthickness=1, highlightbackground="#3b342d")
-                l2.pack(side="right", padx=(0, 10))
-                ws = (row, l1)
-
-                def on(e, ws=ws, b=bar, l=l1):
-                    for x in ws:
-                        x.config(bg=t.PANEL_HI)
-                    b.config(bg=self.accent)
-                    l.config(fg=WHITE)
-
-                def off(e, ws=ws, b=bar, l=l1):
-                    for x in ws:
-                        x.config(bg=t.PANEL)
-                    b.config(bg=t.PANEL)
-                    l.config(fg="#d9d2c5")
-                for w in (row, l1, l2, bar):
-                    w.bind("<Button-1>", lambda e, c=cmd: run(c))
-                    w.bind("<Enter>", on)
-                    w.bind("<Leave>", off)
-        tk.Frame(card, bg=t.PANEL, height=10).pack()
-        pop.update_idletasks()
-        w, h = max(560, pop.winfo_reqwidth()), pop.winfo_reqheight()
-        x = min(self.winfo_pointerx() - w + 40, self.winfo_rootx() + self.winfo_width() - w - 12)
-        y = max(self.winfo_rooty() + 12, self.winfo_pointery() - h - 16)
-        y = min(y, self.winfo_rooty() + self.winfo_height() - h - 70)   # nunca passa da borda de baixo
-        pop.geometry(f"{w}x{h}+{max(0, x)}+{y}")
-        pop.bind("<Escape>", close)
-        pop.bind("<FocusOut>", lambda e: self.after(50, lambda: close() if pop.winfo_exists() and pop.focus_get() is None else None))
-        pop.focus_force()
+        skin.Menu(self, groups, self.winfo_rootx() + self.winfo_width() - MARGIN, self.winfo_rooty() + self.winfo_height() - 56,
+                  self.accent, title="Opções", columns=2, anchor="se", width=310, on_close=lambda: self._sound("menu_off"))
 
     # ---------- aviso rapido (toast) ----------
     def notify(self, text, secs=3.0):
@@ -2058,12 +1985,12 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         t.section_title(body, "Nome").pack(fill="x", pady=(0, 6))
         nome = tk.StringVar(value=(edit or {}).get("versao", ""))
         e1 = t.entry(body, nome)
-        e1.pack(fill="x", ipady=7)
+        e1.pack(fill="x")
         t.section_title(body, "Site ou programa").pack(fill="x", pady=(16, 6))
         alvo = tk.StringVar(value=(edit or {}).get("url") or (edit or {}).get("exe_fixo", ""))
         row = tk.Frame(body, bg=t.PANEL)
         row.pack(fill="x")
-        t.entry(row, alvo, width=40).pack(side="left", fill="x", expand=True, ipady=7)
+        t.entry(row, alvo, width=40).pack(side="left", fill="x", expand=True)
 
         def browse():
             exe = filedialog.askopenfilename(parent=top, title="Escolha o programa", filetypes=[("Programa", "*.exe"), ("Todos", "*.*")])
@@ -2089,12 +2016,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         detect()
         t.section_title(body, "Capítulo").pack(fill="x", pady=(16, 6))
         chv = tk.StringVar(value=cur)
-        om = tk.OptionMenu(body, chv, *names)
-        om.config(bg="#0f0d0c", fg=WHITE, activebackground=t.PANEL_HI, activeforeground=WHITE, relief="flat", font=(t.FONT, 11),
-                  highlightthickness=1, highlightbackground="#3b342d", anchor="w", indicatoron=False, cursor="hand2", padx=10)
-        om["menu"].config(bg=t.PANEL, fg=WHITE, activebackground=self.accent, activeforeground=WHITE, font=(t.FONT, 10),
-                          relief="flat", bd=0)
-        om.pack(fill="x", ipady=5)
+        t.dropdown(body, chv, names, self.accent).pack(fill="x")
         msg = tk.Label(body, text="", fg="#e0857f", bg=t.PANEL, font=(t.FONT, 10), anchor="w")
         msg.pack(fill="x", pady=(10, 0))
 

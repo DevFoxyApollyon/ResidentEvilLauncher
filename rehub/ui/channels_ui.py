@@ -266,7 +266,7 @@ class ChannelsUI:
         row.pack(fill="x")
         ref = tk.StringVar()
         e = t.entry(row, ref, width=30)
-        e.pack(side="left", fill="x", expand=True, ipady=7)
+        e.pack(side="left", fill="x", expand=True)
 
         def add(kind):
             v = ref.get().strip()
