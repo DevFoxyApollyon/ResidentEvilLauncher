@@ -1,0 +1,31 @@
+{
+  "id": "darkside_chronicles_andamento",
+  "ordem": 115.9,
+  "nome": "Resident Evil: The Darkside Chronicles — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "darkside_chronicles",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "Port de PC",
+    "url": "https://github.com/search?q=darkside+chronicles+decomp&type=repositories",
+    "status": "Nenhum projeto publico ainda."
+  },
+  "projetos": [
+    {
+      "nome": "Port de PC",
+      "url": "https://github.com/search?q=darkside+chronicles+decomp&type=repositories",
+      "status": "Nenhum projeto publico ainda."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Nenhum projeto publico ainda.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Boxarts/Resident%20Evil%20-%20The%20Darkside%20Chronicles%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/9/91/REDC_Cover.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Snaps/Resident%20Evil%20-%20The%20Darkside%20Chronicles%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

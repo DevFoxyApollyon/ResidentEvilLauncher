@@ -3,10 +3,9 @@
   "ordem": 1045,
   "nome": "Resident Evil: The Mercenaries 3D",
   "capitulo": "mercenaries3d",
-  "versao": "3DS (emulador)",
+  "versao": "3DS (Azahar)",
   "tipo": "local",
-  "args": "\"{iso}\"",
-  "dica": "Aponte um emulador de 3DS (por exemplo, o Azahar) e a SUA própria cópia do jogo.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
   "arte": {
     "capa": [
       "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_3DS/master/Named_Boxarts/Resident%20Evil%20-%20The%20Mercenaries%203D%20%28USA%29.png",
@@ -23,5 +22,9 @@
       "url": "https://github.com/azahar-emu/azahar",
       "status": "Sem port de PC ainda: emulador de 3DS com o seu jogo."
     }
+  ],
+  "emulador": "azahar",
+  "iso_busca": [
+    "mercenaries"
   ]
 }

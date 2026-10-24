@@ -3,8 +3,7 @@
   "ordem": 1030,
   "nome": "Resident Evil: Dead Aim",
   "tipo": "local",
-  "args": "\"{iso}\"",
-  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
   "projetos": [
     {
       "nome": "Bullseye",
@@ -18,7 +17,7 @@
     }
   ],
   "capitulo": "dead_aim",
-  "versao": "PS2 (emulador)",
+  "versao": "PS2 (PCSX2)",
   "poster": {
     "titulo": "DEAD AIM",
     "subtitulo": "PS2 · 2003"
@@ -32,5 +31,11 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Dead%20Aim%20%28USA%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "emulador": "pcsx2",
+  "iso_busca": [
+    "dead aim",
+    "gun survivor 4"
+  ],
+  "iso_serial": "SLUS-20669"
 }

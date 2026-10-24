@@ -1,0 +1,24 @@
+{
+  "id": "re0_wii",
+  "ordem": 10.7,
+  "nome": "Resident Evil Archives: Resident Evil Zero (Wii)",
+  "tipo": "local",
+  "emulador": "dolphin",
+  "iso_busca": [
+    "zero",
+    "resident evil 0",
+    "biohazard 0"
+  ],
+  "capitulo": "re0",
+  "versao": "Wii (Dolphin)",
+  "dica": "Versao de Wii pelo Dolphin, com mira por mouse ou controle. O hub baixa o Dolphin e procura a SUA ISO no PC; o jogo nao e baixado.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Boxarts/Resident%20Evil%20Archives%20-%20Resident%20Evil%20Zero%20%28USA%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Titles/Resident%20Evil%20Archives%20-%20Resident%20Evil%20Zero%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails (Wii)"
+  }
+}

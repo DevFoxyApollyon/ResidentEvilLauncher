@@ -1,0 +1,31 @@
+{
+  "id": "umbrella_chronicles_andamento",
+  "ordem": 125.9,
+  "nome": "Resident Evil: The Umbrella Chronicles — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "umbrella_chronicles",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "Port de PC",
+    "url": "https://github.com/search?q=umbrella+chronicles+decomp&type=repositories",
+    "status": "Nenhum projeto publico ainda."
+  },
+  "projetos": [
+    {
+      "nome": "Port de PC",
+      "url": "https://github.com/search?q=umbrella+chronicles+decomp&type=repositories",
+      "status": "Nenhum projeto publico ainda."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Nenhum projeto publico ainda.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Boxarts/Resident%20Evil%20-%20The%20Umbrella%20Chronicles%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/b/b5/Resident_Evil%2C_The_Umbrella_Chronicles_%282007_video_game%29.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Snaps/Resident%20Evil%20-%20The%20Umbrella%20Chronicles%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

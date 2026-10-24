@@ -1,0 +1,31 @@
+{
+  "id": "survivor_andamento",
+  "ordem": 1010.9,
+  "nome": "Resident Evil Survivor — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "survivor",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "Port de PC",
+    "url": "https://github.com/search?q=resident+evil+survivor+decomp&type=repositories",
+    "status": "Nenhum projeto publico ainda; o hub avisa quando surgir."
+  },
+  "projetos": [
+    {
+      "nome": "Port de PC",
+      "url": "https://github.com/search?q=resident+evil+survivor+decomp&type=repositories",
+      "status": "Nenhum projeto publico ainda; o hub avisa quando surgir."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Nenhum projeto publico ainda; o hub avisa quando surgir.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation/master/Named_Boxarts/Resident%20Evil%20-%20Survivor%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/e/e3/RE_Survivor_front.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation/master/Named_Titles/Resident%20Evil%20-%20Survivor%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "re1_wii",
+  "ordem": 20.7,
+  "nome": "Resident Evil Archives: Resident Evil (Wii)",
+  "tipo": "local",
+  "emulador": "dolphin",
+  "iso_busca": [
+    "archives resident evil",
+    "resident evil archives",
+    "biohazard"
+  ],
+  "capitulo": "re1",
+  "versao": "Wii (Dolphin)",
+  "dica": "Versao de Wii pelo Dolphin, com mira por mouse ou controle. O hub baixa o Dolphin e procura a SUA ISO no PC; o jogo nao e baixado.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Boxarts/Resident%20Evil%20Archives%20-%20Resident%20Evil%20%28USA%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Wii/master/Named_Titles/Resident%20Evil%20Archives%20-%20Resident%20Evil%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails (Wii)"
+  }
+}

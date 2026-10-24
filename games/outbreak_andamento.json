@@ -1,0 +1,31 @@
+{
+  "id": "outbreak_andamento",
+  "ordem": 31.9,
+  "nome": "Resident Evil Outbreak File #2 — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "outbreak",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "REOF2 (File #2)",
+    "url": "https://github.com/caprado/REOF2",
+    "status": "Decompilacao do File #2: chega ao menu, ainda nao jogavel."
+  },
+  "projetos": [
+    {
+      "nome": "REOF2 (File #2)",
+      "url": "https://github.com/caprado/REOF2",
+      "status": "Decompilacao do File #2: chega ao menu, ainda nao jogavel."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Decompilacao do File #2: chega ao menu, ainda nao jogavel.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Outbreak%20-%20File%202%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/9/9c/Resident_Evil_Outbreak_File_2.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Outbreak%20-%20File%202%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

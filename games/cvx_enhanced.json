@@ -36,5 +36,12 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Code%20-%20Veronica%20X%20%28USA%29.png"
     ],
     "fonte": "capa: libretro-thumbnails (PS2) / Wikipedia; fundo: arte oficial de Code: Veronica X (sem marca de console)"
-  }
+  },
+  "iso_busca": [
+    "code veronica",
+    "veronica x",
+    "recvx",
+    "cvx"
+  ],
+  "iso_serial": "SLUS-20184"
 }

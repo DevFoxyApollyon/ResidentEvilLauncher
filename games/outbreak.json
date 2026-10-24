@@ -3,10 +3,9 @@
   "ordem": 30,
   "nome": "Resident Evil Outbreak",
   "tipo": "local",
-  "args": "\"{iso}\"",
-  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
   "capitulo": "outbreak",
-  "versao": "File #1",
+  "versao": "PS2 (PCSX2)",
   "poster": {
     "titulo": "OUTBREAK",
     "subtitulo": "PS2 · 2003"
@@ -27,5 +26,10 @@
       "url": "https://github.com/PCSX2/pcsx2",
       "status": "Emulador de PS2 (o port de PC fica na versão ao lado)."
     }
-  ]
+  ],
+  "emulador": "pcsx2",
+  "iso_busca": [
+    "outbreak"
+  ],
+  "iso_serial": "SLUS-20765"
 }

@@ -1,0 +1,31 @@
+{
+  "id": "mercenaries3d_andamento",
+  "ordem": 1045.9,
+  "nome": "Resident Evil: The Mercenaries 3D — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "mercenaries3d",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "Port de PC",
+    "url": "https://github.com/search?q=mercenaries+3d+decomp&type=repositories",
+    "status": "Nenhum projeto publico ainda."
+  },
+  "projetos": [
+    {
+      "nome": "Port de PC",
+      "url": "https://github.com/search?q=mercenaries+3d+decomp&type=repositories",
+      "status": "Nenhum projeto publico ainda."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Nenhum projeto publico ainda.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_3DS/master/Named_Boxarts/Resident%20Evil%20-%20The%20Mercenaries%203D%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/4/40/The_Mercenaries_3D.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Nintendo_3DS/master/Named_Snaps/Resident%20Evil%20-%20The%20Mercenaries%203D%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

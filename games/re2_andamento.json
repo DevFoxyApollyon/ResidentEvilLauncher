@@ -1,0 +1,25 @@
+{
+  "id": "re2_andamento",
+  "ordem": 51.9,
+  "nome": "Resident Evil 2 — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "re2",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "OpenBiohazard2",
+    "url": "https://github.com/OpenBiohazard2/OpenBiohazard2",
+    "status": "Reimplementacao aberta do RE2 de 1998: ainda incompleta."
+  },
+  "projetos": [
+    {
+      "nome": "OpenBiohazard2",
+      "url": "https://github.com/OpenBiohazard2/OpenBiohazard2",
+      "status": "Reimplementacao aberta do RE2 de 1998: ainda incompleta."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Reimplementacao aberta do RE2 de 1998: ainda incompleta.",
+  "arte": {
+    "capa": "https://images.gog-statics.com/7cb6d5e76cf9829af4e0efecb73c38b730476ac7fc7bb519eafadebd2ded49c4.jpg",
+    "fundo": "https://images-3.gog-statics.com/d83359a65dc7ea0a2ed193dcac03995598ee5efc177427e5ae9ae7bd2e2b23c1.jpg"
+  }
+}

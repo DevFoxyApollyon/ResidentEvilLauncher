@@ -3,10 +3,9 @@
   "ordem": 1010,
   "nome": "Resident Evil Survivor",
   "capitulo": "survivor",
-  "versao": "PS1 (emulador)",
+  "versao": "PS1 (DuckStation)",
   "tipo": "local",
-  "args": "\"{iso}\"",
-  "dica": "Aponte o DuckStation (emulador de PS1) e a SUA própria imagem do jogo.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
   "poster": {
     "titulo": "SURVIVOR",
     "subtitulo": "PS1 · 2000"
@@ -27,5 +26,11 @@
       "url": "https://github.com/stenzek/duckstation",
       "status": "Sem port de PC ainda: emulador de PS1 com a sua ISO."
     }
-  ]
+  ],
+  "emulador": "duckstation",
+  "iso_busca": [
+    "survivor",
+    "gun survivor"
+  ],
+  "iso_serial": "SLUS-01087"
 }

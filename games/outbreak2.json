@@ -3,8 +3,7 @@
   "ordem": 31,
   "nome": "Resident Evil Outbreak File #2",
   "tipo": "local",
-  "args": "\"{iso}\"",
-  "dica": "Aponte o PCSX2 e a SUA própria ISO do jogo.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
   "projetos": [
     {
       "nome": "REOF2",
@@ -23,7 +22,7 @@
     }
   ],
   "capitulo": "outbreak",
-  "versao": "File #2",
+  "versao": "File #2 (PCSX2)",
   "poster": {
     "titulo": "OUTBREAK FILE #2",
     "subtitulo": "PS2 · 2004"
@@ -37,5 +36,13 @@
       "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Outbreak%20-%20File%202%20%28USA%29.png"
     ],
     "fonte": "capa: libretro-thumbnails / Wikipedia"
-  }
+  },
+  "emulador": "pcsx2",
+  "iso_busca": [
+    "file 2",
+    "file2",
+    "outbreak 2",
+    "file #2"
+  ],
+  "iso_serial": "SLUS-20984"
 }

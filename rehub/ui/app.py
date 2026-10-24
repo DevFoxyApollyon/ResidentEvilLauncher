@@ -18,7 +18,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFo
 
 from .. import audio, catalog, fluffy, fonts, gamepad, github, library, news, trailer, launcher, steam, store, trophies
 from ..mods import ModManager
-from .. import sources
+from .. import emulators, isofind, sources
 from ..franchise import FR, hex_rgb
 from ..paths import COVERS, DATA, ROOT
 from . import theme as t
@@ -1858,9 +1858,62 @@ class Hub(Screens, LoreScreens, tk.Tk):
             return acts
         if launcher.is_ready(g, self.cfg, self.installed):
             return [("Jogar", lambda: self.play(g), True), manage, ("Desinstalar", lambda: self.uninstall_game(g), False)]
+        if g.get("andamento"):   # port ainda em desenvolvimento: so acompanhar o projeto
+            return [("Acompanhar", lambda: webbrowser.open(g["andamento"]["url"]), True), manage]
+        if g.get("emulador"):
+            return [("Instalar", lambda: self.install_emulated(g), True), manage]
         if g.get("github"):
-            return [("Baixar", lambda: self.download_game(g), True), manage]
+            return [("Instalar", lambda: self.download_game(g), True), manage]
         return [("Configurar", lambda: self.configure_local(g), True), manage]
+
+    def ask_iso(self, g, parent=None):
+        """Pede a ISO/imagem da pessoa (a unica coisa que o hub nao baixa) e guarda. True se escolheu."""
+        e = emulators.of(g)
+        kinds = emulators.IMAGE_TYPES.get(g.get("emulador"), "*.iso *.bin *.cue *.chd")
+        if g.get("iso_busca"):   # procura sozinho no PC antes de pedir o arquivo
+            self.config(cursor="watch")
+            self.update()
+            try:
+                found = isofind.find(g["iso_busca"], {k[1:] for k in kinds.split()}, g.get("iso_serial"))
+            finally:
+                self.config(cursor="")
+            if found and messagebox.askyesno(FR["app"], f"Achei a imagem de {g['nome']}:\n\n{found[0]}\n\nUsar esta?",
+                                             parent=parent or self):
+                self.cfg.set(g["id"], iso=found[0])
+                return True
+        iso = filedialog.askopenfilename(parent=parent or self, title=f"{g['nome']}: escolha a SUA ISO/imagem do jogo",
+                                         filetypes=[(f"Imagem {e['sistema'] if e else ''}".strip(), kinds), ("Todos", "*.*")])
+        if not iso:
+            return False
+        self.cfg.set(g["id"], iso=iso)
+        return True
+
+    def install_emulated(self, g):
+        """Instalar de um jogo sem port: baixa o emulador certo (uma vez para todos os jogos dele) e pede so a ISO."""
+        e = emulators.of(g)
+        exe = emulators.find(g["emulador"])
+
+        def ready(path):
+            self.cfg.set(g["id"], exe=str(path))
+            if self.ask_iso(g):
+                messagebox.showinfo(FR["app"], f"{g['nome']} pronto: clique em Jogar ({e['nome']}).")
+            self.refresh()
+
+        if exe:
+            return ready(exe)
+        self.status_text = f"Baixando o {e['nome']}..."
+        self.refresh()
+
+        def done(result):
+            self.status_text = ""
+            ready(result[1])
+
+        def fail(msg):
+            self.status_text = ""
+            self.refresh()
+            messagebox.showerror(FR["app"], f"Falha ao baixar o {e['nome']}:\n{msg}")
+
+        t.in_background(self, lambda: emulators.install(g["emulador"]), done, fail)
 
     def uninstall_game(self, g, parent=None):
         """Desinstalar: na Steam, desativa os mods e abre a confirmação da Steam; nos outros, apaga só o que o app
@@ -1994,7 +2047,9 @@ class Hub(Screens, LoreScreens, tk.Tk):
             tag, exe = result
             if exe:
                 self.cfg.set(g["id"], exe=str(exe))
-            msg = f"{g['nome']} {tag} baixado."
+                if "{iso}" in g.get("args", "") and not self.cfg.get(g["id"]).get("iso"):
+                    self.ask_iso(g)   # o port abre a ISO da pessoa: ja pede agora
+            msg = f"{g['nome']} {tag} instalado."
             if g.get("depois_de_baixar"):
                 msg += "\n\nPróximo passo: " + g["depois_de_baixar"]
             elif not exe:

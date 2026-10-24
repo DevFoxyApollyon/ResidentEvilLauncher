@@ -6,7 +6,7 @@ import subprocess
 import threading
 from pathlib import Path
 
-from . import steam
+from . import emulators, steam
 from .paths import RECOMPS
 
 
@@ -37,7 +37,10 @@ def find_exe(game):
 def is_ready(game, cfg, installed):
     if game["tipo"] == "steam":
         return game["appid"] in installed
-    return bool(cfg.get(game["id"]).get("exe"))
+    c = cfg.get(game["id"])
+    if game.get("emulador"):   # emulador baixado pelo hub: precisa tambem da ISO da pessoa
+        return bool(c.get("exe") and c.get("iso"))
+    return bool(c.get("exe"))
 
 
 def play(game, cfg):
@@ -50,7 +53,7 @@ def play(game, cfg):
     exe = Path(c.get("exe", ""))
     if not exe.is_file():
         raise RuntimeError(f"Executável não encontrado:\n{exe}\n\nUse Configurar para escolher de novo.")
-    args = game.get("args", "")
+    args = emulators.args_for(game) or game.get("args", "")
     if "{iso}" in args and not c.get("iso"):
         raise RuntimeError("Esse jogo precisa da sua ISO. Clique em Configurar.")
     argv = split_args(args, c)

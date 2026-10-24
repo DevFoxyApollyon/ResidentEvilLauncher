@@ -3,10 +3,9 @@
   "ordem": 1005,
   "nome": "Resident Evil Gaiden",
   "capitulo": "gaiden",
-  "versao": "Game Boy Color (emulador)",
+  "versao": "Game Boy Color (mGBA)",
   "tipo": "local",
-  "args": "\"{iso}\"",
-  "dica": "Aponte um emulador de Game Boy Color (por exemplo, o mGBA) e a SUA própria ROM.",
+  "dica": "O hub baixa o emulador sozinho e procura a SUA ISO no PC; se nao achar, voce escolhe o arquivo. O jogo nao e baixado.",
   "arte": {
     "capa": [
       "https://raw.githubusercontent.com/libretro-thumbnails/Nintendo_-_Game_Boy_Color/master/Named_Boxarts/Resident%20Evil%20Gaiden%20%28USA%29.png",
@@ -23,5 +22,9 @@
       "url": "https://github.com/mgba-emu/mgba",
       "status": "Emulador de Game Boy Color (o port de PC fica na versão ao lado)."
     }
+  ],
+  "emulador": "mgba",
+  "iso_busca": [
+    "gaiden"
   ]
 }

@@ -1,0 +1,31 @@
+{
+  "id": "dead_aim_andamento",
+  "ordem": 1030.9,
+  "nome": "Resident Evil: Dead Aim — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "dead_aim",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "Port de PC",
+    "url": "https://github.com/search?q=resident+evil+dead+aim+decomp&type=repositories",
+    "status": "Nenhum projeto publico ainda."
+  },
+  "projetos": [
+    {
+      "nome": "Port de PC",
+      "url": "https://github.com/search?q=resident+evil+dead+aim+decomp&type=repositories",
+      "status": "Nenhum projeto publico ainda."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Nenhum projeto publico ainda.",
+  "arte": {
+    "capa": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Dead%20Aim%20%28USA%29.png",
+      "https://upload.wikimedia.org/wikipedia/en/a/a5/Residentevildeadaim.jpg"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Dead%20Aim%20%28USA%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}

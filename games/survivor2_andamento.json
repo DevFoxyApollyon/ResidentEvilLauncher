@@ -1,0 +1,31 @@
+{
+  "id": "survivor2_andamento",
+  "ordem": 1020.9,
+  "nome": "Resident Evil Survivor 2 – Code: Veronica — Port de PC (em andamento)",
+  "tipo": "local",
+  "capitulo": "survivor2",
+  "versao": "Port de PC (em andamento)",
+  "andamento": {
+    "nome": "Port de PC",
+    "url": "https://github.com/search?q=resident+evil+survivor+2+decomp&type=repositories",
+    "status": "Nenhum projeto publico ainda."
+  },
+  "projetos": [
+    {
+      "nome": "Port de PC",
+      "url": "https://github.com/search?q=resident+evil+survivor+2+decomp&type=repositories",
+      "status": "Nenhum projeto publico ainda."
+    }
+  ],
+  "dica": "Ainda nao ha port de PC jogavel. Nenhum projeto publico ainda.",
+  "arte": {
+    "capa": [
+      "https://upload.wikimedia.org/wikipedia/en/c/ca/RESurvivor2CV.jpg",
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%20-%20Survivor%202%20-%20Code%20-%20Veronica%20%28Europe%29.png"
+    ],
+    "fundo": [
+      "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Titles/Resident%20Evil%20-%20Survivor%202%20-%20Code%20-%20Veronica%20%28Europe%29.png"
+    ],
+    "fonte": "capa: libretro-thumbnails / Wikipedia"
+  }
+}
