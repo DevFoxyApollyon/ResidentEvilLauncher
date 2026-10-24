@@ -264,7 +264,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
 
         self._pil, self._tiles, self._remote, self._remote_pending = {}, {}, {}, set()
         self._tile_base, self._halos, self._halo_base = {}, {}, {}
-        self._clicks, self._bound = {}, set()  # ações dos botões (ligadas ao Tk uma vez só)
+        self._clicks, self._bound, self._last_click, self._launching = {}, set(), {}, {}  # ações dos botões (ligadas ao Tk uma vez só)
         self._bg_key, self._bg_photo, self._bg_pil, self._render_job = None, None, None, None
         self._bg_pending, self._fade, self._preloaded = None, None, False  # troca de fundo com transição suave
         self._panel_box = (0, 0, 0, 0)
@@ -1748,7 +1748,15 @@ class Hub(Screens, LoreScreens, tk.Tk):
         def leave(e):
             c.config(cursor="")
             paint(False)
-        c.tag_bind(tag, "<Button-1>", lambda e: self._clicks[tag][0]())
+        def click(e):
+            now = time.time()
+            last = self._last_click.get(tag, 0)
+            self._last_click[tag] = now
+            if now - last < 1.2:   # duplo clique: o primeiro ja foi aceito
+                self.notify("Um clique ja basta: estou fazendo isso.")
+                return
+            self._clicks[tag][0]()
+        c.tag_bind(tag, "<Button-1>", click)
         c.tag_bind(tag, "<Enter>", enter)
         c.tag_bind(tag, "<Leave>", leave)
 
@@ -1767,38 +1775,87 @@ class Hub(Screens, LoreScreens, tk.Tk):
         return text.rstrip() + "…"
 
     def _options_menu(self):
-        m = tk.Menu(self, tearoff=0, bg=t.PANEL, fg=WHITE, activebackground=t.PANEL_HI, activeforeground=WHITE,
-                    font=(t.FONT, 10), bd=0)
-        for kind, label, _, key in (("extras", "Extras", "", "E"), ("perfil", "Perfil", "", "P"),
-                                    ("historia", "Linha da história", "", "H"), ("personagens", "Personagens", "", "C"),
-                                    ("ofertas", "Ofertas e lançamentos", "", "L")):
-            m.add_command(label=f"{label} ({key})", command=lambda k=kind: self.open_overlay(k))
-        m.add_command(label="Foto do card (F)", command=self.photo_card)
-        m.add_separator()
-        m.add_command(label="Atualizar troféus de todos os jogos", command=self.refresh_all_trophies)
-        m.add_command(label="Baixar as artes de novo", command=self.reload_art)
-        m.add_command(label="Recarregar catálogo e jogos instalados (F5)", command=self.rescan)
-        m.add_separator()
+        """Menu de Opcoes no visual do app: grupos com titulo, atalho a direita, fecha com Esc ou clique fora."""
         name = self.chapter["titulo"] if self.chapter else "este capítulo"
-        m.add_command(label=f"Escolher música para {name}...", command=self.pick_music)
-        m.add_command(label="Abrir pasta de músicas", command=lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True),
-                                                                       os.startfile(audio.MUSIC)))
-        if self.chapter:
-            m.add_command(label=f"Sons de menu para {name}...", command=lambda: os.startfile(audio.theme_folder(self.chapter["id"])))
-        m.add_command(label="Abrir Fluffy Mod Manager (mods)", command=self.open_fluffy)
-        m.add_separator()
-        m.add_command(label="Tela cheia (F11)", command=self.toggle_fullscreen)
-        m.add_command(label="Abrir pasta de dados", command=lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA)))
-        m.add_command(label="Abrir pasta do catálogo (games)", command=lambda: os.startfile(ROOT / "games"))
-        m.add_command(label="Abrir LEIA-ME", command=lambda: os.startfile(ROOT / "LEIA-ME.md"))
-        m.add_separator()
-        m.add_command(label=f"Sair do {FR['app']}", command=self.quit_app)
+        groups = [
+            ("Telas", [("Extras", "E", lambda: self.open_overlay("extras")), ("Perfil", "P", lambda: self.open_overlay("perfil")),
+                       ("Linha da história", "H", lambda: self.open_overlay("historia")),
+                       ("Personagens", "C", lambda: self.open_overlay("personagens")),
+                       ("Ofertas e lançamentos", "L", lambda: self.open_overlay("ofertas")), ("Foto do card", "F", self.photo_card)]),
+            ("Atualizar", [("Troféus de todos os jogos", "", self.refresh_all_trophies), ("Baixar as artes de novo", "", self.reload_art),
+                           ("Recarregar catálogo e jogos", "F5", self.rescan)]),
+            ("Música e sons", [(f"Música para {name}", "", self.pick_music),
+                               ("Pasta de músicas", "", lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True), os.startfile(audio.MUSIC)))]
+             + ([(f"Sons de menu para {name}", "", lambda: os.startfile(audio.theme_folder(self.chapter["id"])))] if self.chapter else [])
+             + [("Fluffy Mod Manager (mods)", "", self.open_fluffy)]),
+            ("Sistema", [("Tela cheia", "F11", self.toggle_fullscreen),
+                         ("Pasta de dados", "", lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA))),
+                         ("Pasta do catálogo", "", lambda: os.startfile(ROOT / "games")),
+                         ("LEIA-ME", "", lambda: os.startfile(ROOT / "LEIA-ME.md")),
+                         (f"Sair do {FR['app']}", "", self.ask_quit)]),
+        ]
         self._sound("menu_on")
-        try:
-            m.tk_popup(self.winfo_pointerx(), self.winfo_pointery())  # no Windows, volta quando o menu fecha
-        finally:
-            m.grab_release()
+        pop = tk.Toplevel(self)
+        pop.overrideredirect(True)
+        pop.configure(bg="#3b342d")
+        pop.attributes("-topmost", True)
+        card = tk.Frame(pop, bg=t.PANEL)
+        card.pack(fill="both", expand=True, padx=1, pady=1)
+        tk.Frame(card, bg=self.accent, height=3).pack(fill="x")
+        closed = {"v": False}
+
+        def close(e=None):
+            if closed["v"]:
+                return
+            closed["v"] = True
+            pop.destroy()
             self._sound("menu_off")
+
+        def run(cmd):
+            close()
+            self.after(10, cmd)
+
+        for k, (title, items) in enumerate(groups):
+            tk.Label(card, text=title.upper(), fg=self.accent, bg=t.PANEL, font=(t.FONT, 8, "bold"), anchor="w").pack(
+                fill="x", padx=18, pady=(12 if k == 0 else 10, 2))
+            for label, key, cmd in items:
+                row = tk.Frame(card, bg=t.PANEL, cursor="hand2")
+                row.pack(fill="x")
+                l1 = tk.Label(row, text=label, fg=WHITE, bg=t.PANEL, font=(t.FONT, 10), anchor="w", padx=18, pady=3)
+                l1.pack(side="left", fill="x", expand=True)
+                l2 = tk.Label(row, text=key, fg=DIM, bg=t.PANEL, font=(t.FONT, 9, "bold"), padx=16)
+                l2.pack(side="right")
+                for w in (row, l1, l2):
+                    w.bind("<Button-1>", lambda e, c=cmd: run(c))
+                    w.bind("<Enter>", lambda e, ws=(row, l1, l2): [x.config(bg=t.PANEL_HI) for x in ws])
+                    w.bind("<Leave>", lambda e, ws=(row, l1, l2): [x.config(bg=t.PANEL) for x in ws])
+        tk.Frame(card, bg=t.PANEL, height=10).pack()
+        pop.update_idletasks()
+        w, h = max(300, pop.winfo_reqwidth()), pop.winfo_reqheight()
+        x = min(self.winfo_pointerx() - w + 40, self.winfo_rootx() + self.winfo_width() - w - 12)
+        y = max(self.winfo_rooty() + 12, self.winfo_pointery() - h - 16)
+        y = min(y, self.winfo_rooty() + self.winfo_height() - h - 70)   # nunca passa da borda de baixo
+        pop.geometry(f"{w}x{h}+{max(0, x)}+{y}")
+        pop.bind("<Escape>", close)
+        pop.bind("<FocusOut>", lambda e: self.after(50, lambda: close() if pop.winfo_exists() and pop.focus_get() is None else None))
+        pop.focus_force()
+
+    # ---------- aviso rapido (toast) ----------
+    def notify(self, text, secs=3.0):
+        """Aviso curto embaixo da tela (ex.: 'Abrindo o jogo...'): some sozinho, nao bloqueia nada."""
+        lab = getattr(self, "_toast_lbl", None)
+        if lab is None or not lab.winfo_exists():
+            box = tk.Frame(self, bg=self.accent)
+            lab = tk.Label(box, bg=t.PANEL, fg=WHITE, font=(t.FONT, 12), padx=22, pady=10)
+            lab.pack(padx=(4, 0))
+            self._toast_lbl, self._toast_box = lab, box
+        lab.config(text=text)
+        self._toast_box.config(bg=self.accent)
+        self._toast_box.place(relx=0.5, rely=1.0, y=-96, anchor="s")
+        self._toast_box.lift()
+        if getattr(self, "_toast_job", None):
+            self.after_cancel(self._toast_job)
+        self._toast_job = self.after(int(secs * 1000), self._toast_box.place_forget)
 
     # ---------- estado e ações ----------
     def _state(self, g):
@@ -1902,6 +1959,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
         if exe:
             return ready(exe)
         self.status_text = f"Baixando o {e['nome']}..."
+        self.notify(f"Baixando o {e['nome']}... aguarde, nao precisa clicar de novo.", 5)
         self.refresh()
 
         def done(result):
@@ -1997,6 +2055,12 @@ class Hub(Screens, LoreScreens, tk.Tk):
         threading.Thread(target=self._fetch_art, daemon=True).start()
 
     def play(self, g):
+        now = time.time()
+        if now - self._launching.get(g["id"], 0) < 10:
+            self.notify(f"{g['nome']} ja esta abrindo. Nao precisa clicar de novo.")
+            return
+        self._launching[g["id"]] = now
+        self.notify(f"Abrindo {g['nome']}... pode levar alguns segundos.", 5)
         try:
             if g["tipo"] != "steam":  # a Steam já guarda quando você jogou; os outros, o app guarda
                 self.cfg.set(g["id"], ultima=int(time.time()))
@@ -2031,6 +2095,7 @@ class Hub(Screens, LoreScreens, tk.Tk):
     def download_game(self, g, on_done=None):
         """Baixa/atualiza o recomp/decomp do GitHub sem apagar saves e assets já colocados."""
         self.status_text = f"Baixando {g['nome']}..."
+        self.notify(f"Baixando {g['nome']}... aguarde, nao precisa clicar de novo.", 5)
         self.refresh()
 
         def work():

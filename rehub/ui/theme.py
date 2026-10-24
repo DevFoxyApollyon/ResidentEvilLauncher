@@ -63,48 +63,62 @@ class ScrollFrame(tk.Frame):
 
 # ---------- caixas de diálogo e interruptor no visual do app (no lugar das caixas brancas do Windows) ----------
 def _dialog(parent, title, message, details=(), buttons=(("OK", True, "primary"),), icon="!", accent=RED):
-    """Janela escura modal. buttons: (texto, valor devolvido, estilo 'primary'|'danger'|'plain'). Devolve o valor."""
-    top = tk.Toplevel(parent)
+    """Janela modal no visual do app: a tela escurece atras, um cartao reto com filete na cor do aviso.
+    buttons: (texto, valor devolvido, estilo 'primary'|'danger'|'plain'). Enter = ultimo botao, Esc = fechar."""
+    p = parent.winfo_toplevel()
+    shade = tk.Toplevel(p)   # escurece o hub atras do aviso
+    shade.overrideredirect(True)
+    shade.configure(bg="#000000")
+    shade.geometry(f"{p.winfo_width()}x{p.winfo_height()}+{p.winfo_rootx()}+{p.winfo_rooty()}")
+    shade.attributes("-alpha", 0.55)
+    shade.attributes("-topmost", True)
+    top = tk.Toplevel(p)
     top.withdraw()
+    top.overrideredirect(True)
     top.title(FR["app"])
-    top.configure(bg=PANEL)
-    top.resizable(False, False)
-    top.transient(parent.winfo_toplevel())
+    top.configure(bg="#3b342d")   # a borda de 1 px
     result = {"v": None}
 
     def close(v):
         result["v"] = v
         top.destroy()
+        shade.destroy()
 
-    tk.Frame(top, bg=accent, height=3).pack(fill="x")
-    body = tk.Frame(top, bg=PANEL)
-    body.pack(fill="both", padx=26, pady=(20, 10))
-    ic = tk.Canvas(body, width=44, height=44, bg=PANEL, highlightthickness=0)
-    ic.create_oval(2, 2, 42, 42, fill=accent, outline="")
-    ic.create_text(22, 22, text=icon, fill="white", font=(FONT, 18, "bold"))
-    ic.pack(side="left", anchor="n", padx=(0, 16))
-    txt = tk.Frame(body, bg=PANEL)
-    txt.pack(side="left", fill="both")
-    label(txt, title, 13, bold=True, wraplength=380).pack(fill="x")
-    label(txt, message, 10, fg="#c4bcae", wraplength=380).pack(fill="x", pady=(6, 0))
+    card = tk.Frame(top, bg=PANEL)
+    card.pack(fill="both", expand=True, padx=1, pady=1)
+    tk.Frame(card, bg=accent, height=3).pack(fill="x")
+    body = tk.Frame(card, bg=PANEL)
+    body.pack(fill="both", padx=30, pady=(22, 6))
+    tk.Label(body, text=FR["app"].upper(), fg=accent, bg=PANEL, font=(FONT, 9, "bold"), anchor="w").pack(fill="x")
+    tk.Label(body, text=title, fg=TEXT, bg=PANEL, font=(FONT, 17, "bold"), anchor="w", justify="left",
+             wraplength=440).pack(fill="x", pady=(4, 0))
+    tk.Label(body, text=message, fg="#c4bcae", bg=PANEL, font=(FONT, 11), anchor="w", justify="left",
+             wraplength=440).pack(fill="x", pady=(8, 0))
     for d in details:
-        label(txt, "•  " + d, 9, fg=MUTED, wraplength=380).pack(fill="x", pady=(3, 0))
-    bar = tk.Frame(top, bg=BG)
-    bar.pack(fill="x", side="bottom")
+        tk.Label(body, text="—  " + d, fg=MUTED, bg=PANEL, font=(FONT, 10), anchor="w", justify="left",
+                 wraplength=440).pack(fill="x", pady=(3, 0))
+    bar = tk.Frame(card, bg=PANEL)
+    bar.pack(fill="x", padx=30, pady=(18, 24))
+    styles = {"primary": (accent, TEXT, accent), "danger": ("#c0392b", TEXT, "#c0392b"), "plain": (PANEL, TEXT, "#4a423a")}
     for text, value, style in reversed(buttons):
-        bg = {"primary": RED, "danger": "#c0392b"}.get(style, PANEL_HI)
-        tk.Button(bar, text=text, command=lambda v=value: close(v), bd=0, cursor="hand2", padx=18, pady=7,
-                  font=(FONT, 10, "bold" if style != "plain" else "normal"), bg=bg, fg=TEXT,
-                  activebackground=RED_DARK, activeforeground=TEXT).pack(side="right", padx=(0, 10), pady=12)
+        bg, fg, border = styles.get(style, styles["plain"])
+        hover = "#e04a3c" if style == "danger" else ("#d0343c" if style == "primary" else PANEL_HI)
+        b = tk.Label(bar, text=text.upper(), bg=bg, fg=fg, font=(FONT, 10, "bold"), padx=22, pady=9, cursor="hand2",
+                     highlightthickness=1, highlightbackground=border)
+        b.pack(side="right", padx=(10, 0))
+        b.bind("<Button-1>", lambda e, v=value: close(v))
+        b.bind("<Enter>", lambda e, w=b, h=hover: w.config(bg=h))
+        b.bind("<Leave>", lambda e, w=b, c=bg: w.config(bg=c))
     top.bind("<Escape>", lambda e: close(None))
+    top.bind("<Return>", lambda e: close(buttons[-1][1]))
     top.protocol("WM_DELETE_WINDOW", lambda: close(None))
     top.update_idletasks()
-    p = parent.winfo_toplevel()
-    x = p.winfo_rootx() + (p.winfo_width() - top.winfo_reqwidth()) // 2
+    w = max(top.winfo_reqwidth(), 500)
+    x = p.winfo_rootx() + (p.winfo_width() - w) // 2
     y = p.winfo_rooty() + (p.winfo_height() - top.winfo_reqheight()) // 3
-    top.geometry(f"+{max(0, x)}+{max(0, y)}")
+    top.geometry(f"{w}x{top.winfo_reqheight()}+{max(0, x)}+{max(0, y)}")
     top.deiconify()
-    top.attributes("-topmost", True)  # sempre na frente, inclusive da tela cheia (atrás dela o app parecia travado)
+    top.attributes("-topmost", True)  # sempre na frente, inclusive da tela cheia (atras dela o app parecia travado)
     top.lift()
     top.grab_set()
     top.focus_force()
