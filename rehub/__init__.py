@@ -1,1 +1,1 @@
-"""RE Hub: todos os Resident Evil em um lugar só."""
+"""RE Launcher: todos os Resident Evil em um lugar só."""

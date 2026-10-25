@@ -1,27 +1,23 @@
 {
   "id": "cvx_enhanced",
   "ordem": 62,
-  "nome": "Code: Veronica X — Port de PC (PT-BR)",
+  "nome": "Code: Veronica X — Port de PC (recvx-enhanced-port)",
   "tipo": "local",
-  "github": "DevFoxyApollyon/recvx-ptbr",
+  "github": "aikatore/recvx-enhanced-port",
   "asset": "recvx-enhanced-port-*-windows-x86.zip",
   "exe": "recvx.exe",
   "args": "\"{iso}\"",
-  "preparar": {
-    "cmd": "tools/ptbr_mods.py --iso \"{iso}\" --mods mods --exe recvx.exe",
-    "aviso": "Preparando a tradução a partir da sua ISO (textos e menus). Na primeira vez leva alguns minutos; o jogo abre sozinho quando terminar."
-  },
-  "dica": "Versão própria do port nativo de PC (baseado no aikatore/recvx-enhanced-port, MIT): 3D na GPU, widescreen, até 8x de resolução, 60+ fps, terceira pessoa opcional, co-op online e fonte com acentos para a tradução PT-BR. Precisa da SUA ISO americana do PS2 (SLUS-20184).",
+  "dica": "Port nativo de PC do aikatore/recvx-enhanced-port (MIT): 3D na GPU, widescreen, até 8x de resolução, 60+ fps, terceira pessoa opcional e co-op online. Precisa da SUA ISO americana do PS2 (SLUS-20184).",
   "depois_de_baixar": "clique em Configurar, confirme o recvx.exe e escolha a sua ISO (PS2, NTSC-U, SLUS-20184). No jogo, F1 abre as configurações (terceira pessoa, widescreen, resolução) e F3 o co-op.",
   "projetos": [
     {
-      "nome": "recvx-enhanced-port (DevFoxyApollyon)",
-      "url": "https://github.com/DevFoxyApollyon/recvx-enhanced-port",
-      "status": "Port de PC usado por este hub: menus em português, fonte com acentos e ferramentas de tradução PT-BR."
+      "nome": "recvx-enhanced-port (aikatore)",
+      "url": "https://github.com/aikatore/recvx-enhanced-port",
+      "status": "Port de PC usado por este hub (pre-releases, baixa a mais nova)."
     }
   ],
   "capitulo": "veronica",
-  "versao": "Port de PC (PT-BR)",
+  "versao": "Port de PC",
   "poster": {
     "titulo": "CODE: VERONICA X",
     "subtitulo": "Port de PC · 2026"

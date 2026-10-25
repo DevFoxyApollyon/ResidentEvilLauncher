@@ -1,0 +1,29 @@
+{
+  "id": "re4_android_cube",
+  "ordem": 81.85,
+  "nome": "Resident Evil 4 — Android (protótipo do GameCube)",
+  "tipo": "local",
+  "capitulo": "re4",
+  "versao": "Android (CubeEvil4)",
+  "mobile": "android",
+  "url": "https://github.com/Andiweli/CubeEvil4-Android/releases/latest",
+  "acao": "Baixar APK",
+  "dica": "Port nativo para Android (beta) do protótipo de RE4 para GameCube (build de depuração de novembro de 2004), sem emulador: OpenGL ES 3, controle ou toque, Android 6.0+. Não traz o jogo: precisa das SUAS imagens dos dois discos desse protótipo (G4BE08).",
+  "projetos": [
+    {
+      "nome": "CubeEvil4-Android (Andiweli)",
+      "url": "https://github.com/Andiweli/CubeEvil4-Android",
+      "status": "Beta 0.90.1 (outubro de 2026)."
+    }
+  ],
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}

@@ -1,4 +1,4 @@
-"""Pastas usadas pelo RE Hub."""
+"""Pastas usadas pelo RE Launcher."""
 import sys
 from pathlib import Path
 

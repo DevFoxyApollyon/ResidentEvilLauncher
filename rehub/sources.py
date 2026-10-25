@@ -50,6 +50,14 @@ def label(game):
 
 def steps(game):
     """Como instalar e jogar esta versão, passo a passo, no caminho qué ela usa."""
+    if game.get("mobile") == "ios":
+        return ["Esta versão é jogada no iPhone, iPad ou Mac: clique em Abrir na App Store e baixe pelo aparelho.",
+                "Precisa de iPhone 15 Pro ou mais novo, ou iPad/Mac com chip Apple M1 ou mais novo.",
+                "O download é grátis e tem um trecho para testar; o jogo completo é comprado dentro do app."]
+    if game.get("mobile") == "android":
+        return ["Clique em Baixar APK e baixe o .apk da última release no celular Android (64 bits).",
+                "Instale o .apk (o Android pede para permitir apps de fora da Play Store).",
+                "Abra o jogo e escolha a SUA ROM americana (.gbc)."]
     if game.get("meu"):
         return ["Versão que você adicionou em Opções > Adicionar jogo ou site.",
                 "Clique em Jogar: abre " + ("o site no navegador." if game.get("url") else "o executável que você escolheu."),

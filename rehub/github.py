@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import tempfile
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -17,6 +18,25 @@ ROOT_FOLDERS = {"natives", "reframework", "nativepc", "data", "usa", "jpn", "dc"
 
 def _open(url, timeout=30):
     return urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=timeout)
+
+
+def copy_progress(r, f, progress=None, cancelled=lambda: False):
+    """Copia a resposta para f em blocos e chama progress(feito, total, bytes/s, segundos restantes) ~4x por segundo."""
+    total = int(r.headers.get("Content-Length") or 0)
+    done, start, last = 0, time.monotonic(), 0.0
+    while True:
+        if cancelled():
+            raise RuntimeError("Download cancelado.")
+        chunk = r.read(1 << 20)
+        if not chunk:
+            break
+        f.write(chunk)
+        done += len(chunk)
+        now = time.monotonic()
+        if progress and (now - last >= 0.25 or done == total):
+            last = now
+            speed = done / max(now - start, 1e-6)
+            progress(done, total, speed, (total - done) / speed if total and speed else None)
 
 
 def latest_release(repo):
@@ -35,7 +55,7 @@ def latest_release(repo):
     return releases[0]
 
 
-def download_release(repo, pattern, dest, merge=False):
+def download_release(repo, pattern, dest, merge=False, progress=None, cancelled=lambda: False):
     """Baixa o asset da última release que casa com `pattern` (ex.: '*windows*.zip').
 
     merge=False: dest vira exatamente o conteúdo do zip.
@@ -53,7 +73,7 @@ def download_release(repo, pattern, dest, merge=False):
     with tempfile.TemporaryDirectory() as tmp:
         zip_path = Path(tmp) / asset["name"]
         with _open(asset["browser_download_url"], timeout=300) as r, open(zip_path, "wb") as f:
-            shutil.copyfileobj(r, f)
+            copy_progress(r, f, progress, cancelled)
         if merge:
             staged = Path(tmp) / "staged"
             extract_zip(zip_path, staged)
@@ -63,7 +83,7 @@ def download_release(repo, pattern, dest, merge=False):
     return release.get("tag_name", "?")
 
 
-def download_asset(repo, pattern, dest_dir):
+def download_asset(repo, pattern, dest_dir, progress=None, cancelled=lambda: False):
     """Baixa so o arquivo da release (ex.: o instalador .exe de um projeto) para dest_dir. Devolve (tag, caminho)."""
     release = latest_release(repo)
     asset = next((a for a in release.get("assets", []) if fnmatch.fnmatch(a["name"].lower(), pattern.lower())), None)
@@ -73,7 +93,7 @@ def download_asset(repo, pattern, dest_dir):
     dest_dir.mkdir(parents=True, exist_ok=True)
     path = dest_dir / asset["name"]
     with _open(asset["browser_download_url"], timeout=600) as r, open(path, "wb") as f:
-        shutil.copyfileobj(r, f, 1 << 20)
+        copy_progress(r, f, progress, cancelled)
     return release.get("tag_name", "?"), path
 
 

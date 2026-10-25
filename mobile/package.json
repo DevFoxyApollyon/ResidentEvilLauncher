@@ -1,0 +1,19 @@
+{
+  "name": "re-launcher-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RE Launcher para Android: linha do tempo, ports para celular, notícias e lives de Resident Evil.",
+  "scripts": {
+    "dados": "python ../tools/mobile_data.py",
+    "sync": "npx cap sync android",
+    "apk": "cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "7.6.9",
+    "@capacitor/browser": "7.0.5",
+    "@capacitor/core": "7.6.9"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.6.9"
+  }
+}

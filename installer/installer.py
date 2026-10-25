@@ -1,12 +1,12 @@
-"""Instalador do RE Hub: um .exe so (tools/build_installer.py) que traz o app inteiro.
+"""Instalador do RE Launcher: um .exe so (tools/build_installer.py) que traz o app inteiro.
 
-Instala em %LOCALAPPDATA%\\Programs\\RE Hub (ou na pasta escolhida), cria os atalhos na area de
+Instala em %LOCALAPPDATA%\\Programs\\RE Launcher (ou na pasta escolhida), cria os atalhos na area de
 trabalho e no menu Iniciar e registra o desinstalador em "Adicionar ou remover programas"
 (so para este usuario: nada pede administrador). A pasta data/ de uma instalacao anterior
 (configuracoes, jogos baixados, mods, musicas suas) nunca e apagada nem sobrescrita.
 
-    "RE Hub - Instalar.exe"               instala (janela)
-    "RE Hub - Instalar.exe" --uninstall   desinstala (o atalho do Windows chama assim)
+    "RE Launcher - Instalar.exe"          instala (janela)
+    "RE Launcher - Instalar.exe" --uninstall   desinstala (o atalho do Windows chama assim)
 """
 import os
 import shutil
@@ -19,9 +19,9 @@ import zipfile
 from pathlib import Path
 from tkinter import filedialog
 
-APP = "RE Hub"
-EXE = "RE Hub.exe"
-UNINSTALLER = "Desinstalar RE Hub.exe"
+APP = "RE Launcher"
+EXE = "RE Launcher.exe"
+UNINSTALLER = "Desinstalar RE Launcher.exe"
 REG = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\REHub"
 DEFAULT = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "Programs" / APP
 BG, PANEL, LINE, TEXT, MUTED, RED = "#0b0a09", "#151311", "#2c2723", "#ece6da", "#958c80", "#b3121b"
@@ -61,7 +61,7 @@ def places():
     return desk / f"{APP}.lnk", menu / f"{APP}.lnk"
 
 
-def install(dest, progress):
+def install(dest, progress, desktop=True):
     dest = Path(dest)
     dest.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(payload()) as z:
@@ -78,9 +78,12 @@ def install(dest, progress):
                 progress(i / len(names))
     shutil.copy2(sys.executable, dest / UNINSTALLER)
     exe, icon = dest / EXE, dest / "re_hub.ico"
-    for lnk in places():
+    desk, menu = places()
+    for lnk in ([desk] if desktop else []) + [menu]:
         lnk.parent.mkdir(parents=True, exist_ok=True)
         shortcut(lnk, exe, dest, icon if icon.exists() else exe)
+    if not desktop and desk.exists():   # desmarcou: tira o atalho que uma instalacao anterior criou
+        desk.unlink()
     size = sum(f.stat().st_size for f in dest.rglob("*") if f.is_file() and "data" not in f.parts) // 1024
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, REG) as k:
         for name, value in (("DisplayName", APP), ("DisplayVersion", version()), ("Publisher", "DevFoxyApollyon"),
@@ -113,7 +116,7 @@ class Window(tk.Tk):
         tk.Frame(self, bg=RED, height=3).pack(fill="x")
         body = tk.Frame(self, bg=BG, padx=34, pady=26)
         body.pack(fill="both")
-        tk.Label(body, text="RE HUB", fg=TEXT, bg=BG, font=(FONT, 26, "bold"), anchor="w").pack(fill="x")
+        tk.Label(body, text=APP.upper(), fg=TEXT, bg=BG, font=(FONT, 26, "bold"), anchor="w").pack(fill="x")
         sub = "Desinstalar" if uninstall else f"Instalar versao {version()}"
         tk.Label(body, text=sub.upper(), fg=MUTED, bg=BG, font=(FONT, 10), anchor="w").pack(fill="x", pady=(0, 18))
         self.body, self.uninstall = body, uninstall
@@ -141,11 +144,15 @@ class Window(tk.Tk):
         e.pack(side="left", fill="x", expand=True, ipady=7)
         self._button(row, "Escolher", self._browse, primary=False).pack(side="left", padx=(8, 0))
         note = ("Ja instalado aqui: atualiza o app e mantem seus dados (data/)." if prev else
-                "Atalhos na area de trabalho e no menu Iniciar. Nao precisa de administrador.")
+                "Atalho no menu Iniciar (e na area de trabalho, se marcar abaixo). Nao precisa de administrador.")
         tk.Label(b, text=note, fg=MUTED, bg=BG, font=(FONT, 10), anchor="w", wraplength=490,
                  justify="left").pack(fill="x", pady=(2, 16))
+        self.desktop = tk.BooleanVar(value=True)
+        tk.Checkbutton(b, text="Criar atalho na area de trabalho", variable=self.desktop, bg=BG, fg=TEXT,
+                       selectcolor=PANEL, activebackground=BG, activeforeground=TEXT, font=(FONT, 10),
+                       anchor="w").pack(fill="x")
         self.open_after = tk.BooleanVar(value=True)
-        tk.Checkbutton(b, text="Abrir o RE Hub no fim", variable=self.open_after, bg=BG, fg=TEXT,
+        tk.Checkbutton(b, text=f"Abrir o {APP} no fim", variable=self.open_after, bg=BG, fg=TEXT,
                        selectcolor=PANEL, activebackground=BG, activeforeground=TEXT, font=(FONT, 10),
                        anchor="w").pack(fill="x")
         self.bar = tk.Canvas(b, height=4, bg=PANEL, highlightthickness=0)
@@ -173,11 +180,11 @@ class Window(tk.Tk):
     def _start(self):
         self.go.config(state="disabled")
         self.status.config(text="Instalando...")
-        dest = self.path.get()
+        dest, desktop = self.path.get(), self.desktop.get()
 
         def work():
             try:
-                install(dest, self._progress)
+                install(dest, self._progress, desktop)
                 self.after(0, lambda: self._done(dest))
             except Exception as e:  # mostra o erro em vez de fechar calado
                 msg = str(e)
@@ -186,7 +193,7 @@ class Window(tk.Tk):
         threading.Thread(target=work, daemon=True).start()
 
     def _done(self, dest):
-        self.status.config(text="Pronto. O RE Hub esta instalado.", fg=TEXT)
+        self.status.config(text=f"Pronto. O {APP} esta instalado.", fg=TEXT)
         if self.open_after.get():
             subprocess.Popen([str(Path(dest) / EXE)], cwd=dest)
             self.after(600, self.destroy)
@@ -226,7 +233,7 @@ class Window(tk.Tk):
         rest = "" if self.keep.get() else f' & rmdir /s /q "{where}"'
         subprocess.Popen(f'cmd /c ping 127.0.0.1 -n 3 >nul & del /f /q "{where / UNINSTALLER}"{rest}',
                          creationflags=subprocess.CREATE_NO_WINDOW)
-        self.status.config(text="RE Hub removido.", fg=TEXT)
+        self.status.config(text=f"{APP} removido.", fg=TEXT)
         self.after(900, self.destroy)
 
 

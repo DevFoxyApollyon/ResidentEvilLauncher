@@ -36,6 +36,20 @@ def brand_row(parent, bg, color, text=None):
         tk.Label(row, image=logo, bg=bg).pack(side="left", padx=(0, 8))
     tk.Label(row, text=(text or FR["app"]).upper(), fg=color, bg=bg, font=(FONT, 9, "bold")).pack(side="left")
     return row
+def dark_titlebar(win):
+    """Barra de título escura do Windows 10/11 (no lugar da branca)."""
+    import ctypes
+    try:
+        win.update_idletasks()
+        hwnd = ctypes.windll.user32.GetParent(win.winfo_id())
+        on = ctypes.c_int(1)
+        for attr in (20, 19):   # DWMWA_USE_IMMERSIVE_DARK_MODE (19 nas versões antigas do Windows 10)
+            if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(on), ctypes.sizeof(on)) == 0:
+                break
+    except (AttributeError, OSError):
+        pass
+
+
 def mix(a, b, k):
     """Cor entre a e b (k de 0 a 1), para as transições suaves."""
     ra, rb = hex_rgb(a), hex_rgb(b)
@@ -144,7 +158,11 @@ def modal(parent, title, subtitle="", width=560, accent=None, badge=None):
     shade = tk.Toplevel(p)
     shade.overrideredirect(True)
     shade.configure(bg="#000000")
-    shade.geometry(f"{p.winfo_width()}x{p.winfo_height()}+{p.winfo_rootx()}+{p.winfo_rooty()}")
+    # hub minimizado ou escondido: escurece e centraliza na tela inteira, não no canto
+    on_screen = p.winfo_viewable() and p.winfo_width() > 200 and p.state() not in ("iconic", "withdrawn")
+    area = ((p.winfo_rootx(), p.winfo_rooty(), p.winfo_width(), p.winfo_height()) if on_screen else
+            (0, 0, p.winfo_screenwidth(), p.winfo_screenheight()))
+    shade.geometry(f"{area[2]}x{area[3]}+{area[0]}+{area[1]}")
     shade.attributes("-alpha", 0.0)
     shade.attributes("-topmost", True)
     top = tk.Toplevel(p)
@@ -212,8 +230,8 @@ def modal(parent, title, subtitle="", width=560, accent=None, badge=None):
         c.create_image(0, 0, image=top._bg, anchor="nw", tags=("bg",))
         c.tag_lower("bg")
         c.config(width=W, height=H)
-        X = p.winfo_rootx() + (p.winfo_width() - W) // 2
-        Y = p.winfo_rooty() + max(20, (p.winfo_height() - H) // 3)
+        X = area[0] + (area[2] - W) // 2
+        Y = area[1] + max(20, (area[3] - H) // 2)
         top._xy = (max(0, X), max(0, Y))
         top.geometry(f"{W}x{H}+{top._xy[0]}+{top._xy[1]}")
 
@@ -271,14 +289,24 @@ class ScrollFrame(tk.Frame):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.inner = tk.Frame(self.canvas, bg=bg)
         win = self.canvas.create_window((0, 0), window=self.inner, anchor="nw")
-        self.inner.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.inner.bind("<Configure>", self._resized)
         self.canvas.bind("<Configure>", lambda e: self.canvas.itemconfigure(win, width=e.width))
         # rola só a janela que está sob o mouse
         self.canvas.bind("<Enter>", lambda e: self.canvas.bind_all("<MouseWheel>", self._wheel))
         self.canvas.bind("<Leave>", lambda e: self.canvas.unbind_all("<MouseWheel>"))
 
+    def _fits(self):
+        return self.inner.winfo_reqheight() <= self.canvas.winfo_height()
+
+    def _resized(self, _e=None):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        if self._fits():
+            self.canvas.yview_moveto(0)
+
     def _wheel(self, e):
-        self.canvas.yview_scroll(-e.delta // 120, "units")
+        # com tudo cabendo na tela, rolar empurrava o conteúdo para baixo (o Tk alinha pelo fim)
+        if not self._fits():
+            self.canvas.yview_scroll(-e.delta // 120, "units")
 
     def clear(self):
         for w in self.inner.winfo_children():

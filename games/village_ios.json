@@ -1,0 +1,29 @@
+{
+  "id": "village_ios",
+  "ordem": 140.5,
+  "nome": "Resident Evil Village — iPhone / iPad / Mac",
+  "tipo": "local",
+  "capitulo": "village",
+  "versao": "iPhone / iPad / Mac",
+  "mobile": "ios",
+  "url": "https://apps.apple.com/br/app/resident-evil-village/id6450980545",
+  "acao": "Abrir na App Store",
+  "dica": "Port oficial da Capcom para iPhone, iPad e Mac (chip Apple M1 ou mais novo; no iPhone, 15 Pro ou mais novo). O download é grátis e dá para testar o começo; o jogo completo é uma compra dentro do app. Lançado na App Store em 30/10/2023.",
+  "projetos": [
+    {
+      "nome": "App Store (Capcom)",
+      "url": "https://apps.apple.com/br/app/resident-evil-village/id6450980545",
+      "status": "Oficial."
+    }
+  ],
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/1196590/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/1196590/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/1196590/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}

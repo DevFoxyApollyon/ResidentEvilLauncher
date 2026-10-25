@@ -1,8 +1,8 @@
-# RE Hub
+# RE Launcher
 
 Todos os Resident Evil em um lugar, em ordem da história, no estilo da tela inicial do PS5:
 jogos da Steam, decomps/recomps, emuladores, mods e troféus.
-Abra com **`RE Hub.exe`** (não precisa de Python). Ou, para rodar o código direto, `Abrir RE Hub.bat`
+Abra com **`RE Launcher.exe`** (não precisa de Python). Ou, para rodar o código direto, `Abrir RE Launcher.bat`
 (precisa de Python e de `pip install pillow`).
 
 Abre em tela cheia (uma cópia só: clicar de novo no .exe só traz a janela para frente). Teclado: ← → capítulos
@@ -50,7 +50,7 @@ F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao come
 - **Bestiário:** nas armas biológicas, a ficha mostra o ponto fraco, a melhor arma e onde ela é chefe.
 - **Speedrun:** aba no painel com o recorde de cada categoria no speedrun.com (clique abre a run).
 - **Foto do card (F):** salva uma imagem 1920x1080 do jogo selecionado (arte, capa, troféus e horas) em
-  `Imagens/RE Hub`, pronta para postar.
+  `Imagens/RE Launcher`, pronta para postar.
 
 ## Prints e gravações
 
@@ -58,6 +58,33 @@ A aba **Prints** do painel mostra as prints da Steam (F12) e as capturas do Wind
 Win+Alt+R; e pastas da Radeon/NVIDIA com o nome do jogo). Clique numa para ver em tela cheia (← → passam); dá para
 **usar a print como fundo** do jogo (e voltar ao original). Se a janela do jogo tiver outro nome, ponha
 `"nomes_janela": ["NOME DA JANELA"]` no .json do jogo.
+
+## ISOs (links e organizar)
+
+O hub não traz nenhuma ISO. Para as suas cópias, em **Opções → ISOs**:
+
+- **Editar links das ISOs:** abre `data/isos.json` (só neste PC; o instalador não leva). Um link por jogo: a chave é o
+  id da versão (`cvx_enhanced`) ou do capítulo (`veronica`). Aceita link direto, MediaFire e Google Drive (MEGA não).
+- **Importar lista de links:** um `.txt` com uma linha por jogo (`code veronica = https://...`, ou só o link com o nome
+  do jogo no arquivo) ou um `.json` igual ao `isos.json`. O hub liga cada link ao jogo e oferece baixar tudo.
+- **Baixar todas as ISOs:** baixa em fila as que têm link e ainda faltam, mostrando quanto falta e a velocidade.
+  O Instalar de um port também já baixa a ISO junto quando há link.
+- **Organizar pasta de ISOs:** escolha a pasta onde estão as ISOs baixadas; o hub reconhece cada uma (nome ou código do
+  disco), move para `data/isos/<jogo>` (o `.cue` leva os `.bin`; `.zip/.rar/.7z` são extraídos) e já deixa escolhida.
+
+## App para Android (pasta `mobile/`)
+
+`RE Launcher.apk` é a versão para celular: linha do tempo e não canônicos com as fichas de cada jogo, a aba
+**No celular** (ports para Android e iPhone, prontos e em andamento), notícias do REVIL e todas as lives de Resident
+Evil agora (Twitch e YouTube). Os jogos de PC e de emulador continuam no RE Launcher do computador.
+Instale copiando o .apk para o celular (o Android pede para permitir apps de fora da Play Store).
+
+Gerar de novo (precisa do Android SDK e do Node):
+```
+python tools/mobile_data.py      # catálogo (games/) -> mobile/www/data.json e ícones
+cd mobile && npx cap sync android && cd android && gradlew.bat assembleDebug
+```
+O APK sai em `mobile/android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ## Controle e atalho
 
@@ -84,7 +111,11 @@ O app não traz as músicas (são da Capcom). Ele toca, em loop e com fade, a tr
 Os sons da interface são os do PS5, em `data/sons/ps5` (Navigation ao passar e trocar, Navigation_Enter ao abrir,
 Navigation_Back no Esc, Prompt ao abrir "Gerenciar", Prompt_Enter no Jogar, Control Center no menu de Opções e
 Trophy_Notification quando chega troféu novo). Sem esses arquivos, o app usa tons próprios.
-Ao abrir, uma tela de carregamento com o símbolo da Umbrella toca `inicio.mp3` (qualquer tecla pula).
+**Abertura:** o vídeo `data/video/fundo.wmv` em loop (tocado pelo Windows), com `data/sons/abertura/antes_intro.mp3`.
+Aos 15 segundos aparece o símbolo; aos 20 o logo se revela; depois "Pressione qualquer botão" (teclado, mouse ou
+controle): toca `intro.mp3` e o hub abre. Ao sair do hub toca `sair.mp3`.
+**Voz do título:** ao apertar Jogar, toca `data/sons/titulos/<id do capítulo>.mp3` (ou `_geral.mp3`).
+Capítulos sem música própria tocam `data/musica/_fundo`; as telas de Extras tocam `data/musica/_submenu`.
 Seções sem jogo (Perdidos, Filmes, HQs, Fãs) tocam o tema do menu, em `data/musica/_menu`. Com várias músicas na
 pasta de um jogo, cada visita sorteia uma. Uma versão pode ter música própria: `data/musica/<id da versão>/`
 (ex.: `re4_2005` toca The Drive original e `re4` o Remake). Cada música começa onde o som aparece, sem o silêncio
@@ -92,8 +123,8 @@ do início: depois de pôr músicas novas, rode `python tools/audio_inicio.py` (
 
 ## Instalar
 
-Baixe **RE Hub - Instalar.exe** na página de releases do GitHub e abra: ele instala o app inteiro
-em `%LOCALAPPDATA%\Programs\RE Hub` (ou na pasta que você escolher), cria os atalhos na área de
+Baixe **RE Launcher - Instalar.exe** na página de releases do GitHub e abra: ele instala o app inteiro
+em `%LOCALAPPDATA%\Programs\RE Launcher` (ou na pasta que você escolher), cria os atalhos na área de
 trabalho e no menu Iniciar e aparece em "Adicionar ou remover programas". Não pede administrador.
 Para atualizar, rode a versão nova por cima: seus dados (`data/`) ficam.
 
@@ -103,29 +134,14 @@ Gerar o instalador: `python tools/build_installer.py --version 1.0.0` (sai em `b
 
 ```
 python tools/make_icon.py
-python -m PyInstaller --noconfirm --noconsole --onedir --contents-directory _internal --icon re_hub.ico --name "RE Hub" --distpath build/dist --workpath build --specpath build main.py
+python -m PyInstaller --noconfirm --noconsole --onedir --contents-directory _internal --icon re_hub.ico --name "RE Launcher" --distpath build/dist --workpath build --specpath build main.py
 ```
 
-Depois copie `build/dist/RE Hub/RE Hub.exe` e a pasta `_internal` para cá. (O .exe agora vem com a pasta `_internal`
+Depois copie `build/dist/RE Launcher/RE Launcher.exe` e a pasta `_internal` para cá. (O .exe agora vem com a pasta `_internal`
 ao lado em vez de ser um arquivo único: abre em menos de meio segundo, porque não precisa descompactar nada.)
 
 O catálogo (`games/`) e os dados (`data/`) ficam fora do .exe, então editar o catálogo não exige gerar de novo.
 Cards já montados ficam em `data/cache/cards` (pode apagar à vontade; o app monta de novo).
-
-## Outras franquias (Silent Hill e outras)
-
-O programa é o mesmo para qualquer franquia. O que muda fica em **`franquia.json`** (nome, cor, logo, símbolo da
-tela de carregamento, mensagens, feed de notícias, fontes dos títulos) e no catálogo `games/`.
-
-Para criar o hub do Silent Hill numa pasta nova:
-
-```
-python tools/nova_franquia.py silent_hill "C:/Users/<você>/Documents/SH Hub"
-```
-
-Isso copia o programa, o `franquia.json` de `modelos/silent_hill/` (Halo do Sol na abertura, cor ferrugem, logo do
-Silent Hill, notícias pelo Google Notícias), as fontes, os sons e o ffmpeg, e cria um catálogo vazio. Os dois hubs
-abrem ao mesmo tempo sem conflito.
 
 ## Fontes dos títulos
 

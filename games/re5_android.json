@@ -1,0 +1,31 @@
+{
+  "id": "re5_android",
+  "ordem": 100.5,
+  "nome": "Resident Evil 5 — Android (em andamento)",
+  "tipo": "local",
+  "capitulo": "re5",
+  "versao": "Android (em andamento)",
+  "andamento": {
+    "nome": "Resident-Evil-5-Android-PORT (luisxl15)",
+    "url": "https://github.com/luisxl15/Resident-Evil-5-Android-PORT",
+    "status": "Recompilação do RE5 de Xbox 360 para Android: começo do projeto, ainda sem versão jogável."
+  },
+  "projetos": [
+    {
+      "nome": "Resident-Evil-5-Android-PORT (luisxl15)",
+      "url": "https://github.com/luisxl15/Resident-Evil-5-Android-PORT",
+      "status": "Em andamento, sem release."
+    }
+  ],
+  "dica": "Ainda não dá para jogar: projeto no começo.",
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/21690/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/21690/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/21690/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}

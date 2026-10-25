@@ -1,4 +1,4 @@
-"""Som do RE Hub.
+"""Som do RE Launcher.
 
 - Efeitos da interface: os sons do PS5 em data/sons/ps5 (se existirem); senão, tons gerados pelo próprio app.
 - Trilha de cada capítulo: o app NÃO traz as músicas oficiais (são da Capcom). Ele toca, nesta ordem:
@@ -26,6 +26,10 @@ SOUNDS = DATA / "sons"
 PS5 = SOUNDS / "ps5"
 MUSIC = DATA / "musica"
 MENU = MUSIC / "_menu"  # tema do menu: seções sem jogo (perdidos, filmes, HQs, fãs)
+FUNDO = MUSIC / "_fundo"  # capítulos sem música própria tocam esta (antes do tema composto pelo app)
+SUBMENU = MUSIC / "_submenu"  # telas por cima (Extras, Perfil, História...)
+OPENING = SOUNDS / "abertura"  # antes_intro.mp3 (tela de início, em loop), intro.mp3 (ao apertar), sair.mp3
+TITLES = SOUNDS / "titulos"  # voz do título ao parar num capítulo: <id do capítulo>.mp3, ou _geral.mp3
 EXTS = {".mp3", ".wav", ".wma", ".m4a"}
 ALIAS = "rehub_trilha"
 
@@ -98,11 +102,11 @@ class _Fx:
 
     def __init__(self):
         self._q = queue.Queue()
-        self._open = set()
+        self._open = {}   # nome -> arquivo aberto com esse apelido
         threading.Thread(target=self._worker, daemon=True).start()
 
-    def play(self, name, path, volume=1.0):
-        self._q.put(("play", name, path, volume))
+    def play(self, name, path, volume=1.0, loop=False):
+        self._q.put(("play", name, path, (volume, loop)))
 
     def stop(self, name, fade=0.8):
         self._q.put(("stop", name, None, fade))
@@ -119,12 +123,16 @@ class _Fx:
                         time.sleep(arg / 10)
                     mci(f"stop {alias}", None, 0, 0)
                 continue
-            if name not in self._open:
+            if self._open.get(name) != path:   # outro arquivo com o mesmo nome (ex.: a voz de outro capítulo)
+                if name in self._open:
+                    mci(f"close {alias}", None, 0, 0)
+                    del self._open[name]
                 if mci(f'open "{path}" type mpegvideo alias {alias}', None, 0, 0) != 0:
                     continue
-                self._open.add(name)
-            mci(f"setaudio {alias} volume to {int(arg * 1000)}", None, 0, 0)
-            mci(f"play {alias} from {start_ms(path)}", None, 0, 0)
+                self._open[name] = path
+            volume, loop = arg
+            mci(f"setaudio {alias} volume to {int(volume * 1000)}", None, 0, 0)
+            mci(f"play {alias} from {start_ms(path)}{' repeat' if loop else ''}", None, 0, 0)
 
 
 _fx = None
@@ -153,6 +161,29 @@ def effect(name, min_gap=0.05, volume=0.8):
     p = SOUNDS / f"{FALLBACK.get(name, name)}.wav"
     if p.exists():
         winsound.PlaySound(str(p), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+
+
+def play_file(name, path, volume=0.8, loop=False):
+    """Toca um arquivo de som qualquer (abertura, voz do título...); loop=True repete até stop_effect(name)."""
+    global _fx
+    if path and Path(path).exists():
+        _fx = _fx or _Fx()
+        _fx.play(name, path, volume, loop)
+        return True
+    return False
+
+
+def opening(name):
+    p = OPENING / f"{name}.mp3"
+    return p if p.exists() else None
+
+
+def title_voice(chapter_id):
+    """Voz do título do capítulo (data/sons/titulos/<id>.mp3), ou a geral; None se não houver nenhuma."""
+    for p in (TITLES / f"{chapter_id}.mp3", TITLES / "_geral.mp3"):
+        if p.exists():
+            return p
+    return None
 
 
 # ---------- sons de menu por jogo ----------
@@ -226,6 +257,10 @@ def chapter_tracks(chapter, game=None):
                     files = sorted(p for p in folder.rglob("*") if p.suffix.lower() in EXTS)
                     if files:
                         return files
+    if chapter.get("secao") not in ("perdidos", "midia", "hqs", "fas", "noticias") and FUNDO.is_dir():
+        files = sorted(p for p in FUNDO.rglob("*") if p.suffix.lower() in EXTS)
+        if files:
+            return files
     try:  # sem trilha sua: o tema original que o app compõe para o capítulo
         return [compose.ensure(chapter["id"])]
     except Exception:
@@ -245,6 +280,13 @@ class Music:
 
     def play_chapter(self, chapter, game=None):
         self._q.put(("chapter", (chapter, game)))
+
+    def play_folder(self, folder):
+        """Toca as músicas de uma pasta (ex.: data/musica/_submenu); False se ela estiver vazia."""
+        files = sorted(p for p in folder.rglob("*") if p.suffix.lower() in EXTS) if folder.is_dir() else []
+        if files:
+            self._q.put(("chapter", files))
+        return bool(files)
 
     def set_enabled(self, on):
         self.enabled = on
@@ -297,7 +339,7 @@ class Music:
                 self._close()
                 continue
             try:
-                tracks = chapter_tracks(*wanted)
+                tracks = wanted if isinstance(wanted, list) else chapter_tracks(*wanted)
             except OSError:
                 tracks = []
             if not tracks:

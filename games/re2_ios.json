@@ -1,0 +1,29 @@
+{
+  "id": "re2_ios",
+  "ordem": 51.95,
+  "nome": "Resident Evil 2 — iPhone / iPad / Mac",
+  "tipo": "local",
+  "capitulo": "re2",
+  "versao": "iPhone / iPad / Mac",
+  "mobile": "ios",
+  "url": "https://apps.apple.com/br/app/resident-evil-2/id1640632432",
+  "acao": "Abrir na App Store",
+  "dica": "Port oficial da Capcom para iPhone, iPad e Mac (chip Apple M1 ou mais novo; no iPhone, 15 Pro ou mais novo). O download é grátis e dá para testar o começo; o jogo completo é uma compra dentro do app. Lançado na App Store em 10/12/2024.",
+  "projetos": [
+    {
+      "nome": "App Store (Capcom)",
+      "url": "https://apps.apple.com/br/app/resident-evil-2/id1640632432",
+      "status": "Oficial."
+    }
+  ],
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/883710/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/883710/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/883710/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}

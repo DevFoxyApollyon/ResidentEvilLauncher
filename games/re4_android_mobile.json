@@ -1,0 +1,31 @@
+{
+  "id": "re4_android_mobile",
+  "ordem": 81.87,
+  "nome": "Resident Evil 4 Mobile Edition — Android novo (em andamento)",
+  "tipo": "local",
+  "capitulo": "re4",
+  "versao": "Mobile Edition (ARMBIO4)",
+  "andamento": {
+    "nome": "ARMBIO4",
+    "url": "https://github.com/aarvsn/ARMBIO4",
+    "status": "Faz o RE4 Mobile Edition (2011) da Capcom rodar no Android atual, carregando as bibliotecas do jogo original: ainda sem release pronta."
+  },
+  "projetos": [
+    {
+      "nome": "ARMBIO4 (aarvsn)",
+      "url": "https://github.com/aarvsn/ARMBIO4",
+      "status": "Em andamento; precisa dos arquivos do jogo original."
+    }
+  ],
+  "dica": "Para o RE4 Mobile Edition, o jogo oficial de celular de 2011, que saiu das lojas. Ainda sem versão pronta.",
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}

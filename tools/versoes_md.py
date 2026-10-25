@@ -23,7 +23,7 @@ def main():
     for g in games:
         if g.get("tipo") in ("steam", "local"):
             by_ch.setdefault(g.get("capitulo", g["id"]), []).append(g)
-    out = ["# Versões jogáveis no RE Hub", "",
+    out = ["# Versões jogáveis no RE Launcher", "",
            "Todas as versões que o hub instala ou abre, de onde vem cada uma e como instalar. O hub nunca baixa o jogo:",
            "versões da Steam e da GOG você compra (as demos são grátis); ports e emuladores precisam da SUA cópia/ISO.",
            "Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).", ""]

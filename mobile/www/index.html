@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b0a09">
+  <title>RE Launcher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- abertura: símbolo, logo e "toque para começar" -->
+  <div id="intro">
+    <div class="intro-glow"></div>
+    <img class="intro-sym" src="re_hub.png" alt="">
+    <img class="intro-logo" src="re_logo.png" alt="Resident Evil">
+    <div class="intro-tap">TOQUE PARA COMEÇAR</div>
+  </div>
+
+  <div id="app" hidden>
+    <div id="bg"></div>
+    <header>
+      <img class="brand-sym" src="re_hub.png" alt="">
+      <img class="brand-logo" src="re_logo.png" alt="Resident Evil">
+      <span id="clock"></span>
+    </header>
+    <main id="view"></main>
+    <nav id="nav"></nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

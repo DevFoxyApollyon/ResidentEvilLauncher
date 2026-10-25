@@ -38,6 +38,8 @@ def find_exe(game):
 def is_ready(game, cfg, installed):
     if game["tipo"] == "steam":
         return game["appid"] in installed
+    if game.get("mobile"):   # port para celular: joga-se no aparelho, nunca conta como instalado no PC
+        return False
     c = cfg.get(game["id"])
     if game.get("url"):   # versao que abre um site (adicionada pela pessoa)
         return True

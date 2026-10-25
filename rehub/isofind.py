@@ -51,7 +51,7 @@ def score(path, words, serial=None):
     if serial and _norm(serial).replace(" ", "") in name.replace(" ", ""):
         pts += 10
     for w in words:
-        if _norm(w) in name:
+        if _norm(w) and _norm(w) in name:   # palavra so com simbolos (ex.: japones) vira vazia e casaria com tudo
             pts += 3
     if pts and Path(path).suffix.lower() == ".bin" and Path(path).with_suffix(".cue").exists():
         pts -= 1   # com .cue ao lado, o .cue e o arquivo certo

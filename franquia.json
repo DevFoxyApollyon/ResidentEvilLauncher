@@ -1,7 +1,7 @@
 {
   "id": "resident_evil",
   "nome": "Resident Evil",
-  "app": "RE Hub",
+  "app": "RE Launcher",
   "cor": "#d1121b",
   "logo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Resident_Evil_logo.svg/960px-The_Resident_Evil_logo.svg.png",
   "logo_cor": [
@@ -9,17 +9,10 @@
     20,
     30
   ],
-  "simbolo": "umbrella",
+  "simbolo": "re_hub.png",
   "icone": "re_hub",
   "prefixo_titulo": "Resident Evil",
   "wiki_referer": "https://residentevil.fandom.com/",
-  "mensagens": [
-    "Iniciando sistema Umbrella...",
-    "Carregando arquivos dos S.T.A.R.S....",
-    "Lendo a biblioteca da Steam...",
-    "Preparando a linha do tempo...",
-    "Abrindo a mansão Spencer..."
-  ],
   "noticias": {
     "feed": "https://residentevil.com.br/feed/",
     "fonte": "REVIL",
@@ -34,5 +27,6 @@
     "twitch": [
       "residentevil"
     ]
-  }
+  },
+  "logo_arquivo": "re_logo.png"
 }

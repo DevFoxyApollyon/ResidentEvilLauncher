@@ -211,36 +211,46 @@ def icon_photo(name, size=16, color=TEXT, stroke=1.6):
 
 
 # ---------- botões ----------
+def _solid(_a):
+    """Botões cheios sempre no vermelho da franquia: a cor tirada de capas claras dava botões cor de pêssego/barro."""
+    return rgb(FR["cor"])
+
+
 def _style(style, accent, state):
-    """(fundo topo, fundo base, borda, texto, brilho) em RGBA para o estilo e o estado."""
-    a = rgb(accent)
+    """(fundo topo, fundo base, borda, texto, brilho) em RGBA para o estilo e o estado.
+    Visual liso: o principal é cheio na cor do capítulo; os outros são vidro escuro com um fio claro de borda."""
+    a = _solid(rgb(accent))
     hot, down = state == "hover", state == "press"
     if style == "primary":
-        top, bot = (lighten(a, 0.22 if hot else 0.1), darken(a, 0.12 if hot else 0.22))
-        if down:
-            top, bot = darken(a, 0.15), darken(a, 0.3)
-        return (*top, 255), (*bot, 255), (*lighten(a, 0.35), 200), (255, 255, 255, 255), (*a, 150 if hot else 0)
+        base = lighten(a, 0.10) if hot else darken(a, 0.18) if down else a
+        return (*base, 255), (*darken(base, 0.08), 255), (*lighten(base, 0.28), 140 if hot else 70), (255, 255, 255, 255),             (*a, 140 if hot else 0)
+    if style == "on":   # opção ligada (Trilha, Efeitos): leve tom da cor, sem brilho
+        return (*a, 70 if hot else 52), (*a, 52 if hot else 40), (*lighten(a, 0.3), 170), (255, 255, 255, 255), (0, 0, 0, 0)
     if style in ("danger", "alert"):
-        red = (214, 58, 48)
-        if style == "alert" or hot:
-            top, bot = (lighten(red, 0.12 if hot else 0), darken(red, 0.25))
-            if down:
-                top, bot = darken(red, 0.2), darken(red, 0.4)
-            return (*top, 255), (*bot, 255), (255, 140, 125, 200), (255, 255, 255, 255), (*red, 130 if hot else 0)
-        return (58, 20, 18, 235), (40, 14, 13, 235), (170, 64, 54, 170), (255, 170, 158, 255), (0, 0, 0, 0)
+        red = (200, 50, 42)
+        if style == "alert" or hot or down:
+            base = darken(red, 0.2) if down else red
+            return (*base, 255), (*darken(base, 0.1), 255), (255, 130, 115, 120), (255, 255, 255, 255), (*red, 110 if hot else 0)
+        return (24, 14, 13, 200), (20, 12, 11, 200), (200, 70, 60, 120), (240, 150, 140, 255), (0, 0, 0, 0)
+    if style == "seg_on":   # versão escolhida: pílula clara com texto escuro (como na PS5)
+        return (238, 232, 222, 255), (222, 215, 204, 255), (0, 0, 0, 0), (22, 19, 17, 255), (0, 0, 0, 0)
+    if style == "seg":      # as outras versões: só o texto; com o mouse, um vidro leve
+        if hot or down:
+            return (255, 255, 255, 26), (255, 255, 255, 20), (0, 0, 0, 0), (255, 255, 255, 255), (0, 0, 0, 0)
+        return (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (*MUTED, 255), (0, 0, 0, 0)
     if style == "ghost":
         if hot or down:
             return (255, 255, 255, 18 if hot else 10), (255, 255, 255, 12), (255, 255, 255, 30), (*TEXT, 255), (0, 0, 0, 0)
         return (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (*MUTED, 255), (0, 0, 0, 0)
     # plain: vidro escuro
     if hot:
-        return (52, 46, 41, 240), (34, 30, 27, 240), (*lighten(a, 0.25), 210), (255, 255, 255, 255), (*a, 70)
+        return (46, 42, 38, 235), (40, 36, 33, 235), (255, 255, 255, 90), (255, 255, 255, 255), (0, 0, 0, 0)
     if down:
-        return (22, 20, 18, 240), (28, 25, 22, 240), (*a, 200), (*TEXT, 255), (0, 0, 0, 0)
-    return (40, 36, 32, 225), (24, 21, 19, 225), (255, 255, 255, 38), (*TEXT, 230), (0, 0, 0, 0)
+        return (18, 16, 15, 235), (18, 16, 15, 235), (255, 255, 255, 60), (*TEXT, 255), (0, 0, 0, 0)
+    return (20, 18, 17, 200), (16, 15, 14, 200), (255, 255, 255, 34), (*TEXT, 235), (0, 0, 0, 0)
 
 
-def button_image(text, style="plain", accent=None, icon=None, state="normal", height=38, size=11, radius=7,
+def button_image(text, style="plain", accent=None, icon=None, state="normal", height=38, size=11, radius=5,
                  pad=18, glow=6, min_width=0, track=1.2):
     """Botão com transparência em volta (margem 'glow' para o brilho do hover)."""
     accent = tuple(v // 12 * 12 for v in rgb(accent or FR["cor"]))   # cores quase iguais reaproveitam a imagem
@@ -270,8 +280,6 @@ def button_image(text, style="plain", accent=None, icon=None, state="normal", he
     d = ImageDraw.Draw(body)
     if border[3]:
         d.rounded_rectangle((0, 0, bw - 1, bh - 1), radius * SS, outline=border, width=max(1, SS))
-    if style in ("primary", "alert") or (style == "danger" and state != "normal"):   # fio de luz no alto
-        d.line((radius * SS, SS * 1.5, bw - radius * SS, SS * 1.5), fill=(255, 255, 255, 70), width=SS)
     img.alpha_composite(body, (box[0], box[1]))
     d = ImageDraw.Draw(img)
     x = box[0] + (bw - (tw + iw) * SS) / 2
@@ -363,17 +371,65 @@ def hilite_image(w, h, accent, radius=7):
 
 
 def keycap_photo(text, bg=PANEL):
-    key = ("cap", text)
+    """Tecla do rodapé: tampinha lisa clara-escura, com uma sombra fina embaixo."""
+    key = ("cap2", text)
     if key not in _photos:
-        f = font(9 * SS, "SemiBold")
-        tw = _text_width(text, f, SS) / SS
-        w, h = int(max(22, tw + 12)), 20
+        f = font(9 * SS, "Bold")
+        sym = ImageFont.truetype("seguisym.ttf", 10 * SS)   # setas (a Bahnschrift não tem)
+        parts = [(ch, sym if ord(ch) > 0x2000 else f) for ch in text]
+        tw = sum(pf.getlength(ch) + SS * 0.6 for ch, pf in parts) / SS
+        w, h = int(max(24, tw + 14)), 22
+        img = Image.new("RGBA", (w * SS, (h + 2) * SS), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        d.rounded_rectangle((0, 2 * SS, w * SS - 1, (h + 2) * SS - 1), 5 * SS, fill=(0, 0, 0, 150))   # sombra
+        d.rounded_rectangle((0, 0, w * SS - 1, h * SS - 1), 5 * SS, fill=(52, 48, 44, 235))
+        d.rounded_rectangle((0, 0, w * SS - 1, h * SS - 1), 5 * SS, outline=(255, 255, 255, 30), width=SS)
+        x = (w * SS - tw * SS) / 2
+        for ch, pf in parts:
+            d.text((x, h * SS / 2), ch, font=pf, fill=(240, 236, 228, 255), anchor="lm")
+            x += pf.getlength(ch) + SS * 0.6
+        _photos[key] = ImageTk.PhotoImage(img.resize((w, h + 2), Image.LANCZOS))
+    return _photos[key]
+
+
+def nav_photo(icon, label, expanded=False, on=False, size=40, focus=False):
+    """Item do topo: um círculo com o ícone; aberto (escolhido ou com o mouse em cima) vira pílula com o texto.
+    O escolhido é claro com ícone e texto escuros, como na PS5."""
+    key = ("nav", icon, label, expanded, on, size, focus)
+    if key not in _photos:
+        f = font(10 * SS, "SemiBold")
+        text = label.upper()
+        track = 1.0 * SS
+        tw = _text_width(text, f, track) if expanded else 0
+        h = size * SS
+        w = h if not expanded else int(h * 0.82 + tw + h * 0.5)
+        if on:
+            fill, line, fg = (238, 232, 222, 250), (0, 0, 0, 0), (22, 19, 17, 255)
+        elif expanded:
+            fill, line, fg = (58, 53, 48, 235), (255, 255, 255, 60), (255, 255, 255, 255)
+        else:
+            fill, line, fg = (24, 22, 20, 205), (255, 255, 255, 34), (*TEXT, 230)
+        img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        d.rounded_rectangle((0, 0, w - 1, h - 1), h // 2, fill=fill, outline=line if line[3] else None, width=SS)
+        if focus:   # o menu está com o foco do teclado/controle: contorno vermelho
+            d.rounded_rectangle((SS, SS, w - 1 - SS, h - 1 - SS), h // 2, outline=(*rgb(FR["cor"]), 255), width=3 * SS)
+        draw_icon(d, icon, h / 2, h / 2, h * 0.21, fg, max(2, int(1.8 * SS)))
+        if expanded:
+            asc, desc = f.getmetrics()
+            _draw_text(d, (h * 0.82, (h - asc - desc) / 2 + desc * 0.15), text, f, fg, track)
+        _photos[key] = ImageTk.PhotoImage(img.resize((w // SS, size), Image.LANCZOS))
+    return _photos[key]
+
+
+def track_photo(w, h, radius=None):
+    """Trilho escuro arredondado atrás das pílulas de versão."""
+    key = ("track", w, h)
+    if key not in _photos:
+        r = (radius or h // 2) * SS
         img = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
-        d.rounded_rectangle((0, 0, w * SS - 1, h * SS - 1), 5 * SS, fill=(38, 34, 30, 255), outline=(78, 70, 62, 255), width=SS)
-        d.line((5 * SS, h * SS - 2 * SS, w * SS - 5 * SS, h * SS - 2 * SS), fill=(20, 18, 16, 255), width=SS)
-        asc, desc = f.getmetrics()
-        _draw_text(d, ((w * SS - tw * SS) / 2, (h * SS - asc - desc) / 2 - SS), text, f, (*MUTED, 255), SS)
+        d.rounded_rectangle((0, 0, w * SS - 1, h * SS - 1), r, fill=(12, 11, 10, 190), outline=(255, 255, 255, 30), width=SS)
         _photos[key] = ImageTk.PhotoImage(img.resize((w, h), Image.LANCZOS))
     return _photos[key]
 

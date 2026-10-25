@@ -14,3 +14,5 @@ _sh_*.png
 _f_*.png
 screenshot.png
 perf.txt
+# app Android (mobile/): dependências e saídas de build
+mobile/node_modules/

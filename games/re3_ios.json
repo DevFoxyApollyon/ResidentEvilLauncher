@@ -1,0 +1,29 @@
+{
+  "id": "re3_ios",
+  "ordem": 41.6,
+  "nome": "Resident Evil 3 — iPhone / iPad / Mac",
+  "tipo": "local",
+  "capitulo": "re3",
+  "versao": "iPhone / iPad / Mac",
+  "mobile": "ios",
+  "url": "https://apps.apple.com/br/app/resident-evil-3/id1640630077",
+  "acao": "Abrir na App Store",
+  "dica": "Port oficial da Capcom para iPhone, iPad e Mac (chip Apple M1 ou mais novo; no iPhone, 15 Pro ou mais novo). O download é grátis e dá para testar o começo; o jogo completo é uma compra dentro do app. Lançado na App Store em 18/03/2025.",
+  "projetos": [
+    {
+      "nome": "App Store (Capcom)",
+      "url": "https://apps.apple.com/br/app/resident-evil-3/id1640630077",
+      "status": "Oficial."
+    }
+  ],
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/952060/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/952060/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/952060/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}

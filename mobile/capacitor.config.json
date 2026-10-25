@@ -1,0 +1,14 @@
+{
+  "appId": "com.devfoxyapollyon.relauncher",
+  "appName": "RE Launcher",
+  "webDir": "www",
+  "backgroundColor": "#0b0a09",
+  "android": {
+    "backgroundColor": "#0b0a09"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

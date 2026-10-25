@@ -18,10 +18,11 @@ from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFo
 
 from .. import audio, catalog, fluffy, fonts, gamepad, github, library, news, trailer, launcher, steam, store, trophies
 from ..mods import ModManager
-from .. import emulators, isofind, sources
+from .. import channels, emulators, isodl, isofind, sources
 from ..franchise import FR, hex_rgb
 from ..paths import COVERS, DATA, ROOT
 from . import skin, theme as t
+from .progress import Progress
 from .splash import Splash
 from .manage import ManageWindow
 from .lore_screens import LoreScreens
@@ -229,11 +230,12 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         super().__init__()
         self.title(FR["app"])
         self.geometry("1280x800")
-        self.minsize(1100, 740)
+        self.minsize(min(1280, self.winfo_screenwidth() - 40), min(900, self.winfo_screenheight() - 80))
         self.configure(bg=t.BG)
         icon = ROOT / f"{FR['icone']}.ico"
         if icon.exists():
             self.iconbitmap(default=str(icon))
+        t.dark_titlebar(self)
 
         self.cfg = catalog.Config()
         self.prefs = {"tela_cheia": True, "trilha": True, "efeitos": True, **self.cfg.get("_prefs")}
@@ -242,6 +244,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self.attributes("-fullscreen", not os.environ.get("REHUB_TESTE"))  # sempre abre em tela cheia
         audio.ensure_effects()
         self.music = audio.Music()
+        self.splash = None
         self.music.set_enabled(self.prefs["trilha"])
         self._music_job = None
         self.installed = steam.installed_apps()
@@ -288,6 +291,9 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self.c.pack(fill="both", expand=True)
         self.c.bind("<Configure>", lambda e: self.refresh())
         self.c.bind("<Motion>", self._motion)
+        self._nav_hover, self._nav_rects, self._peek_rect = None, [], None
+        self.nav_focus = False   # teclado/controle no menu do topo (W ou seta para cima)
+        self.c.bind("<Leave>", lambda e: self._nav_hover and (setattr(self, "_nav_hover", None), self._draw_nav()), add="+")
         self.c.bind("<Button-1>", self._canvas_click)
         self.c.bind("<Leave>", lambda e: self._set_hover(None))
         self.bind("<MouseWheel>", self._wheel)
@@ -296,7 +302,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
                             ("<e>", "extras"), ("<Prior>", "tab_prev"), ("<Next>", "tab_next"), ("<m>", "map"),
-                            ("<a>", "left"), ("<d>", "right"), ("<q>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements")):
+                            ("<a>", "left"), ("<d>", "right"), ("<w>", "up"), ("<s>", "down"), ("<q>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements")):
             self.bind(key, lambda e, a=action: self._press(a))
         self.bind("<F11>", lambda e: self.toggle_fullscreen())
         self.bind("<F5>", lambda e: self.rescan())
@@ -572,7 +578,14 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
     def quit_app(self):
         """Fecha de vez. Antes, o Tk era destruído com as threads (capas, troféus, áudio) ainda rodando,
-        e uma delas mexendo nele derrubava o Tcl ("alloc: invalid block")."""
+        e uma delas mexendo nele derrubava o Tcl ("alloc: invalid block").
+        Com os efeitos ligados, a janela some e o som de saída (data/sons/abertura/sair.mp3) toca antes."""
+        if self.prefs["efeitos"] and not getattr(self, "_quitting", False) and audio.opening("sair"):
+            self._quitting = True
+            self.music.stop()
+            audio.play_file("sair", audio.opening("sair"), 0.9)
+            self.withdraw()
+            return self.after(2600, self.quit_app)
         try:
             if getattr(self, "_tplayer", None):
                 self._tplayer.close()
@@ -614,8 +627,16 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         if self.overlay:
             return self._ov_press("back" if action == "esc" else action)
         keys = self._section_keys()
+        if self.nav_focus:   # no menu do topo: A/D (ou setas) trocam a seção, S/seta para baixo volta para os jogos
+            if action in ("left", "right", "prev_section", "next_section"):
+                d = -1 if action in ("left", "prev_section") else 1
+                return self.set_section(keys[(keys.index(self.section) + d) % len(keys)])
+            if action in ("down", "enter", "esc", "back"):
+                return self._menu_focus(False)
+            if action == "up":
+                return None
         fn = {"left": lambda: self.step(-1), "right": lambda: self.step(1),
-              "up": lambda: self.pick_version(-1), "down": lambda: self.pick_version(1),
+              "up": lambda: self._menu_focus(True), "down": lambda: self.pick_version(1),
               "enter": self.primary_action, "manage": self.manage, "next_section": self.next_section,
               "prev_section": lambda: self.set_section(keys[keys.index(self.section) - 1]),
               "esc": lambda: (self._sound("back"), self.toggle_fullscreen(False)), "back": lambda: self._sound("back"),
@@ -628,6 +649,14 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
               "home": self.go_home}.get(action)
         if fn:
             fn()
+
+    def _menu_focus(self, on):
+        """W/seta para cima sobe para o menu das seções; S/seta para baixo desce de volta."""
+        if self.nav_focus == on:
+            return
+        self.nav_focus = on
+        self._sound("tab" if on else "back")
+        self.refresh()
 
     @staticmethod
     def _section_keys():
@@ -661,6 +690,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             if self.pad.guide_since and time.time() - self.pad.guide_since > 0.8 and not self._is_front():
                 self.pad.guide_since = None
                 self.summon()
+            elif events and self._is_front() and getattr(self, "splash", None):
+                self.splash.press()   # abertura: qualquer botão do controle
             elif events and self._is_front():
                 for ev in events:
                     if ev in self.PAD_ACTIONS:
@@ -734,6 +765,14 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
     # ---------- mouse sobre os cards ----------
     def _motion(self, e):
+        nav = next((k for k, x1, y1, x2, y2 in getattr(self, "_nav_rects", []) if x1 <= e.x <= x2 and y1 <= e.y <= y2), None)
+        pr = self._peek_rect
+        if nav is None and pr and pr[0] <= e.x <= pr[2] and pr[1] <= e.y <= pr[3]:
+            nav = "canais"   # o mouse desceu para a prévia das lives: ela continua aberta
+        if nav != self._nav_hover:   # passou por uma seção do topo: ela abre com o nome (o som é só no clique)
+            self._nav_hover = nav
+            if not self.overlay:
+                self._draw_nav()
         hit = next((i for i, x1, y1, x2, y2 in self._tile_rects if x1 <= e.x <= x2 and y1 <= e.y <= y2), None)
         self._set_hover(hit)
         row = next((r for r in self._row_rects if r[0] <= e.x <= r[2] and r[1] <= e.y <= r[3]), None)
@@ -748,9 +787,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
     def _set_hover(self, i):
         if i == self._hover:
             return
-        self._hover = i
-        if i is not None:
-            self._sound("hover", 0.04)
+        self._hover = i   # sem som ao passar o mouse: só cliques e teclas fazem som
         self.c.config(cursor="hand2" if i is not None else "")
         if not self._anim_job:  # começa a animação já, sem esperar o próximo quadro
             self._animate()
@@ -799,6 +836,9 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         """F11/Esc: só para esta vez. Ao abrir de novo (ou voltar de outra janela), é sempre tela cheia."""
         on = (not self.attributes("-fullscreen")) if on is None else on
         self.attributes("-fullscreen", on)
+        if not on:   # fora da tela cheia: maximizada (numa janela pequena os textos e botões se encavalavam)
+            self.state("zoomed")
+            t.dark_titlebar(self)
 
     # ---------- saiu para outra janela (jogo, navegador, Steam): minimiza e tira o som ----------
     def _watch_focus(self):
@@ -965,6 +1005,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self._draw_details()
         self._draw_panel(*panel)
         self._draw_toasts(W)
+        c.tag_raise("navitem")
 
     def _redraw_carousel(self):
         """Apaga e redesenha só as capas e a linha do tempo (camada 'car')."""
@@ -978,6 +1019,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             if item >= mark:
                 c.addtag_withtag("car", item)
         c.tag_raise("toast")  # avisos sempre por cima das capas
+        c.tag_raise("navitem")   # a prévia das lives (aberta no menu) fica por cima das capas
 
     def _preload(self):
         """Em segundo plano: abre do disco as artes e monta as capas grandes, para a troca de capítulo não travar."""
@@ -1038,15 +1080,18 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             icon = ROOT / f"{FR['icone']}.png"
             if icon.exists():
                 parts.append(Image.open(icon).convert("RGBA").resize((40, 40), Image.LANCZOS))
-            logo = COVERS / "_serie_logo.png"
+            own = ROOT / FR["logo_arquivo"] if FR.get("logo_arquivo") else None
+            logo = own if own and own.exists() else COVERS / "_serie_logo.png"
             if logo.exists():
                 img = Image.open(logo).convert("RGBA")
                 img = img.crop(img.getbbox() or (0, 0, *img.size))
                 h = 30 if img.width / img.height < 6 else 24  # logos bem largos (ex.: SILENT HILL) ficam mais baixos
                 img = img.resize((min(220, int(img.width * h / img.height)), h), Image.LANCZOS)
-                red = Image.new("RGBA", img.size, (*FR["logo_cor"], 255))  # cor do app, menos berrante
-                red.putalpha(img.getchannel("A"))
-                parts.append(red)
+                if logo != own:   # o baixado é pintado na cor do app; o próprio (re_logo.png) fica com as cores dele
+                    red = Image.new("RGBA", img.size, (*FR["logo_cor"], 255))
+                    red.putalpha(img.getchannel("A"))
+                    img = red
+                parts.append(img)
             if not parts:
                 return None
             W = sum(p.width for p in parts) + 14 * (len(parts) - 1)
@@ -1058,6 +1103,69 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             self._brand_img = ImageTk.PhotoImage(out)
         return self._brand_img
 
+    NAV_ICONS = {"canon": "timeline", "spinoff": "grid", "perdidos": "question", "midia": "play", "hqs": "image",
+                 "fas": "users", "noticias": "doc", "canais": "tv"}
+
+    def _draw_nav(self):
+        """Seções do topo em círculos com ícone; a escolhida e a que está sob o mouse abrem com o nome.
+        Só estes itens são redesenhados quando o mouse passa (não a tela toda)."""
+        c, x = self.c, self._nav_x0
+        c.delete("navitem")
+        self._nav_rects = []
+        for key, label in SECTIONS:
+            on = self.section == key
+            tag = f"nav_{key}"
+            ph = skin.nav_photo(self.NAV_ICONS.get(key, "grid"), label, expanded=on or key == self._nav_hover, on=on,
+                                focus=on and self.nav_focus)
+            c.create_image(x, 38, image=ph, anchor="w", tags=(tag, "navitem"))
+            self._nav_rects.append((key, x, 18, x + ph.width(), 58))
+            self._clickable(tag, lambda k=key: (setattr(self, "overlay", None), self.set_section(k), self.refresh()))
+            if key == "canais" and (self._nav_hover == "canais" or (self.nav_focus and on)):
+                self._live_peek(x)
+            x += ph.width() + 10
+        self._nav_end = x + 18
+        if not (self._nav_hover == "canais" or (self.nav_focus and self.section == "canais")):
+            self._peek_rect = None
+
+    def _live_peek(self, x):
+        """Prévia das lives no ícone de Canais: as primeiras que estão no ar agora, com a imagem de cada uma."""
+        st = channels.cached()
+        lives = (st.get("lives", []) + st.get("descobertas", []))[:4]
+        c, W = self.c, self.c.winfo_width()
+        pw, rh = 380, 84
+        x1 = max(MARGIN, min(x - 20, W - MARGIN - pw))
+        y1 = 66
+        y2 = y1 + 46 + (len(lives) * rh if lives else 40)
+        self._peek_rect = (x1, 18, x1 + pw, y2)
+        self._round_rect(x1, y1, x1 + pw, y2, 8, fill="#121010", outline="#3b342d", tags=("navitem",))
+        c.create_text(x1 + 16, y1 + 22, anchor="w", text="AO VIVO AGORA", fill=WHITE, font=self.f["tiny"], tags=("navitem",))
+        c.create_oval(x1 + pw - 26, y1 + 18, x1 + pw - 18, y1 + 26, fill="#e0242e", outline="", tags=("navitem",))
+        if not lives:
+            c.create_text(x1 + 16, y1 + 62, anchor="w", text="Nenhuma live de Resident Evil agora.", fill=MUTED,
+                          font=self.f["small"], tags=("navitem",))
+            return
+        for k, l in enumerate(lives):
+            ry = y1 + 44 + k * rh
+            tag = f"peek_{k}"
+            c.create_rectangle(x1 + 6, ry - 2, x1 + pw - 6, ry + rh - 6, fill="#121010", outline="", tags=(tag, "navitem"))
+            url = l.get("imagem")   # a Twitch troca a imagem da live no mesmo endereço: pede de novo a cada 5 min
+            img = self._remote_img(f"{url}?t={int(time.time() // 300)}" if url and l["plataforma"] == "twitch" else url, (124, 70), 4)
+            if img:
+                c.create_image(x1 + 14, ry, image=img, anchor="nw", tags=(tag, "navitem"))
+            else:
+                c.create_rectangle(x1 + 14, ry, x1 + 138, ry + 70, fill="#1f1b18", outline="", tags=(tag, "navitem"))
+            c.create_rectangle(x1 + 18, ry + 4, x1 + 58, ry + 18, fill="#e0242e", outline="", tags=(tag, "navitem"))
+            c.create_text(x1 + 38, ry + 11, text="AO VIVO", fill="white", font=self.f["tiny"], tags=(tag, "navitem"))
+            title = c.create_text(x1 + 150, ry + 2, anchor="nw", text=self._elide(l["titulo"], self.f["small"], pw - 166),
+                                  fill=WHITE, font=self.f["small"], tags=(tag, "navitem"))
+            who = l["canal"] + (f"  ·  {l['espectadores']} assistindo" if l.get("espectadores") else "")
+            c.create_text(x1 + 150, ry + 24, anchor="nw", text=self._elide(who, self.f["small"], pw - 166), fill=MUTED,
+                          font=self.f["small"], tags=(tag, "navitem"))
+            plat = "Twitch" if l["plataforma"] == "twitch" else "YouTube"
+            c.create_text(x1 + 150, ry + 46, anchor="nw", text=self._elide(f"{plat}  {l.get('categoria') or ''}", self.f["tiny"], pw - 166),
+                          fill="#b18cff" if plat == "Twitch" else "#ff6b6b", font=self.f["tiny"], tags=(tag, "navitem"))
+            self._clickable(tag, lambda u=l["link"]: webbrowser.open(u), hover=[(title, WHITE, "#ffd9dc")])
+
     def _draw_header(self, W):
         c = self.c
         brand = self._brand()
@@ -1068,17 +1176,9 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             c.create_text(MARGIN, 38, anchor="w", text=FR["nome"].upper(), fill=RED, font=self.f["logo"], tags=("home",))
             x = MARGIN + self.f["logo"].measure(FR["nome"].upper()) + 30
         self._clickable("home", self.go_home)
-        for key, label in SECTIONS:
-            on = self.section == key
-            tag = f"nav_{key}"
-            label = label.upper()
-            w = self.f["nav"].measure(label)
-            c.create_text(x, 38, anchor="w", text=label, fill=WHITE if on else MUTED, font=self.f["nav"], tags=(tag,))
-            if on:
-                c.create_rectangle(x, 54, x + w, 56, fill=self.accent, outline="")
-            self._clickable(tag, lambda k=key: (setattr(self, "overlay", None), self.set_section(k), self.refresh()))
-            x += w + 28
-        self._nav_end = x
+        self._nav_x0 = x
+        self._draw_nav()
+        x = self._nav_end
         self._live_pill_show(x - 12, 38)   # selo AO VIVO pulsando quando algum canal está transmitindo
 
         right = W - MARGIN
@@ -1115,27 +1215,27 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             chips.append(("Continuar", self.continue_last, False))
         for label, cmd, on in chips:
             tag = "opt_" + label.split()[0].lower()
-            opts = dict(style="plain", accent=self.accent, icon="dot" if on else None, height=28, size=9, glow=6, pad=13,
-                        radius=14, track=0.4)
-            normal = skin.button_photo(label, state="hover" if on else "normal", **opts)
+            opts = dict(style="on" if on else "plain", accent=self.accent, icon="dot" if on else None, height=28, size=9,
+                        glow=6, pad=13, radius=14, track=0.6)
+            normal = skin.button_photo(label, state="normal", **opts)
             hot = lambda label=label, opts=opts: skin.button_photo(label, state="hover", **opts)
             w = normal.width() - 12
             item = c.create_image(x - w - 6, y - 20, image=normal, anchor="nw", tags=(tag,))
             self._clickable(tag, cmd, hover=[(item, normal, hot)])
             x -= w + 8
         # atalhos como teclas: a tecla numa tampinha, o que ela faz ao lado; os que não cabem ficam de fora
-        hints = (("A D  ← →", "capítulos"), ("↑ ↓", "versões"), ("Enter", "jogar"), ("G", "gerenciar"), ("Tab", "seção"),
+        hints = (("A D / ← →", "capítulos"), ("W ↑", "menu"), ("S ↓", "versões"), ("Enter", "jogar"), ("G", "gerenciar"), ("Tab", "seção"),
                  ("E", "extras"), ("F", "foto"), ("F11", "tela cheia"))
-        kf, lf = self.f["tiny"], self.f["small"]
+        lf = self.f["small"]
         hx, limit = MARGIN, x - 16
         for key, label in hints:
-            kw = max(kf.measure(key) + 14, 24)
-            need = kw + 6 + lf.measure(label) + 18
+            cap = skin.keycap_photo(key)
+            kw = cap.width()
+            need = kw + 8 + lf.measure(label) + 22
             if hx + need > limit:
                 break
-            self._round_rect(hx, y - 11, hx + kw, y + 11, 6, fill="#1b1917", outline="#3b342d")
-            c.create_text(hx + kw / 2, y, text=key, fill=WHITE, font=kf)
-            c.create_text(hx + kw + 6, y, anchor="w", text=label, fill=MUTED, font=lf)
+            c.create_image(hx, y - 11, image=cap, anchor="nw")
+            c.create_text(hx + kw + 8, y, anchor="w", text=label, fill=MUTED, font=lf)
             hx += need
 
     def _draw_carousel(self, W):
@@ -1356,34 +1456,29 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             syn = c.create_text(x, y, anchor="nw", text=ch["sinopse"], fill="#d9d2c5", font=self.f["body"], width=min(w, 640))
             y = c.bbox(syn)[3] + 16
 
-        if len(ch["versoes"]) > 1:  # versoes: uma barra segmentada, a escolhida com filete na cor do capitulo
-            widths = [self.f["small"].measure(v["versao"]) + 34 for v in ch["versoes"]]
+        if len(ch["versoes"]) > 1:  # versoes: pílulas num trilho escuro, a escolhida clara (como na PS5)
+            opts = dict(accent=self.accent, height=28, size=9, glow=0, pad=14, radius=14, track=0.6)
+            pills = [(skin.button_photo(v["versao"], style="seg_on" if v is g else "seg", state="normal", **opts), v)
+                     for v in ch["versoes"]]
             maxw = min(w, 760)
             rows, cur, cw = [], [], 0
-            for j, pw in enumerate(widths):   # quebra em mais linhas se nao couber
-                if cur and cw + pw > maxw:
+            for j, (ph, _v) in enumerate(pills):   # quebra em mais linhas se nao couber
+                if cur and cw + ph.width() + 2 > maxw:
                     rows.append(cur); cur, cw = [], 0
-                cur.append(j); cw += pw
+                cur.append(j); cw += ph.width() + 2
             rows.append(cur)
             for r in rows:
-                total = sum(widths[j] for j in r)
-                c.create_rectangle(x, y, x + total, y + 34, fill="#0f0d0c", outline="#3b342d")
-                px = x
-                for n, j in enumerate(r):
-                    v, pw = ch["versoes"][j], widths[j]
-                    on = v is g
+                total = sum(pills[j][0].width() + 2 for j in r) + 6
+                c.create_image(x, y, image=skin.track_photo(total, 36), anchor="nw")
+                px = x + 4
+                for j in r:
+                    ph, v = pills[j]
                     tag = f"ver{j}"
-                    bg = c.create_rectangle(px + 1, y + 1, px + pw, y + 33, fill="#24201c" if on else "#0f0d0c", outline="", tags=(tag,))
-                    if n:
-                        c.create_line(px, y + 8, px, y + 26, fill="#3b342d")
-                    if on:
-                        c.create_rectangle(px + 1, y + 30, px + pw, y + 33, fill=self.accent, outline="")
-                    tx = c.create_text(px + pw / 2, y + 16, text=v["versao"], fill=WHITE if on else MUTED,
-                                       font=self.f["small"], tags=(tag,))
-                    self._clickable(tag, lambda j=j: self.pick_version(0, absolute=j),
-                                    hover=None if on else [(tx, MUTED, WHITE), (bg, "#0f0d0c", "#1a1715")])
-                    px += pw
-                y += 42
+                    item = c.create_image(px, y + 4, image=ph, anchor="nw", tags=(tag,))
+                    hot = None if v is g else [(item, ph, lambda t=v["versao"]: skin.button_photo(t, style="seg", state="hover", **opts))]
+                    self._clickable(tag, lambda j=j: self.pick_version(0, absolute=j), hover=hot)
+                    px += ph.width() + 2
+                y += 46
         elif g["tipo"] != "info":  # nos itens de informação o formato já aparece na linha de estado
             c.create_text(x, y, anchor="nw", text=g.get("versao", ""), fill=DIM, font=self.f["small"])
             y += 24
@@ -1573,7 +1668,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         c, items = self.c, ch.get("lancamentos", [])
         hub = [v for v in ch.get("versoes", []) if v.get("tipo") in ("steam", "local")]
         if hub:   # as versoes deste hub e de onde vem cada uma (clique abre a loja ou o GitHub)
-            c.create_text(x, y - 4, anchor="nw", text="NO RE HUB", fill=WHITE, font=self.f["tiny"])
+            c.create_text(x, y - 4, anchor="nw", text=f"NO {FR['app'].upper()}", fill=WHITE, font=self.f["tiny"])
             yy = y + 16
             for k, v in enumerate(hub):
                 src = sources.sources(v)
@@ -1747,7 +1842,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
     ACTION_ICONS = {"JOGAR": "play", "INSTALAR": "down", "BAIXAR": "down", "ACOMPANHAR": "eye", "ABRIR SITE": "link",
                     "GERENCIAR": "gear", "LOJA": "bag", "DESINSTALAR": "trash", "REMOVER": "trash", "EDITAR": "edit",
                     "CONFIGURAR": "gear", "CANAL": "tv", "ASSISTIR AO VIVO": "live", "ASSISTIR NO YOUTUBE": "play",
-                    "LER NOTÍCIA": "doc", "PESQUISAR": "eye", "ONDE BAIXAR": "down"}
+                    "LER NOTÍCIA": "doc", "PESQUISAR": "eye", "ONDE BAIXAR": "down", "ABRIR NA APP STORE": "link",
+                    "BAIXAR APK": "down"}
 
     def _button(self, x, y, text, cmd, primary, tag):
         """Botao desenhado (skin.py): o principal na cor do capitulo com brilho, os outros em vidro escuro;
@@ -1809,6 +1905,12 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
     def _canvas_click(self, e):
         """Clique nos cards (pela posição, sem ligar cada card ao Tk a cada quadro)."""
+        pr = self._peek_rect
+        if pr and pr[0] <= e.x <= pr[2] and pr[1] <= e.y <= pr[3]:
+            return   # clique na prévia das lives (por cima dos cards)
+        if self.nav_focus:
+            self.nav_focus = False
+            self.refresh()
         hit = next((i for i, x1, y1, x2, y2 in self._tile_rects if x1 <= e.x <= x2 and y1 <= e.y <= y2), None)
         if hit is not None:
             self.click_tile(hit)
@@ -1842,6 +1944,10 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
                                ("Pasta de músicas", "", lambda: (audio.MUSIC.mkdir(parents=True, exist_ok=True), os.startfile(audio.MUSIC)), "folder")]
              + ([(f"Sons de menu para {name}", "", lambda: os.startfile(audio.theme_folder(self.chapter["id"])), "folder")] if self.chapter else [])
              + [("Fluffy Mod Manager (mods)", "", self.open_fluffy, "puzzle")]),
+            ("ISOs", [("Importar lista de links", "", self.import_iso_links, "plus"),
+                      ("Baixar todas as ISOs", "", self.download_all_isos, "down"),
+                      ("Organizar pasta de ISOs", "", self.organize_isos, "folder"),
+                      ("Editar links das ISOs", "", lambda: os.startfile(isodl.ensure_file(self.games)), "doc")]),
             ("Sistema", [("Tela cheia", "F11", self.toggle_fullscreen, "screen"),
                          ("Pasta de dados", "", lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA)), "folder"),
                          ("Pasta do catálogo", "", lambda: os.startfile(ROOT / "games"), "folder"),
@@ -1875,6 +1981,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             return g.get("versao", ""), MUTED
         if g.get("meu"):   # adicionado pela pessoa: diz o que acontece ao clicar
             return ("Site  ·  abre no navegador", "#7fb3ff") if g.get("url") else ("Seu programa  ·  o hub executa o .exe", GREEN)
+        if g.get("mobile"):
+            return ("Joga-se no iPhone, iPad ou Mac  ·  App Store" if g["mobile"] == "ios" else "Joga-se no Android  ·  APK"), "#7fb3ff"
         ready = launcher.is_ready(g, self.cfg, self.installed)
         if g["tipo"] == "steam":
             text, color = ("Instalado", GREEN) if ready else ("Não instalado", MUTED)
@@ -1930,11 +2038,13 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         if g.get("meu"):   # adicionado pela pessoa: site abre no navegador, .exe o hub executa
             first = ("Abrir site", lambda: self.play(g), True) if g.get("url") else ("Jogar", lambda: self.play(g), True)
             return [first, ("Editar", lambda: self.add_custom(edit=g), False), ("Remover", lambda: self.remove_custom(g), False)]
+        if g.get("mobile"):   # port para celular: abre a App Store ou a página do APK (joga-se no aparelho)
+            return [(g.get("acao", "Abrir"), lambda: webbrowser.open(g["url"]), True), manage]
         if launcher.is_ready(g, self.cfg, self.installed):
             return [("Jogar", lambda: self.play(g), True), manage, ("Desinstalar", lambda: self.uninstall_game(g), False)]
         if g.get("andamento"):   # port ainda em desenvolvimento: so acompanhar o projeto
             return [("Acompanhar", lambda: webbrowser.open(g["andamento"]["url"]), True), manage]
-        where = [("Onde baixar", lambda: webbrowser.open(g["projetos"][0]["url"]), False)] if g.get("projetos") and not g.get("github") else []
+        where = []   # o hub baixa direto (Instalar); os links de cada projeto ficam em Gerenciar
         if g.get("emulador"):
             return [("Instalar", lambda: self.install_emulated(g), True), *where, manage]
         if g.get("github"):
@@ -2122,6 +2232,116 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self.cfg.set(g["id"], iso=iso)
         return True
 
+    def download_iso(self, g, on_done=None):
+        """Baixa a ISO pelo link de data/isos.json, com a janela de progresso, e ja deixa escolhida."""
+        prog = Progress(self, f"Baixando a ISO de {g['nome']}")
+
+        def done(iso):
+            prog.close()
+            self.cfg.set(g["id"], iso=str(iso))
+            self.refresh()
+            (on_done or (lambda: t.notice(self, "ISO pronta", str(iso))))()
+
+        def fail(msg):
+            prog.close()
+            self.refresh()
+            messagebox.showerror(FR["app"], f"Falha ao baixar a ISO:\n{msg}")
+
+        t.in_background(self, lambda: isodl.download(g, prog.step("ISO do jogo"), prog.cancelled), done, fail)
+
+    def _iso_games(self, with_link=False):
+        """Versoes que abrem a ISO da pessoa e ainda nao tem uma (com link em data/isos.json, se with_link)."""
+        return [g for g in self.games if isodl.needs_iso(g) and g["tipo"] != "steam"
+                and not os.path.isfile(self.cfg.get(g["id"]).get("iso") or "")
+                and (not with_link or isodl.link_for(g))]
+
+    def import_iso_links(self):
+        """Le um arquivo de links (.txt ou .json), liga cada link ao jogo certo e guarda em data/isos.json."""
+        path = filedialog.askopenfilename(parent=self, title="Arquivo com os links das ISOs (.txt ou .json)",
+                                          filetypes=[("Lista de links", "*.txt *.json"), ("Todos", "*.*")])
+        if not path:
+            return
+        try:
+            found, missed = isodl.import_links(path, self.games)
+        except (OSError, ValueError) as e:
+            return t.notice(self, "Não deu certo", str(e), error=True)
+        names = {g["id"]: g["nome"] for g in self.games}
+        details = [f"{names.get(k, k)}" for k in found][:12] + (["..."] if len(found) > 12 else [])
+        if missed:
+            details.append(f"Sem jogo reconhecido ({len(missed)}): " + "; ".join(missed[:3]))
+        if not found:
+            return t.notice(self, "Nenhum link reconhecido", "Use uma linha por jogo: nome do jogo = link.", details, error=True)
+        if t.confirm(self, f"{len(found)} link(s) guardado(s)", "Baixar agora as ISOs que ainda faltam?", details, ok="Baixar tudo"):
+            self.download_all_isos()
+
+    def download_all_isos(self):
+        """Baixa, uma depois da outra, as ISOs que tem link e ainda faltam; cada uma vai para data/isos/<jogo>."""
+        todo = self._iso_games(with_link=True)
+        if not todo:
+            return t.notice(self, "Nada para baixar", "Todos os jogos com link em data/isos.json já têm a ISO.")
+        prog = Progress(self, "Baixando as ISOs", f"{len(todo)} jogo(s), um de cada vez")
+
+        def work():
+            got, errors, by_url = {}, [], {}
+            for k, g in enumerate(todo, 1):
+                if prog.cancelled():
+                    break
+                url = isodl.link_for(g)
+                try:
+                    if url not in by_url:   # versoes do mesmo jogo com o mesmo link baixam uma vez so
+                        by_url[url] = isodl.download(g, prog.step(f"{k}/{len(todo)}  ·  {g['nome']}"), prog.cancelled)
+                    got[g["id"]] = by_url[url]
+                except Exception as e:
+                    errors.append(f"{g['nome']}: {e}")
+            return got, errors
+
+        def done(result):
+            got, errors = result
+            prog.close()
+            for gid, iso in got.items():
+                self.cfg.set(gid, iso=str(iso))
+            self.refresh()
+            (t.notice(self, "Algumas ISOs falharam", f"{len(got)} pronta(s), {len(errors)} com erro.", errors[:8], error=True)
+             if errors else t.notice(self, "ISOs prontas", f"{len(got)} ISO(s) baixada(s) e já escolhida(s) em cada jogo."))
+
+        t.in_background(self, work, done, lambda msg: (prog.close(), t.notice(self, "Não deu certo", msg, error=True)))
+
+    def organize_isos(self):
+        """Escolhe uma pasta com ISOs já baixadas: o hub reconhece cada uma, move para data/isos/<jogo> e escolhe."""
+        folder = filedialog.askdirectory(parent=self, title="Pasta com as ISOs baixadas",
+                                         initialdir=os.path.join(os.path.expanduser("~"), "Downloads"))
+        if not folder:
+            return
+        self.config(cursor="watch")
+        self.update()
+        try:
+            matches = isodl.scan_folder(folder, self.games, self.cfg)
+        finally:
+            self.config(cursor="")
+        if not matches:
+            return t.notice(self, "Nenhuma ISO reconhecida", "Nenhum arquivo da pasta parece ser de um jogo que ainda está sem ISO.",
+                            ["O nome do arquivo precisa ter o nome do jogo ou o código do disco (ex.: SLUS-20184)."])
+        details = [f"{os.path.basename(f)}  →  {', '.join(g['nome'] for g in gs)}" for f, gs in matches[:12]]
+        details += ["..."] if len(matches) > 12 else []
+        details.append("Os arquivos são movidos para data/isos (um .zip/.rar/.7z é extraído e o original fica onde está).")
+        if not t.confirm(self, f"Organizar {len(matches)} arquivo(s)?", "Cada um vai para a pasta do seu jogo e já fica escolhido.",
+                         details, ok="Organizar"):
+            return
+        prog = Progress(self, "Organizando as ISOs")
+
+        def step(k, n, name):
+            prog.step(f"Movendo  ·  {name}", items=True)(k, n, 0, None)
+
+        def done(found):
+            prog.close()
+            for gid, iso in found.items():
+                self.cfg.set(gid, iso=str(iso))
+            self.refresh()
+            t.notice(self, "ISOs organizadas", f"{len(found)} jogo(s) com a ISO escolhida.")
+
+        t.in_background(self, lambda: isodl.organize(matches, step), done,
+                        lambda msg: (prog.close(), t.notice(self, "Não deu certo", msg, error=True)))
+
     def install_emulated(self, g):
         """Instalar de um jogo sem port: baixa o emulador certo (uma vez para todos os jogos dele) e pede so a ISO."""
         e = emulators.of(g)
@@ -2129,6 +2349,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
         def ready(path):
             self.cfg.set(g["id"], exe=str(path))
+            if not self.cfg.get(g["id"]).get("iso") and isodl.link_for(g):
+                return self.download_iso(g, lambda: messagebox.showinfo(FR["app"], f"{g['nome']} pronto: clique em Jogar ({e['nome']})."))
             if self.ask_iso(g):
                 messagebox.showinfo(FR["app"], f"{g['nome']} pronto: clique em Jogar ({e['nome']}).")
             self.refresh()
@@ -2237,6 +2459,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             self.notify(f"{g['nome']} ja esta abrindo. Nao precisa clicar de novo.")
             return
         self._launching[g["id"]] = now
+        if self.prefs["efeitos"]:   # voz do título do jogo (data/sons/titulos/<capítulo>.mp3, ou _geral.mp3)
+            audio.play_file("titulo", audio.title_voice(g.get("capitulo", g["id"])), 0.9)
         self.notify(f"Abrindo {g['nome']}... pode levar alguns segundos.", 5)
         try:
             if g["tipo"] != "steam":  # a Steam já guarda quando você jogou; os outros, o app guarda
@@ -2272,25 +2496,42 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
     def download_game(self, g, on_done=None):
         """Baixa/atualiza o recomp/decomp do GitHub sem apagar saves e assets já colocados."""
         self.status_text = f"Baixando {g['nome']}..."
-        self.notify(f"Baixando {g['nome']}... aguarde, nao precisa clicar de novo.", 5)
         self.refresh()
+        # com link em data/isos.json, a ISO vem junto com o port
+        get_iso = ("{iso}" in g.get("args", "") and not self.cfg.get(g["id"]).get("iso") and not g.get("instalador")
+                   and isodl.link_for(g))
+        prog = Progress(self, f"Instalando {g['nome']}", "O port e a ISO" if get_iso else "")
 
         def work():
             if g.get("instalador"):   # o projeto tem instalador proprio: baixa e abre ele
-                tag, setup = github.download_asset(g["github"], g.get("asset"), launcher.download_dir(g))
+                tag, setup = github.download_asset(g["github"], g.get("asset"), launcher.download_dir(g),
+                                                   prog.step(f"{g['nome']}: instalador"), prog.cancelled)
                 os.startfile(setup)
-                return tag, None
-            tag = github.download_release(g["github"], g.get("asset"), launcher.download_dir(g), merge=True)
-            return tag, launcher.find_exe(g)
+                return tag, None, None
+            tag = github.download_release(g["github"], g.get("asset"), launcher.download_dir(g), merge=True,
+                                          progress=prog.step(f"Port ({g['github']})"), cancelled=prog.cancelled)
+            iso = None
+            if get_iso:   # se a ISO falhar, o port continua instalado e o erro aparece no fim
+                try:
+                    iso = isodl.download(g, prog.step("ISO do jogo"), prog.cancelled)
+                except Exception as e:
+                    iso = e
+            return tag, launcher.find_exe(g), iso
 
         def finish():
+            prog.close()
             self.status_text = ""
             self.refresh()
             if on_done:
                 on_done()
 
         def done(result):
-            tag, exe = result
+            prog.close()   # terminou: a janela do download sai sozinha antes de pedir a ISO ou avisar
+            tag, exe, iso = result
+            if isinstance(iso, Exception):
+                messagebox.showerror(FR["app"], f"O port foi instalado, mas a ISO falhou:\n{iso}")
+            elif iso:
+                self.cfg.set(g["id"], iso=str(iso))
             if exe:
                 self.cfg.set(g["id"], exe=str(exe))
                 if "{iso}" in g.get("args", "") and not self.cfg.get(g["id"]).get("iso"):
@@ -2305,6 +2546,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             finish()
 
         def fail(msg):
+            prog.close()
             messagebox.showerror(FR["app"], f"Falha ao baixar:\n{msg}")
             finish()
 

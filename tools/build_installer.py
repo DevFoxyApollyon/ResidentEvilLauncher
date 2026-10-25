@@ -1,9 +1,9 @@
-"""Gera o instalador do RE Hub: build/installer/RE Hub - Instalar.exe (um arquivo so).
+"""Gera o instalador do RE Launcher: build/installer/RE Launcher - Instalar.exe (um arquivo so).
 
     python tools/build_installer.py [--version 1.2.0]
 
-1. gera o app (PyInstaller, como no LEIA-ME) em build/dist/RE Hub;
-2. junta num zip o app, o catalogo (games/, franquia.json, modelos/) e as fontes livres
+1. gera o app (PyInstaller, como no LEIA-ME) em build/dist/RE Launcher;
+2. junta num zip o app, o catalogo (games/, franquia.json) e as fontes livres
    (data/fontes, licenca OFL). Nao entra nada pessoal nem de terceiros: configuracoes, jogos
    baixados, mods, capas e trailers em cache, musicas e sons que voce colocou;
 3. empacota installer/installer.py com esse zip num .exe so (PyInstaller --onefile).
@@ -18,9 +18,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
-APP = BUILD / "dist" / "RE Hub"
+APP = BUILD / "dist" / "RE Launcher"
 OUT = BUILD / "installer"
-CATALOG = ["games", "modelos", "franquia.json", "re_hub.ico", "re_hub.png", "LEIA-ME.md"]
+CATALOG = ["games", "franquia.json", "re_hub.ico", "re_hub.png", "re_logo.png", "LEIA-ME.md"]
 FREE_DATA = ["data/fontes"]
 
 
@@ -36,7 +36,7 @@ def main():
     icon = str(ROOT / "re_hub.ico")
     if not a.skip_app:
         pyinstaller("--noconsole", "--onedir", "--contents-directory", "_internal", "--icon", icon,
-                    "--name", "RE Hub", "--distpath", str(BUILD / "dist"), "--workpath", str(BUILD),
+                    "--name", "RE Launcher", "--distpath", str(BUILD / "dist"), "--workpath", str(BUILD),
                     "--specpath", str(BUILD), str(ROOT / "main.py"))
     OUT.mkdir(parents=True, exist_ok=True)
     zpath = OUT / "payload.zip"
@@ -52,11 +52,11 @@ def main():
                     z.write(f, f.relative_to(ROOT).as_posix())
     print("payload", zpath, zpath.stat().st_size // (1 << 20), "MB")
     sep = ";" if os.name == "nt" else ":"
-    pyinstaller("--noconsole", "--onefile", "--icon", icon, "--name", "RE Hub - Instalar",
+    pyinstaller("--noconsole", "--onefile", "--icon", icon, "--name", "RE Launcher - Instalar",
                 "--add-data", f"{zpath}{sep}.", "--add-data", f"{icon}{sep}.",
                 "--distpath", str(OUT), "--workpath", str(OUT / "work"), "--specpath", str(OUT / "work"),
                 str(ROOT / "installer" / "installer.py"))
-    exe = OUT / "RE Hub - Instalar.exe"
+    exe = OUT / "RE Launcher - Instalar.exe"
     print(exe, exe.stat().st_size // (1 << 20), "MB")
 
 

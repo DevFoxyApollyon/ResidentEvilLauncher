@@ -1,4 +1,5 @@
-"""Aba Canais: vídeos novos do YouTube e transmissões ao vivo (YouTube e Twitch) dos canais da franquia.
+"""Aba Canais: vídeos novos do YouTube e transmissões ao vivo (YouTube e Twitch) dos canais da franquia,
+mais todas as lives de Resident Evil no ar agora (categorias da Twitch e busca "ao vivo" do YouTube).
 
 Sem chave de API: os vídeos vêm do feed Atom que todo canal do YouTube publica; "ao vivo" do YouTube sai da
 página /live do canal; o da Twitch, do decapi.me (serviço aberto que lê a API da Twitch).
@@ -190,6 +191,110 @@ def twitch_live(login):
             "espectadores": viewers if viewers.isdigit() else "", "desde": 0, "categoria": game, "no_ar": _uptime_pt(up)}
 
 
+# ---------- todas as lives de Resident Evil agora (não só dos canais escolhidos) ----------
+GQL = "https://gql.twitch.tv/gql"
+GQL_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko"   # o mesmo identificador público que o site da Twitch usa
+MAX_FOUND = 24
+
+
+def _gql(query):
+    req = urllib.request.Request(GQL, data=json.dumps({"query": query}).encode(),
+                                 headers={"Client-ID": GQL_ID, "Content-Type": "application/json", "User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.load(r).get("data") or {}
+
+
+def twitch_category_lives():
+    """Lives nas categorias da franquia na Twitch (Resident Evil 4, Village, Requiem...), as em português primeiro."""
+    cats = _gql(f'query {{ searchCategories(query: {json.dumps(FR["nome"])}, first: 40) '
+                '{ edges { node { id name viewersCount } } } }')
+    cats = sorted((e["node"] for e in cats.get("searchCategories", {}).get("edges", []) if e["node"].get("viewersCount")),
+                  key=lambda n: -n["viewersCount"])[:10]
+    if not cats:
+        return []
+    fields = ("edges { node { title viewersCount createdAt broadcaster { login displayName } "
+              "previewImageURL(width: 640, height: 360) } }")
+    def one(i_c):   # uma consulta por categoria (todas juntas passam do limite da Twitch e voltam erro 400)
+        i, c = i_c
+        try:
+            return _gql(f'query {{ p{i}: game(id: "{c["id"]}") {{ name streams(first: 4, options: {{languages: ["pt"]}}) '
+                        f'{{ {fields} }} }} a{i}: game(id: "{c["id"]}") {{ name streams(first: 3) {{ {fields} }} }} }}')
+        except (OSError, ValueError):
+            return {}
+    data = {}
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        for part in pool.map(one, enumerate(cats)):
+            data.update(part)
+    out, seen = [], set()
+    for key, game in sorted(data.items(), key=lambda kv: not kv[0].startswith("p")):   # as em português primeiro
+        for e in (game or {}).get("streams", {}).get("edges", []):
+            n = e["node"]
+            login = (n.get("broadcaster") or {}).get("login")
+            if not login or login in seen:
+                continue
+            seen.add(login)
+            try:
+                since = datetime.fromisoformat(n["createdAt"].replace("Z", "+00:00")).timestamp()
+            except (KeyError, ValueError):
+                since = 0
+            out.append({"plataforma": "twitch", "id": login, "canal": n["broadcaster"].get("displayName") or login,
+                        "titulo": n.get("title") or "Ao vivo na Twitch", "link": f"https://www.twitch.tv/{login}",
+                        "canal_link": f"https://www.twitch.tv/{login}", "imagem": n.get("previewImageURL", ""),
+                        "espectadores": str(n.get("viewersCount", "")), "desde": since, "categoria": game.get("name", ""),
+                        "pt": key.startswith("p"), "n": n.get("viewersCount", 0)})
+    return out
+
+
+def youtube_search_lives():
+    """Lives do YouTube na busca pelo nome da franquia (filtro "Ao vivo" da própria busca)."""
+    q = urllib.parse.quote_plus(FR["nome"])
+    page = _get(f"https://www.youtube.com/results?search_query={q}&sp=EgJAAQ%253D%253D")
+    m = re.search(r"var ytInitialData = (\{.*?\});</script>", page)
+    if not m:
+        return []
+    found = []
+
+    def walk(o):
+        if isinstance(o, dict):
+            v = o.get("videoRenderer")
+            if v and v.get("videoId"):
+                found.append(v)
+            for x in o.values():
+                walk(x)
+        elif isinstance(o, list):
+            for x in o:
+                walk(x)
+    walk(json.loads(m.group(1)))
+    out = []
+    for v in found:
+        views = "".join(r.get("text", "") for r in v.get("viewCountText", {}).get("runs", []))
+        if "assistindo" not in views and "watching" not in views:
+            continue   # só quem está no ar agora
+        owner = (v.get("ownerText", {}).get("runs") or [{}])[0]
+        cid = owner.get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
+        num = re.sub(r"\D", "", views)
+        out.append({"plataforma": "youtube", "id": v["videoId"], "canal": owner.get("text", ""),
+                    "titulo": "".join(r.get("text", "") for r in v.get("title", {}).get("runs", [])) or "Ao vivo no YouTube",
+                    "link": f"https://www.youtube.com/watch?v={v['videoId']}",
+                    "canal_link": f"https://www.youtube.com/channel/{cid}" if cid else f"https://www.youtube.com/watch?v={v['videoId']}",
+                    "imagem": f"https://i.ytimg.com/vi/{v['videoId']}/hqdefault_live.jpg", "espectadores": num, "desde": 0,
+                    "categoria": "", "pt": False, "n": int(num or 0)})
+    return out
+
+
+def discover_lives():
+    """Todas as lives da franquia agora, Twitch e YouTube: as em português primeiro, depois as mais vistas."""
+    out = []
+    for fn in (twitch_category_lives, youtube_search_lives):
+        try:
+            out += fn()
+        except (OSError, ValueError, KeyError):
+            pass
+    pt = sorted((l for l in out if l.get("pt")), key=lambda l: -l.get("n", 0))[:MAX_FOUND // 2]
+    rest = sorted((l for l in out if not l.get("pt")), key=lambda l: -l.get("n", 0))
+    return (pt + rest)[:MAX_FOUND]
+
+
 # ---------- estado e atualização ----------
 _memo = {"mtime": None, "data": None}
 
@@ -216,7 +321,7 @@ def refresh(force=False):
     if not force and time.time() - old.get("quando", 0) < MAX_AGE - 5:
         return None
     cfg = config()
-    jobs = [("v", c) for c in cfg["youtube"]] + [("y", c) for c in cfg["youtube"]] + [("t", l) for l in cfg["twitch"]]
+    jobs = [("v", c) for c in cfg["youtube"]] + [("y", c) for c in cfg["youtube"]] + [("t", l) for l in cfg["twitch"]] + [("d", None)]
 
     def run(job):
         kind, c = job
@@ -225,6 +330,8 @@ def refresh(force=False):
                 if not c.get("id"):
                     c.update(resolve_youtube(c["handle"]))
                 return kind, youtube_videos(c)
+            if kind == "d":
+                return kind, discover_lives()
             if kind == "y":
                 if not c.get("id"):
                     return kind, None
@@ -236,10 +343,12 @@ def refresh(force=False):
         results = list(pool.map(run, jobs))
     if any(c.get("id") for c in cfg["youtube"]):
         save_config(cfg)   # guarda os códigos que acabaram de ser descobertos pelos @
-    videos, lives, failed = [], [], False
+    videos, lives, found, failed = [], [], [], False
     for kind, res in results:
         if res == "erro":
             failed = True
+        elif kind == "d":
+            found = res
         elif kind == "v":
             videos += res
         elif res:
@@ -258,6 +367,7 @@ def refresh(force=False):
     DATA.mkdir(parents=True, exist_ok=True)
     STATE.write_text(json.dumps({
         "quando": now, "videos": videos, "lives": lives,
+        "descobertas": [l for l in found if _live_key(l) not in {_live_key(x) for x in lives}],
         "vistos": sorted(seen | {v["id"] for v in videos}), "avisadas": [_live_key(l) for l in lives],
     }, ensure_ascii=False, indent=1), encoding="utf-8")
     return new_videos, new_lives
@@ -276,7 +386,7 @@ def _duration(seconds):
 def chapters():
     """Lives primeiro e depois os vídeos mais novos, no formato de "capítulo" que a tela já sabe mostrar."""
     out, st, now = [], cached(), time.time()
-    for l in st.get("lives", []):
+    for l in st.get("lives", []) + st.get("descobertas", []):   # os canais escolhidos e depois todas as lives da franquia
         plat = "Twitch" if l["plataforma"] == "twitch" else "YouTube"
         bits = [plat, l["canal"]]
         if l.get("espectadores"):

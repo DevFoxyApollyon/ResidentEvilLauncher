@@ -11,7 +11,7 @@ from datetime import datetime
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageTk
 
-from .. import catalog, characters, deals, library, steam, store, trophies
+from .. import audio, catalog, characters, deals, library, steam, store, trophies
 from ..franchise import FR
 from ..paths import DATA, ROOT
 from . import app as A
@@ -42,6 +42,11 @@ class Screens:
             self.refresh_deals()
         elif kind in LORE_KINDS:
             self._lore_open(kind)
+        if kind != "viewer" and self.prefs["trilha"]:   # telas por cima tocam a música dos submenus
+            if self._music_job:
+                self.after_cancel(self._music_job)
+                self._music_job = None
+            self.music.play_folder(audio.SUBMENU)
         self._sound("open")
         self.refresh()
 
@@ -49,6 +54,7 @@ class Screens:
         if self.overlay:
             self.overlay = None
             self._sound("back")
+            self._queue_music()   # volta a música do capítulo
             self.refresh()
 
     def _ov_press(self, action):

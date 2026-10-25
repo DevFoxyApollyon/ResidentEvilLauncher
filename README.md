@@ -1,4 +1,4 @@
-# Resident Evil Launcher (RE Hub)
+# Resident Evil Launcher (RE Launcher)
 
 
 **[Todas as versões jogáveis e como instalar cada uma](VERSOES.md)**

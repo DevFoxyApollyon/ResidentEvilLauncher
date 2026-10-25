@@ -1,4 +1,4 @@
-# Versões jogáveis no RE Hub
+# Versões jogáveis no RE Launcher
 
 Todas as versões que o hub instala ou abre, de onde vem cada uma e como instalar. O hub nunca baixa o jogo:
 versões da Steam e da GOG você compra (as demos são grátis); ports e emuladores precisam da SUA cópia/ISO.
@@ -118,6 +118,12 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   2. Abra pelo Jogar: o assistente pede o .cue e a BIOS e gera o jogo nativo (na primeira vez demora; precisa do Python 3 instalado).
   3. Clique em Jogar.
 
+### iPhone / iPad / Mac
+- **Onde:** [Projeto: App Store](https://apps.apple.com/br/app/resident-evil-3/id1640630077)
+  1. Esta versão é jogada no iPhone, iPad ou Mac: clique em Abrir na App Store e baixe pelo aparelho.
+  2. Precisa de iPhone 15 Pro ou mais novo, ou iPad/Mac com chip Apple M1 ou mais novo.
+  3. O download é grátis e tem um trecho para testar; o jogo completo é comprado dentro do app.
+
 ## Resident Evil 2
 
 ### Remake
@@ -141,6 +147,12 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   1. Ainda não dá para jogar esta versão no PC. Reimplementação aberta do RE2 de 1998: ainda incompleta.
   2. Clique em Acompanhar para ver o projeto; quando sair uma versão jogável, ela entra aqui.
 
+### iPhone / iPad / Mac
+- **Onde:** [Projeto: App Store](https://apps.apple.com/br/app/resident-evil-2/id1640632432)
+  1. Esta versão é jogada no iPhone, iPad ou Mac: clique em Abrir na App Store e baixe pelo aparelho.
+  2. Precisa de iPhone 15 Pro ou mais novo, ou iPad/Mac com chip Apple M1 ou mais novo.
+  3. O download é grátis e tem um trecho para testar; o jogo completo é comprado dentro do app.
+
 ## Code: Veronica
 
 ### Resident Evil Veronica
@@ -148,8 +160,8 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   1. Clique em Instalar: a Steam abre e baixa o jogo (o jogo precisa estar na sua conta Steam).
   2. Quando terminar, o botão vira Jogar.
 
-### Port de PC (PT-BR)
-- **Onde:** [GitHub](https://github.com/DevFoxyApollyon/recvx-ptbr/releases/latest), [Projeto: recvx-enhanced-port](https://github.com/DevFoxyApollyon/recvx-enhanced-port)
+### Port de PC
+- **Onde:** [GitHub](https://github.com/aikatore/recvx-enhanced-port/releases/latest)
   1. Clique em Instalar: o hub baixa a versão mais nova do GitHub e ja configura o executável.
   2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
   3. Clique em Configurar, confirme o recvx.exe e escolha a sua ISO (PS2, NTSC-U, SLUS-20184). No jogo, F1 abre as configurações (terceira pessoa, widescreen, resolução) e F3 o co-op.
@@ -204,6 +216,28 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
   3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
 
+### iPhone / iPad / Mac
+- **Onde:** [Projeto: App Store](https://apps.apple.com/br/app/resident-evil-4/id6462360082)
+  1. Esta versão é jogada no iPhone, iPad ou Mac: clique em Abrir na App Store e baixe pelo aparelho.
+  2. Precisa de iPhone 15 Pro ou mais novo, ou iPad/Mac com chip Apple M1 ou mais novo.
+  3. O download é grátis e tem um trecho para testar; o jogo completo é comprado dentro do app.
+
+### Android (CubeEvil4)
+- **Onde:** [Projeto: CubeEvil4-Android](https://github.com/Andiweli/CubeEvil4-Android)
+  1. Clique em Baixar APK e baixe o .apk da última release no celular Android (64 bits).
+  2. Instale o .apk (o Android pede para permitir apps de fora da Play Store).
+  3. Abra o jogo e escolha a SUA ROM americana (.gbc).
+
+### Android nativo (em andamento)
+- **Onde:** [Em andamento](https://github.com/st4rwhx/Resident-Evil-4-Native-Port)
+  1. Ainda não dá para jogar esta versão no PC. Port nativo do RE4 de GameCube para Windows e Android: no Android já abre a vila com controles de toque, mas roda a 1-2 fps; ainda não dá para jogar.
+  2. Clique em Acompanhar para ver o projeto; quando sair uma versão jogável, ela entra aqui.
+
+### Mobile Edition (ARMBIO4)
+- **Onde:** [Em andamento](https://github.com/aarvsn/ARMBIO4)
+  1. Ainda não dá para jogar esta versão no PC. Faz o RE4 Mobile Edition (2011) da Capcom rodar no Android atual, carregando as bibliotecas do jogo original: ainda sem release pronta.
+  2. Clique em Acompanhar para ver o projeto; quando sair uma versão jogável, ela entra aqui.
+
 ## Resident Evil Revelations
 
 ### PC
@@ -222,6 +256,11 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
 - **Onde:** [Steam](https://store.steampowered.com/app/21690)
   1. Clique em Instalar: a Steam abre e baixa o jogo (o jogo precisa estar na sua conta Steam).
   2. Quando terminar, o botão vira Jogar.
+
+### Android (em andamento)
+- **Onde:** [Em andamento](https://github.com/luisxl15/Resident-Evil-5-Android-PORT)
+  1. Ainda não dá para jogar esta versão no PC. Recompilação do RE5 de Xbox 360 para Android: começo do projeto, ainda sem versão jogável.
+  2. Clique em Acompanhar para ver o projeto; quando sair uma versão jogável, ela entra aqui.
 
 ## Resident Evil Revelations 2
 
@@ -249,6 +288,12 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   1. Clique em Instalar: a Steam abre e baixa o jogo (o jogo precisa estar na sua conta Steam).
   2. Quando terminar, o botão vira Jogar.
 
+### iPhone / iPad / Mac
+- **Onde:** [Projeto: App Store](https://apps.apple.com/br/app/resident-evil-7-biohazard/id1640629241)
+  1. Esta versão é jogada no iPhone, iPad ou Mac: clique em Abrir na App Store e baixe pelo aparelho.
+  2. Precisa de iPhone 15 Pro ou mais novo, ou iPad/Mac com chip Apple M1 ou mais novo.
+  3. O download é grátis e tem um trecho para testar; o jogo completo é comprado dentro do app.
+
 ## Resident Evil Village
 
 ### PC
@@ -260,6 +305,12 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
 - **Onde:** [Steam](https://store.steampowered.com/app/2062120)
   1. Clique em Instalar: a Steam abre e baixa o jogo (o jogo precisa estar na sua conta Steam).
   2. Quando terminar, o botão vira Jogar.
+
+### iPhone / iPad / Mac
+- **Onde:** [Projeto: App Store](https://apps.apple.com/br/app/resident-evil-village/id6450980545)
+  1. Esta versão é jogada no iPhone, iPad ou Mac: clique em Abrir na App Store e baixe pelo aparelho.
+  2. Precisa de iPhone 15 Pro ou mais novo, ou iPad/Mac com chip Apple M1 ou mais novo.
+  3. O download é grátis e tem um trecho para testar; o jogo completo é comprado dentro do app.
 
 ## Resident Evil Requiem
 
@@ -306,6 +357,12 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
   1. Clique em Instalar: o hub baixa a versão mais nova do GitHub e ja configura o executável.
   2. Coloque a sua ROM (.gbc, USA) na pasta do jogo, como o README pede, e clique em Configurar.
   3. Clique em Jogar.
+
+### Android (recomp)
+- **Onde:** [Projeto: regaiden-recomp](https://github.com/sergiomanzur/regaiden-recomp)
+  1. Clique em Baixar APK e baixe o .apk da última release no celular Android (64 bits).
+  2. Instale o .apk (o Android pede para permitir apps de fora da Play Store).
+  3. Abra o jogo e escolha a SUA ROM americana (.gbc).
 
 ## Survivor 2 – Code: Veronica
 
@@ -366,3 +423,37 @@ Gerado por `tools/versoes_md.py` a partir do catálogo (`games/`).
 - **Onde:** [Steam](https://store.steampowered.com/app/952070)
   1. Clique em Instalar: a Steam abre e baixa o jogo (o jogo precisa estar na sua conta Steam).
   2. Quando terminar, o botão vira Jogar.
+
+## Resident Evil 1.5 — protótipo jogável
+
+### Protótipo nov/1996 (DuckStation)
+- **Onde:** [Emulador: DuckStation](https://www.duckstation.org), [Projeto: Hidden Palace](https://hiddenpalace.org/Biohazard_2_(Nov_6,_1996_prototype)), [Projeto: Restauração Team IGAS](https://residentevil15.fandom.com/wiki/Team_IGAS), [Projeto: TCRF](https://tcrf.net/Proto:Resident_Evil_2_(PlayStation))
+  1. Clique em Instalar: o hub baixa o DuckStation (PS1) sozinho, uma vez para todos os jogos dele.
+  2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
+  3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
+  4. A imagem não vem com o hub: baixe nas páginas de Onde baixar e escolha o .cue/.bin quando o hub pedir.
+  5. É um protótipo: pode travar em áreas inacabadas. Salve sempre que puder.
+
+## Biohazard 2 Trial Edition
+
+### Trial Edition (DuckStation)
+- **Onde:** [Emulador: DuckStation](https://www.duckstation.org), [Projeto: TCRF](https://tcrf.net/Proto:Resident_Evil_2_(PlayStation))
+  1. Clique em Instalar: o hub baixa o DuckStation (PS1) sozinho, uma vez para todos os jogos dele.
+  2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
+  3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
+  4. Use a imagem do SEU disco da Trial Edition (.cue/.bin).
+
+## Resident Evil (Game Boy Color) — build 98%
+
+### Build quase final (mGBA)
+- **Onde:** [Emulador: mGBA](https://mgba.io), [Projeto: Games That Weren't](https://www.gamesthatwerent.com/?s=resident+evil), [Projeto: Notícia](https://www.videogameschronicle.com/news/a-98-complete-version-of-the-cancelled-game-boy-color-resident-evil-port-has-been-shared-online)
+  1. Clique em Instalar: o hub baixa o mGBA (Game Boy Color) sozinho, uma vez para todos os jogos dele.
+  2. O hub procura a SUA ISO no PC e pergunta se é ela; se não achar, você escolhe o arquivo.
+  3. Clique em Jogar: o jogo abre direto no emulador, em tela cheia.
+  4. A ROM não vem com o hub: baixe na página de Onde baixar e escolha o .gbc quando o hub pedir.
+
+## Resident Evil Zero N64 — demo E3/TGS 2000 refeita
+
+### Demo de 2000 refeita (PC, fã)
+- **Onde:** [Projeto: itch.io](https://itch.io/search?q=resident+evil+0+n64), [Projeto: Notícia](https://www.generationamiga.com/2026/08/02/resident-evil-0-n64-demo-remake-brings-the-cancelled-prototype-to-pc/)
+  1. Clique em Configurar e escolha o executável do jogo.

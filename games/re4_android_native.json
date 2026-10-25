@@ -1,0 +1,31 @@
+{
+  "id": "re4_android_native",
+  "ordem": 81.86,
+  "nome": "Resident Evil 4 — Android nativo (em andamento)",
+  "tipo": "local",
+  "capitulo": "re4",
+  "versao": "Android nativo (em andamento)",
+  "andamento": {
+    "nome": "Resident Evil 4 Native Port (st4rwhx)",
+    "url": "https://github.com/st4rwhx/Resident-Evil-4-Native-Port",
+    "status": "Port nativo do RE4 de GameCube para Windows e Android: no Android já abre a vila com controles de toque, mas roda a 1-2 fps; ainda não dá para jogar."
+  },
+  "projetos": [
+    {
+      "nome": "Resident Evil 4 Native Port (st4rwhx)",
+      "url": "https://github.com/st4rwhx/Resident-Evil-4-Native-Port",
+      "status": "Em andamento (código fechado; o repositório tem as releases e as notícias)."
+    }
+  ],
+  "dica": "Ainda não dá para jogar no Android: o port roda a 1-2 fps no celular. No Windows já é jogável (~20 fps).",
+  "arte": {
+    "capa": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_600x900_2x.jpg",
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_600x900.jpg"
+    ],
+    "fundo": [
+      "https://cdn.akamai.steamstatic.com/steam/apps/254700/library_hero.jpg"
+    ],
+    "fonte": "arte oficial (Steam)"
+  }
+}
