@@ -108,13 +108,13 @@ def install(dest, progress, desktop=True):
     desk, menu = places()
     for lnk in ([desk] if desktop else []) + [menu]:
         lnk.parent.mkdir(parents=True, exist_ok=True)
-        shortcut(lnk, exe, dest, icon if icon.exists() else exe)
+        shortcut(lnk, exe, dest, exe)   # o ícone de dentro do .exe: o Windows não fica com o antigo em cache
     if not desktop and desk.exists():   # desmarcou: tira o atalho que uma instalacao anterior criou
         desk.unlink()
     size = sum(f.stat().st_size for f in dest.rglob("*") if f.is_file() and "data" not in f.parts) // 1024
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, REG) as k:
         for name, value in (("DisplayName", APP), ("DisplayVersion", version()), ("Publisher", "DevFoxyApollyon"),
-                            ("InstallLocation", str(dest)), ("DisplayIcon", str(icon if icon.exists() else exe)),
+                            ("InstallLocation", str(dest)), ("DisplayIcon", str(exe)),
                             ("UninstallString", f'"{dest / UNINSTALLER}" --uninstall')):
             winreg.SetValueEx(k, name, 0, winreg.REG_SZ, value)
         winreg.SetValueEx(k, "EstimatedSize", 0, winreg.REG_DWORD, size)
