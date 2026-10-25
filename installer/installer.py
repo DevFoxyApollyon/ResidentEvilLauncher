@@ -64,14 +64,38 @@ def places():
     return desk / f"{APP}.lnk", menu / f"{APP}.lnk"
 
 
+def close_running():
+    """Fecha o launcher (e o antigo RE Hub) se estiver aberto: com ele rodando, os arquivos de _internal ficam
+    presos e a atualização parava em "Acesso negado"."""
+    for exe in (EXE, "RE Hub.exe"):
+        subprocess.run(["taskkill", "/IM", exe, "/F"], capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
+    import time
+    time.sleep(1.0)
+
+
+def _rmtree(path, tries=6):
+    import time
+    for k in range(tries):   # o Windows solta os arquivos um instante depois de fechar o programa
+        try:
+            shutil.rmtree(path)
+            return
+        except FileNotFoundError:
+            return
+        except PermissionError:
+            if k == tries - 1:
+                raise
+            time.sleep(0.8)
+
+
 def install(dest, progress, desktop=True):
     dest = Path(dest)
     dest.mkdir(parents=True, exist_ok=True)
+    close_running()
     with zipfile.ZipFile(payload()) as z:
         names = [n for n in z.namelist() if n != "VERSION"]
         old = dest / "_internal"
         if old.exists():  # a biblioteca do app e trocada inteira (arquivos de versoes antigas saem)
-            shutil.rmtree(old)
+            _rmtree(old)
         for i, n in enumerate(names):
             target = dest / n
             if n.startswith("data/") and target.exists():
@@ -324,7 +348,7 @@ class Window(tk.Tk):
         dot = tk.Canvas(note, width=10, height=10, bg=BG, highlightthickness=0)
         dot.create_oval(1, 1, 9, 9, fill=GREEN if prev else MUTED, outline="")
         dot.pack(side="left", padx=(2, 8))
-        tk.Label(note, text=("Já instalado aqui: atualiza o app e mantém seus dados (data/)." if prev else
+        tk.Label(note, text=("Já instalado aqui: atualiza (fecha o launcher se estiver aberto) e mantém seus dados." if prev else
                              "Atalho no menu Iniciar. Não precisa de administrador."),
                  fg=GREEN if prev else MUTED, bg=BG, font=(FONT, 10), anchor="w").pack(side="left")
         self.desktop = tk.BooleanVar(value=True)

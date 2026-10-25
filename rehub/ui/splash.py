@@ -5,7 +5,8 @@
 - Aos 15 segundos aparece o símbolo; aos 20 o logo vai se revelando da esquerda para a direita; quando ele termina,
   "PRESSIONE QUALQUER BOTÃO" pulsa.
 - Qualquer tecla, clique ou botão do controle antes disso pula direto para o aviso (e começa o antes_intro);
-  com o aviso na tela, toca intro.mp3, a tela escurece e o hub aparece.
+  pulando, o símbolo e o nome aparecem na hora, devagar, e o aviso vem logo depois.
+  Com o aviso na tela, toca intro.mp3, a tela escurece e o hub aparece.
 
 O símbolo e o logo ficam numa janela transparente por pixel (UpdateLayeredWindow) por cima do vídeo nativo.
 """
@@ -28,6 +29,7 @@ SYMBOL_AT = 15.0   # segundos até o símbolo aparecer
 LOGO_AT = 20.0     # o logo começa a se revelar
 LOGO_TIME = 2.6
 PROMPT_AT = LOGO_AT + LOGO_TIME   # a partir daqui dá para apertar
+SKIP_LOGO = 1.4    # pulando a abertura: o logo começa a se revelar este tanto depois do símbolo
 FADE = 0.6         # escurecer até o preto, depois clarear até o hub
 MUSIC_AT = 30.0    # o som do vídeo dá lugar ao antes_intro
 VIDEO_VOL = 800    # volume do som do vídeo (0 a 1000)
@@ -217,6 +219,7 @@ class Splash:
             _mci(f"play {ALIAS} repeat")
         self.video_vol = VIDEO_VOL if sound and self.video else 0
         self.music_on = False
+        self.sym_at, self.logo_at, self.prompt_at = SYMBOL_AT, LOGO_AT, PROMPT_AT   # mudam ao pular a abertura
         # símbolo, logo e aviso por cima
         self.sym, self.halo, self.logo = symbol(SYM), glow(560), series_logo()
         self.font = skin.font(22, "Bold")
@@ -238,29 +241,28 @@ class Splash:
         if now - getattr(self, "_last_press", 0) < 0.6:   # o mesmo clique chega pelo Tk e pela leitura do Windows
             return "break"
         self._last_press = now
-        if self.pressed_at is None and time.time() - self.t0 < PROMPT_AT:
-            self.t0 = time.time() - PROMPT_AT
+        tt = now - self.t0
+        if self.pressed_at is None and tt < self.prompt_at:
+            # pula a espera: o símbolo e o nome começam a aparecer agora (devagar, não de uma vez)
+            self.sym_at = min(self.sym_at, tt)
+            self.logo_at = min(self.logo_at, max(tt, self.sym_at) + SKIP_LOGO)
+            self.prompt_at = self.logo_at + LOGO_TIME
             if self._sound and not self.music_on:
                 self.music_on = True
                 audio.play_file("antes_intro", audio.opening("antes_intro"), 0.8, loop=True)
             return "break"
         if self.pressed_at is None:
-            self.pressed_at = time.time()
+            self.pressed_at = time.time()   # a tela escurece e o hub aparece
             if self._sound:
                 audio.stop_effect("antes_intro", 0.5)
                 audio.play_file("intro", audio.opening("intro"), 0.9)
-            self.curtain = tk.Toplevel(self.root, bg="#000000")
-            self.curtain.overrideredirect(True)
-            self.curtain.geometry(f"{self.W}x{self.H}+0+0")
-            self.curtain.attributes("-alpha", 0.0)
-            own(self.curtain, self.root)
         return "break"   # a tela principal por baixo não recebe a tecla
 
     # ---------- quadro a quadro ----------
     def _compose(self, tt):
         img = Image.new("RGBA", (OW, OH), (0, 0, 0, 0))
         cx, sy = OW // 2, 130 + SYM // 2   # centro do símbolo na camada
-        a = ease((tt - SYMBOL_AT) / 1.6)
+        a = ease((tt - self.sym_at) / 1.6)
         if a > 0:
             pulse = 0.55 + 0.45 * math.sin(tt * 2.2)
             h = faded(self.halo, a * (0.3 + 0.4 * pulse))
@@ -269,14 +271,14 @@ class Splash:
             sym = faded(self.sym.resize((s, s), Image.LANCZOS), a)
             img.alpha_composite(sym, (cx - s // 2, sy - s // 2))
         ly = sy + SYM // 2 + GAP
-        if self.logo and tt >= LOGO_AT:
-            lg = wipe(self.logo, ease((tt - LOGO_AT) / LOGO_TIME))
+        if self.logo and tt >= self.logo_at:
+            lg = wipe(self.logo, ease((tt - self.logo_at) / LOGO_TIME))
             img.alpha_composite(lg, (cx - lg.width // 2, ly))
         if self.logo:
             ly += self.logo.height
-        if tt >= PROMPT_AT:   # pulsa entre apagado e branco
-            k = 0.5 + 0.5 * math.sin((tt - PROMPT_AT) * 3.2 - math.pi / 2)
-            v = int(80 + 175 * k * ease((tt - PROMPT_AT) / 0.6))
+        if tt >= self.prompt_at:   # pulsa entre apagado e branco
+            k = 0.5 + 0.5 * math.sin((tt - self.prompt_at) * 3.2 - math.pi / 2)
+            v = int(80 + 175 * k * ease((tt - self.prompt_at) / 0.6))
             d = ImageDraw.Draw(img)
             text = "P R E S S I O N E   Q U A L Q U E R   B O T Ã O"
             tw = d.textlength(text, font=self.font)
@@ -314,9 +316,15 @@ class Splash:
         if self.pressed_at is None:
             if self.root.focus_get() is not None and self.root.focus_get() is not self.layer.top:
                 self.layer.top.focus_force()   # o hub pede foco ao abrir; as teclas são da abertura até ela sumir
-            if tt >= SYMBOL_AT - 0.1:
+            if tt >= self.sym_at - 0.1:
                 self.layer.show(self._compose(tt))
         else:
+            if self.curtain is None:   # apertou com o aviso na tela: escurece até o preto e o menu aparece
+                self.curtain = tk.Toplevel(self.root, bg="#000000")
+                self.curtain.overrideredirect(True)
+                self.curtain.geometry(f"{self.W}x{self.H}+0+0")
+                self.curtain.attributes("-alpha", 0.0)
+                own(self.curtain, self.root)
             k = (now - self.pressed_at) / FADE
             if k < 1:   # escurece até o preto
                 self.layer.set_alpha(1 - k)

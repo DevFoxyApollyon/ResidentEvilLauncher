@@ -581,18 +581,20 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
     def quit_app(self):
         """Fecha de vez. Antes, o Tk era destruído com as threads (capas, troféus, áudio) ainda rodando,
         e uma delas mexendo nele derrubava o Tcl ("alloc: invalid block").
-        Com os efeitos ligados, a janela some e o som de saída (data/sons/abertura/sair.mp3) toca antes."""
-        if self.prefs["efeitos"] and not getattr(self, "_quitting", False) and audio.opening("sair"):
-            self._quitting = True
-            self.music.stop()
-            audio.play_file("sair", audio.opening("sair"), 0.9)
-            self.withdraw()
-            return self.after(2600, self.quit_app)
+        Com os efeitos ligados, as janelas fecham na hora e o processo só fica vivo o tempo do som de saída
+        (data/sons/abertura/sair.mp3). Antes a janela era escondida e esperava: a vigia de foco a reabria minimizada
+        e ela ficava travada na área de trabalho."""
+        bye = self.prefs["efeitos"] and audio.opening("sair")
         try:
             if getattr(self, "_tplayer", None):
                 self._tplayer.close()
-            ctypes.windll.winmm.mciSendStringW("close all", None, 0, 0)
+            self.music.stop()
+            if bye:
+                audio.play_file("sair", audio.opening("sair"), 0.9)
             self.destroy()
+            if bye:
+                time.sleep(2.5)   # sem janela nenhuma: só termina de tocar o som
+            ctypes.windll.winmm.mciSendStringW("close all", None, 0, 0)
         finally:
             os._exit(0)
 
