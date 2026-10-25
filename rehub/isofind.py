@@ -18,8 +18,8 @@ EXTS = {".iso", ".bin", ".cue", ".chd", ".cso", ".wbfs", ".rvz", ".gcm", ".ciso"
 def _roots():
     home = Path.home()
     seen, out = set(), []
-    for p in [home / "Downloads", home / "Documents", home / "Desktop", home / "OneDrive", home / "Games", home / "Jogos",
-              home] + [Path(f"{d}:\\") for d in string.ascii_uppercase if os.path.exists(f"{d}:\\")]:
+    for p in [home / "Downloads", home / "Documents", home / "Desktop", home / "Pictures", home / "Videos",
+              home / "OneDrive", home / "Games", home / "Jogos", home] +[Path(f"{d}:\\") for d in string.ascii_uppercase if os.path.exists(f"{d}:\\")]:
         if p.exists() and str(p).lower() not in seen:
             seen.add(str(p).lower())
             out.append(p)
