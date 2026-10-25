@@ -104,7 +104,7 @@ def install(dest, progress, desktop=True):
             if i % 40 == 0:
                 progress(i / len(names))
     shutil.copy2(sys.executable, dest / UNINSTALLER)
-    exe, icon = dest / EXE, dest / "re_hub.ico"
+    exe = dest / EXE
     desk, menu = places()
     for lnk in ([desk] if desktop else []) + [menu]:
         lnk.parent.mkdir(parents=True, exist_ok=True)
