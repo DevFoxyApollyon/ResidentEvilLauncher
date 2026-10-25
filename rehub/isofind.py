@@ -58,11 +58,11 @@ def score(path, words, serial=None):
     return pts
 
 
-def find(words, exts=None, serial=None, limit=5):
-    """As melhores imagens candidatas, a mais provavel primeiro."""
+def find(words, exts=None, serial=None, limit=5, extra=()):
+    """As melhores imagens candidatas, a mais provavel primeiro. extra: pastas a mais (ex.: data/isos do hub)."""
     exts = {e.lower() for e in exts} if exts else EXTS
     hits = {}
-    for root in _roots():
+    for root in [Path(e) for e in extra if Path(e).is_dir()] + _roots():
         depth = 2 if len(root.parts) == 1 else 4   # raiz do disco: so dois niveis
         for p in _walk(root, depth):
             if os.path.splitext(p)[1].lower() not in exts:

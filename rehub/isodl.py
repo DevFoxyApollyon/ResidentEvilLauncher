@@ -63,6 +63,9 @@ def bad_image(path, game=None):
             return f"{p.name} é pequeno demais para ser a imagem do jogo."
     except OSError:
         return f"Não encontrei {p.name}."
+    disc_9660 = game is not None and game.get("emulador") in (None, "pcsx2", "duckstation")   # Wii/GameCube não é
+    if p.suffix.lower() == ".iso" and disc_9660 and not is_iso9660(p):
+        return f"{p.name} não é uma imagem de disco válida (pode ter sido convertida errado ou estar incompleta)."
     return None
 
 
@@ -225,16 +228,27 @@ def ensure_chdman(progress=None, cancelled=lambda: False):
     raise RuntimeError("Não consegui tirar o chdman.exe do MAME. Instale o 7-Zip e tente de novo.")
 
 
-def convert(game, path, progress=None, cancelled=lambda: False, keep=True):
-    """Converte o .chd para .iso em data/isos/<id>/ (o original fica, a não ser que keep=False).
-    progress(feito, total, 0, None) recebe a porcentagem em milésimos."""
-    src = Path(path)
-    chdman = ensure_chdman()
-    folder = src.parent if DEST in src.parents else _folder(game)
-    folder.mkdir(parents=True, exist_ok=True)
-    out = folder / (src.stem + ".iso")
-    proc = subprocess.Popen([str(chdman), "extractdvd", "-i", str(src), "-o", str(out), "-f"], stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
+def is_iso9660(path):
+    """True se o arquivo é uma imagem de disco de verdade (o descritor 'CD001' no setor 16)."""
+    try:
+        with open(path, "rb") as f:
+            f.seek(16 * 2048)
+            return f.read(6)[1:6] == b"CD001"
+    except OSError:
+        return False
+
+
+def _chd_kind(chdman, src):
+    """"cd" ou "dvd": um .chd feito de .bin/.cue (createcd) guarda setores crus de CD, não dá para extrair como DVD."""
+    r = subprocess.run([str(chdman), "info", "-i", str(src)], capture_output=True, text=True, errors="ignore",
+                       stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
+    return "cd" if re.search(r"Tag='(CHT2|CHTR|CHCD)'|cdlz|cdzl|cdfl", r.stdout) else "dvd"
+
+
+def _run_chdman(cmd, progress, cancelled, part, parts, cleanup):
+    """Roda o chdman e passa a porcentagem dele (a etapa `part` de `parts`) para progress."""
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                            creationflags=NO_WINDOW)
     buf, log = "", ""
     while True:
         ch = proc.stdout.read(1)
@@ -242,19 +256,79 @@ def convert(game, path, progress=None, cancelled=lambda: False, keep=True):
             break
         if cancelled():
             proc.kill()
-            out.unlink(missing_ok=True)
+            proc.wait()
+            cleanup()
             raise RuntimeError("Conversão cancelada.")
         c = ch.decode("latin-1")
         if c in "\r\n":
             m = re.search(r"([\d.]+)% complete", buf)
             if m and progress:
-                progress(int(float(m.group(1)) * 10), 1000, 0, None)
+                progress(int((part + float(m.group(1)) / 100) / parts * 1000), 1000, 0, None)
             log, buf = (log + buf + "\n")[-2000:], ""
         else:
             buf += c
-    if proc.wait() != 0 or not out.exists():
+    if proc.wait() != 0:
+        cleanup()
+        raise RuntimeError("O chdman não conseguiu converter.\n" + log[-300:])
+
+
+def _bin_to_iso(cue, out, progress, cancelled, part, parts):
+    """Tira os 2048 bytes de dados de cada setor de 2352 da faixa de dados (MODE1 a partir do byte 16, MODE2 do 24)."""
+    text = cue.read_text(errors="ignore")
+    m = re.search(r'FILE\s+"([^"]+)".*?TRACK\s+\d+\s+(MODE[12])/(2352|2048)', text, re.S | re.I)
+    if not m:
+        raise RuntimeError("A faixa de dados do CD não é MODE1/MODE2 (2048 ou 2352 bytes); não sei converter.")
+    binf = cue.parent / m.group(1)
+    if m.group(3) == "2048":   # setores já só com os dados (MODE1/2048): o .bin já é a ISO
+        binf.replace(out)
+        return
+    offset = 16 if m.group(2).upper() == "MODE1" else 24
+    total = binf.stat().st_size // 2352
+    with open(binf, "rb") as fi, open(out, "wb") as fo:
+        for k in range(total):
+            sector = fi.read(2352)
+            if len(sector) < 2352:
+                break
+            fo.write(sector[offset:offset + 2048])
+            if k % 4096 == 0:
+                if cancelled():
+                    raise RuntimeError("Conversão cancelada.")
+                if progress:
+                    progress(int((part + k / total) / parts * 1000), 1000, 0, None)
+
+
+def convert(game, path, progress=None, cancelled=lambda: False, keep=True):
+    """Converte o .chd para .iso em data/isos/<id>/ (o original fica, a não ser que keep=False).
+    .chd de DVD: chdman extractdvd. .chd de CD (feito de .bin/.cue): chdman extractcd e depois tira os dados de cada
+    setor. No fim confere se o .iso é uma imagem de disco de verdade.
+    progress(feito, total, 0, None) recebe a porcentagem em milésimos."""
+    src = Path(path)
+    chdman = ensure_chdman()
+    folder = src.parent if DEST in src.parents else _folder(game)
+    folder.mkdir(parents=True, exist_ok=True)
+    out = folder / (src.stem + ".iso")
+    if _chd_kind(chdman, src) == "dvd":
+        _run_chdman([str(chdman), "extractdvd", "-i", str(src), "-o", str(out), "-f"], progress, cancelled, 0, 1,
+                    lambda: out.unlink(missing_ok=True))
+    else:
+        tmp = folder / "_convertendo"
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir()
+        try:
+            cue = tmp / "disco.cue"
+            _run_chdman([str(chdman), "extractcd", "-i", str(src), "-o", str(cue), "-ob", str(tmp / "disco.bin"), "-f"],
+                        progress, cancelled, 0, 2, lambda: None)
+            _bin_to_iso(cue, out, progress, cancelled, 1, 2)
+        except BaseException:
+            out.unlink(missing_ok=True)
+            raise
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+    if not is_iso9660(out):
         out.unlink(missing_ok=True)
-        raise RuntimeError("O chdman não conseguiu converter (o .chd pode ser de CD, não de DVD de PS2).\n" + log[-300:])
+        raise RuntimeError(f"A conversão de {src.name} não gerou uma imagem de disco válida.")
+    if progress:
+        progress(1000, 1000, 0, None)
     if not keep:
         src.unlink(missing_ok=True)
     return out

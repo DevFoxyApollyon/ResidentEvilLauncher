@@ -453,7 +453,8 @@ class Menu:
         self.top = top = tk.Toplevel(master)
         top.overrideredirect(True)
         top.configure(bg=KEY)
-        top.attributes("-topmost", True)
+        from . import theme
+        theme.own(top, master)   # por cima só do launcher, não dos outros programas
         try:
             top.attributes("-transparentcolor", KEY)
             top.attributes("-alpha", 0.0)

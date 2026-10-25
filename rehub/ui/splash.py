@@ -11,6 +11,7 @@ O símbolo e o logo ficam numa janela transparente por pixel (UpdateLayeredWindo
 """
 import ctypes
 import math
+import os
 import time
 import tkinter as tk
 from ctypes import wintypes
@@ -233,6 +234,10 @@ class Splash:
     def press(self, _e=None):
         """Qualquer tecla, clique ou botão do controle. Antes do aviso: pula direto para ele (símbolo e logo prontos)
         e começa a música antes_intro. Com o aviso na tela: toca a intro e abre o hub."""
+        now = time.time()
+        if now - getattr(self, "_last_press", 0) < 0.6:   # o mesmo clique chega pelo Tk e pela leitura do Windows
+            return "break"
+        self._last_press = now
         if self.pressed_at is None and time.time() - self.t0 < PROMPT_AT:
             self.t0 = time.time() - PROMPT_AT
             if self._sound and not self.music_on:
@@ -284,9 +289,23 @@ class Splash:
             self.video_vol = max(target, self.video_vol - step) if self.video_vol > target else min(target, self.video_vol + step)
             _mci(f"setaudio {ALIAS} volume to {self.video_vol}")
 
+    def _mouse_click(self):
+        """Clique em qualquer botão do mouse, lido direto do Windows: o vídeo é uma janela nativa por cima do Tk e
+        engolia os cliques. Só conta com o launcher na frente; vale uma vez por aperto."""
+        u = ctypes.windll.user32
+        down = any(u.GetAsyncKeyState(vk) & 0x8000 for vk in (0x01, 0x02, 0x04, 0x05, 0x06))   # esq, dir, meio, X1, X2
+        pid = wintypes.DWORD()
+        u.GetWindowThreadProcessId(u.GetForegroundWindow(), ctypes.byref(pid))
+        mine = pid.value == os.getpid()
+        clicked = down and mine and not getattr(self, "_was_down", True)
+        self._was_down = down
+        return clicked
+
     def _step(self):
         now = time.time()
         tt = now - self.t0
+        if self.pressed_at is None and self._mouse_click():
+            self.press()
         if self._sound and not self.music_on and tt >= MUSIC_AT and self.pressed_at is None:
             self.music_on = True
             audio.play_file("antes_intro", audio.opening("antes_intro"), 0.8, loop=True)

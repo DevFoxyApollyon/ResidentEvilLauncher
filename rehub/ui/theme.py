@@ -36,6 +36,21 @@ def brand_row(parent, bg, color, text=None):
         tk.Label(row, image=logo, bg=bg).pack(side="left", padx=(0, 8))
     tk.Label(row, text=(text or FR["app"]).upper(), fg=color, bg=bg, font=(FONT, 9, "bold")).pack(side="left")
     return row
+def own(win, owner):
+    """Prende a janela à janela do launcher (dona): fica por cima só dela, não dos outros programas, e some junto
+    quando ela é minimizada. (Com "sempre por cima", menus e avisos apareciam em cima do navegador.)"""
+    import ctypes
+    try:
+        owner = owner.winfo_toplevel()
+        win.update_idletasks()
+        owner.update_idletasks()
+        f = ctypes.windll.user32.SetWindowLongPtrW
+        f.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
+        f(int(win.wm_frame(), 16), -8, int(owner.wm_frame(), 16))   # GWLP_HWNDPARENT: a dona
+    except (AttributeError, OSError, ValueError, tk.TclError):
+        win.transient(owner)
+
+
 def dark_titlebar(win):
     """Barra de título escura do Windows 10/11 (no lugar da branca)."""
     import ctypes
@@ -166,12 +181,12 @@ def modal(parent, title, subtitle="", width=560, accent=None, badge=None):
             (0, 0, p.winfo_screenwidth(), p.winfo_screenheight()))
     shade.geometry(f"{area[2]}x{area[3]}+{area[0]}+{area[1]}")
     shade.attributes("-alpha", 0.0)
-    shade.attributes("-topmost", True)
+    own(shade, p)
     top = tk.Toplevel(p)
     top.withdraw()
     top.overrideredirect(True)
     top.configure(bg=skin.KEY)
-    top.attributes("-topmost", True)
+    own(top, p)
     try:
         top.attributes("-transparentcolor", skin.KEY)
     except tk.TclError:

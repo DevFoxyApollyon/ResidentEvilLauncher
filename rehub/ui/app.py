@@ -246,6 +246,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         audio.ensure_effects()
         self.music = audio.Music()
         self.splash = None
+        self.tasks, self._tasks_job = [], None   # downloads e conversões em andamento (aparecem embaixo do jogo)
         self.music.set_enabled(self.prefs["trilha"])
         self._music_job = None
         self.installed = steam.installed_apps()
@@ -802,6 +803,20 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
     QUIET = ("select", "hover")   # passar de capa em capa e escolher itens de listas não faz som:
                                   # só o menu (seções, telas), as versões e os botões do jogo
+
+    def _tasks_tick(self):
+        """Redesenha meio a meio segundo enquanto houver download ou conversão (a barra embaixo do jogo anda)."""
+        if self._tasks_job is None and self.tasks:
+            def tick():
+                self._tasks_job = None
+                if self.tasks:
+                    self.refresh()
+                    self._tasks_tick()
+            self._tasks_job = self.after(500, tick)
+
+    def _task(self, g, title=""):
+        from .progress import Task
+        return Task(self, g["id"] if g else "", title)
 
     def _sound(self, name, gap=0.05):
         if self.prefs["efeitos"] and name not in self.QUIET:
@@ -1487,8 +1502,19 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             y += 24
 
         state, color = self._state(g)
-        item = c.create_text(x, y, anchor="nw", text=self.status_text or state, fill=color, font=self.f["body"])
-        if not self.status_text:
+        task = next((tk for tk in self.tasks if tk.gid in (g["id"], ch["id"])), None)
+        if task:   # download/conversão deste jogo: a linha de estado vira o progresso, com a barra e Cancelar
+            line = c.create_text(x, y, anchor="nw", text=task.line(), fill=GREEN, font=self.f["body"])
+            bw = max(320, c.bbox(line)[2] - x)
+            c.create_rectangle(x, y + 26, x + bw, y + 29, fill="#2a2522", outline="")
+            c.create_rectangle(x, y + 26, x + bw * task.frac(), y + 29, fill=self.accent, outline="")
+            cx = c.create_text(x + bw + 16, y + 27, anchor="w", text="Cancelar", fill=MUTED, font=self.f["small"],
+                               tags=("task_cancel",))
+            self._clickable("task_cancel", lambda tk=task: tk.cancel(), hover=[(cx, MUTED, WHITE)])
+            y += 14
+        item = c.create_text(x, y, anchor="nw", text="" if task else (self.status_text or state), fill=color,
+                             font=self.f["body"])
+        if not self.status_text and not task:
             sx = c.bbox(item)[2]
             for text, col, cmd in self._extra_state(ch, g):
                 sep = c.create_text(sx, y, anchor="nw", text="   ·   ", fill=DIM, font=self.f["body"])
@@ -1502,10 +1528,6 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         bx = x
         for k, (text, cmd, primary) in enumerate(self._actions(g)):
             bx = self._button(bx, y, text, cmd, primary, f"btn{k}") + 10
-        track = self.music.current
-        if track and self.prefs["trilha"]:  # o que está tocando agora
-            name = f"Tema original do {FR['app']}" if track.parent.name == "musica_gerada" else track.stem
-            c.create_text(x, y + 60, anchor="nw", text=f"♪  {name}", fill=self.accent, font=self.f["small"])
 
     # ---------- painel da direita ----------
     def steam_game(self):
@@ -2213,64 +2235,74 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self.notify(f"{g.get('versao', g['nome'])} removido.")
         return True
 
-    def ask_iso(self, g, parent=None):
-        """Pede a ISO/imagem da pessoa (a unica coisa que o hub nao baixa) e guarda. True se escolheu."""
+    def ask_iso(self, g, parent=None, adopt=False):
+        """Procura no PC todas as imagens do jogo e mostra numa lista dentro do launcher (sem abrir pasta por pasta).
+        Clicar numa usa ela (um .chd que a versão não abre é convertido). Sem nenhuma: avisa e oferece baixar pelos
+        links. adopt=True (Gerenciar): a escolhida é movida para data/isos/<jogo>. True se escolheu algo."""
         parent = parent or self
-        e = emulators.of(g)
-        kinds = isodl.image_types(g)
-        if g.get("iso_busca"):   # procura sozinho no PC (também .chd que dá para converter)
-            self.config(cursor="watch")
-            self.update()
-            try:
-                found = isofind.find(g["iso_busca"], {k[1:] for k in kinds.split()} | {".chd"}, g.get("iso_serial"))
-            finally:
-                self.config(cursor="")
-            ok = [f for f in found if not isodl.bad_image(f, g)]
-            conv = [f for f in found if isodl.convertible(g, f)]
-            if ok and messagebox.askyesno(FR["app"], f"Achei a imagem de {g['nome']}:\n\n{ok[0]}\n\nUsar esta?", parent=parent):
-                self.cfg.set(g["id"], iso=ok[0])
-                return True
-            if not ok and conv and self._offer_convert(g, conv[0], parent):
-                return True
-        choice = None
-        if isodl.link_for(g):   # não achou no PC: oferece baixar pelos links (cada opção que a pessoa cadastrou)
-            opts = [v for v in isodl.VARIANTS if v in isodl.link_for(g)] + [v for v in isodl.link_for(g) if v not in isodl.VARIANTS]
-            buttons = [(f"Baixar {v}", v, "primary" if k == 0 else "plain") for k, v in enumerate(opts)]
-            choice = t._dialog(parent, f"Não achei a ISO de {g['nome']} no PC",
-                               "Baixe pelo seu link ou escolha o arquivo que você já tem.",
-                               [f"{v}: {isodl.link_for(g)[v][:70]}" for v in opts],
-                               buttons + [("Escolher arquivo", "arquivo", "plain")], icon="alert")
-            if choice in opts:
-                self.download_iso(g, variant=choice)
-                return True
-            if choice != "arquivo":
-                return False
-        iso = filedialog.askopenfilename(parent=parent, title=f"{g['nome']}: escolha a SUA ISO/imagem do jogo",
-                                         filetypes=[(f"Imagem {e['sistema'] if e else ''}".strip(), kinds + " *.chd"),
-                                                    ("Todos", "*.*")])
-        if not iso:
-            return False
-        if isodl.convertible(g, iso):
-            return self._offer_convert(g, iso, parent)
-        bad = isodl.bad_image(iso, g)
-        if bad:
-            messagebox.showerror(FR["app"], bad, parent=parent)
-            return False
-        self.cfg.set(g["id"], iso=iso)
-        return True
+        kinds = {k[1:] for k in isodl.image_types(g).split()} | {".chd"}
+        self.config(cursor="watch")
+        self.update()
+        try:
+            found = isofind.find(g.get("iso_busca") or [g["nome"]], kinds, g.get("iso_serial"), limit=12,
+                                 extra=[isodl.DEST])
+        finally:
+            self.config(cursor="")
+        found = [f for f in found if isodl.convertible(g, f) or not isodl.bad_image(f, g)]
+        opts = [v for v in isodl.VARIANTS if v in isodl.link_for(g)] + [v for v in isodl.link_for(g) if v not in isodl.VARIANTS]
+        top, body, bar, close = t.modal(parent, f"ISO de {g['nome']}",
+                                        f"{len(found)} encontrada(s) no PC: clique na que quer usar." if found else
+                                        "Não achei a ISO deste jogo no PC. Baixe pelo seu link.", width=660)
+        result = {"ok": False}
 
-    def _offer_convert(self, g, path, parent=None):
-        """Imagem num formato que a versão não abre (.chd num port que só lê .iso): pergunta e converte."""
-        if not t.confirm(parent or self, "Converter para .iso?",
-                         f"Achei {os.path.basename(path)}, mas {g['nome']} só abre .iso.",
-                         ["O hub converte com o chdman do MAME (baixado uma vez, ~100 MB) e guarda o .iso em data/isos.",
-                          "O .chd original fica onde está."], ok="Converter"):
-            return False
-        self.convert_iso(g, path)
-        return True
+        def use(path):
+            close()
+            result["ok"] = True
+            if isodl.convertible(g, path):
+                self.convert_iso(g, path)
+            elif adopt:
+                self._adopt_iso(g, path)
+            else:
+                self.cfg.set(g["id"], iso=path)
+                self.refresh()
+
+        cur = self.cfg.get(g["id"]).get("iso")
+        for path in found:
+            size = os.path.getsize(path) / 1024 ** 3
+            note = "vai ser convertida para .iso" if isodl.convertible(g, path) else ("em uso agora" if path == cur else "")
+            row = tk.Frame(body, bg=t.PANEL_HI, cursor="hand2")
+            row.pack(fill="x", pady=3)
+            name = t.label(row, os.path.basename(path), 11, bold=True, bg=t.PANEL_HI)
+            name.pack(fill="x", padx=14, pady=(9, 0))
+            sub = t.label(row, f"{os.path.dirname(path)}  ·  {size:.2f} GB" + (f"  ·  {note}" if note else ""), 9,
+                          fg=t.MUTED, bg=t.PANEL_HI, wraplength=580)
+            sub.pack(fill="x", padx=14, pady=(2, 9))
+            for w in (row, name, sub):
+                w.bind("<Button-1>", lambda e, p=path: use(p))
+                w.bind("<Enter>", lambda e, ws=(row, name, sub): [x.config(bg="#34302b") for x in ws])
+                w.bind("<Leave>", lambda e, ws=(row, name, sub): [x.config(bg=t.PANEL_HI) for x in ws])
+        if not found and not opts:
+            t.label(body, "Cadastre o link em Opções > ISOs > Editar links das ISOs (Normal, Português ou Dublada).",
+                    10, fg=t.MUTED, wraplength=600).pack(fill="x")
+        for k, v in enumerate(opts):   # baixar cada opção que a pessoa cadastrou
+            t.flat_button(bar, f"Baixar {v}", lambda v=v: (close(), result.update(ok=True), self.download_iso(g, variant=v)),
+                          "plain" if found or k else "primary").pack(side="left", padx=(0, 8))
+        t.flat_button(bar, "Fechar", close, "ghost").pack(side="right")
+        top.place_again()
+        top.wait_window()
+        return result["ok"]
+
+    def _adopt_iso(self, g, path):
+        """Move a ISO escolhida para dentro do launcher (data/isos/<jogo>/, com o nome dela) e deixa escolhida."""
+        def done(new):
+            self.cfg.set(g["id"], iso=str(new))
+            self.refresh()
+            t.notice(self, "ISO escolhida", f"Movida para dentro do RE Launcher:\n{new}")
+        t.in_background(self, lambda: isodl.adopt(g, path), done,
+                        lambda msg: t.notice(self, "Não deu certo", msg, error=True))
 
     def convert_iso(self, g, path, on_done=None):
-        prog = Progress(self, f"Convertendo a ISO de {g['nome']}", os.path.basename(path))
+        prog = self._task(g, "Convertendo a ISO")
 
         def work():
             if not isodl.CHDMAN.exists():
@@ -2293,7 +2325,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         """Baixa a ISO pelo link de data/isos.json (na opção escolhida), com a janela de progresso, e já deixa
         escolhida. Se vier .chd para um port que só lê .iso, converte no fim."""
         variant = variant or isodl.default_variant(g)
-        prog = Progress(self, f"Baixando a ISO de {g['nome']}", variant or "")
+        prog = self._task(g, f"Baixando a ISO ({variant})")
 
         def done(iso):
             prog.close()
@@ -2309,7 +2341,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         def converting(d, total, _speed, _eta):   # se vier .chd para um port que só lê .iso
             prog.state.update(step="Convertendo .chd para .iso", items="pct", done=d, total=total, speed=0, eta=None)
 
-        t.in_background(self, lambda: isodl.download(g, prog.step(f"ISO do jogo ({variant})"), prog.cancelled,
+        t.in_background(self, lambda: isodl.download(g, prog.step(f"Baixando a ISO ({variant})"), prog.cancelled,
                                                      variant=variant, convert_progress=converting), done, fail)
 
     def _iso_games(self, with_link=False):
@@ -2342,7 +2374,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         todo = self._iso_games(with_link=True)
         if not todo:
             return t.notice(self, "Nada para baixar", "Todos os jogos com link em data/isos.json já têm a ISO.")
-        prog = Progress(self, "Baixando as ISOs", f"{len(todo)} jogo(s), um de cada vez")
+        prog = self._task(todo[0], "Baixando as ISOs")   # aparece embaixo de cada jogo enquanto baixa o dele
+        self.notify(f"Baixando {len(todo)} ISO(s), uma de cada vez: o progresso aparece embaixo de cada jogo.", 5)
 
         def work():
             got, errors, by_url = {}, [], {}
@@ -2353,8 +2386,8 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
                 url = isodl.link_for(g)[variant]
                 try:
                     if url not in by_url:   # versoes do mesmo jogo com o mesmo link baixam uma vez so
-                        by_url[url] = isodl.download(g, prog.step(f"{k}/{len(todo)}  ·  {g['nome']}"), prog.cancelled,
-                                                     variant=variant)
+                        by_url[url] = isodl.download(g, prog.step(f"Baixando a ISO ({k}/{len(todo)})", gid=g["id"]),
+                                                     prog.cancelled, variant=variant)
                     got[g["id"]] = by_url[url]
                 except Exception as e:
                     errors.append(f"{g['nome']}: {e}")
@@ -2562,35 +2595,29 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
 
     def download_game(self, g, on_done=None):
         """Baixa/atualiza o recomp/decomp do GitHub sem apagar saves e assets já colocados."""
-        self.status_text = f"Baixando {g['nome']}..."
-        self.refresh()
-        # a ISO vem depois: o hub procura no PC e, se não achar, oferece baixar pelos links (ask_iso)
-        prog = Progress(self, f"Instalando {g['nome']}")
+        # o progresso aparece embaixo do jogo; a ISO vem depois: o hub procura no PC e, se não achar, oferece
+        # baixar pelos links (ask_iso)
+        prog = self._task(g, "Baixando o port")
 
         def work():
             if g.get("instalador"):   # o projeto tem instalador proprio: baixa e abre ele
                 tag, setup = github.download_asset(g["github"], g.get("asset"), launcher.download_dir(g),
                                                    prog.step(f"{g['nome']}: instalador"), prog.cancelled)
                 os.startfile(setup)
-                return tag, None, None
+                return tag, None
             tag = github.download_release(g["github"], g.get("asset"), launcher.download_dir(g), merge=True,
-                                          progress=prog.step(f"Port ({g['github']})"), cancelled=prog.cancelled)
-            return tag, launcher.find_exe(g), None
+                                          progress=prog.step("Baixando o port"), cancelled=prog.cancelled)
+            return tag, launcher.find_exe(g)
 
         def finish():
             prog.close()
-            self.status_text = ""
             self.refresh()
             if on_done:
                 on_done()
 
         def done(result):
-            prog.close()   # terminou: a janela do download sai sozinha antes de pedir a ISO ou avisar
-            tag, exe, iso = result
-            if isinstance(iso, Exception):
-                messagebox.showerror(FR["app"], f"O port foi instalado, mas a ISO falhou:\n{iso}")
-            elif iso:
-                self.cfg.set(g["id"], iso=str(iso))
+            prog.close()   # terminou: o progresso some antes de pedir a ISO ou avisar
+            tag, exe = result
             if exe:
                 self.cfg.set(g["id"], exe=str(exe))
                 if "{iso}" in g.get("args", "") and not self.cfg.get(g["id"]).get("iso"):

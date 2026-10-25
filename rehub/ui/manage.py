@@ -80,10 +80,9 @@ class ManageWindow(tk.Toplevel):
         self.body = t.ScrollFrame(self)
         self.body.pack(fill="both", expand=True, padx=(PAD, 14), pady=(6, 18))
         self.refresh()
+        t.own(self, hub)   # por cima só do launcher (sem barra de título ela não tinha dona)
         self.lift()
         self.focus_force()  # na frente da tela cheia
-        self.attributes("-topmost", True)
-        self.after(300, lambda: self.winfo_exists() and self.attributes("-topmost", False))
 
     @property
     def page(self):
@@ -385,27 +384,10 @@ class ManageWindow(tk.Toplevel):
         self.refresh()
 
     def _change_iso(self):
-        """Escolhe outra imagem e move para dentro do RE Launcher (data/isos/<jogo>/), com o nome dela."""
-        kinds = isodl.image_types(self.g)
-        path = filedialog.askopenfilename(parent=self, title=f"{self.g['nome']}: escolha a SUA ISO/imagem do jogo",
-                                          filetypes=[("Imagem do jogo", kinds + " *.chd"), ("Todos", "*.*")])
-        if not path:
-            return
-        if isodl.convertible(self.g, path):   # .chd num port que só lê .iso: converte (o .iso já nasce em data/isos)
-            if self.hub._offer_convert(self.g, path, self):
-                self.after(500, self.refresh)
-            return
-        bad = isodl.bad_image(path, self.g)
-        if bad:
-            return t.notice(self, "Essa imagem não serve", bad, error=True)
-        g = self.g
-
-        def done(new):
-            self.hub.cfg.set(g["id"], iso=str(new))
-            self._done("ISO trocada", f"Movida para dentro do RE Launcher:\n{new}")
-
-        self._working("Movendo a ISO para a pasta do RE Launcher...")
-        t.in_background(self, lambda: isodl.adopt(g, path), done, self._fail)   # outro disco: pode levar um tempo
+        """A lista das imagens do jogo achadas no PC (dentro do launcher); a escolhida é movida para
+        data/isos/<jogo>/ com o nome dela (um .chd que a versão não abre é convertido)."""
+        if self.hub.ask_iso(self.g, parent=self, adopt=True):
+            self.after(800, lambda: self.winfo_exists() and self.refresh())
 
     def _choose_exe(self):
         if self.hub.configure_local(self.g, parent=self):
