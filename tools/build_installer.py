@@ -54,6 +54,7 @@ def main():
     sep = ";" if os.name == "nt" else ":"
     pyinstaller("--noconsole", "--onefile", "--icon", icon, "--name", "RE Launcher - Instalar",
                 "--add-data", f"{zpath}{sep}.", "--add-data", f"{icon}{sep}.",
+                "--add-data", f"{ROOT / 're_hub.png'}{sep}.", "--add-data", f"{ROOT / 're_logo.png'}{sep}.",
                 "--distpath", str(OUT), "--workpath", str(OUT / "work"), "--specpath", str(OUT / "work"),
                 str(ROOT / "installer" / "installer.py"))
     exe = OUT / "RE Launcher - Instalar.exe"
