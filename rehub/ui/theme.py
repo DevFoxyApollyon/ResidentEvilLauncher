@@ -41,12 +41,14 @@ def dark_titlebar(win):
     import ctypes
     try:
         win.update_idletasks()
-        hwnd = ctypes.windll.user32.GetParent(win.winfo_id())
+        hwnd = int(win.wm_frame(), 16)   # a moldura de verdade da janela (a que tem a barra de título)
         on = ctypes.c_int(1)
         for attr in (20, 19):   # DWMWA_USE_IMMERSIVE_DARK_MODE (19 nas versões antigas do Windows 10)
             if ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(on), ctypes.sizeof(on)) == 0:
                 break
-    except (AttributeError, OSError):
+        # redesenha a barra já (sem isso ela ficava clara até a janela ser redimensionada)
+        ctypes.windll.user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0010 | 0x0020)
+    except (AttributeError, OSError, ValueError, tk.TclError):
         pass
 
 

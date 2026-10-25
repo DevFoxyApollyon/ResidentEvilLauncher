@@ -29,7 +29,7 @@ class Progress:
 
     def step(self, name, items=False):
         """Comeca uma etapa e devolve o callback de progresso dela (chamado pela thread do download).
-        items=True: conta arquivos (3 de 5) em vez de bytes."""
+        items=True: conta arquivos (3 de 5) em vez de bytes; items="pct": só a porcentagem (conversão)."""
         self.state.update(step=name, done=0, total=0, speed=0, eta=None, items=items)
 
         def progress(done, total, speed, eta):
@@ -52,11 +52,11 @@ class Progress:
         if s["total"]:
             self.canvas.coords(self.fill, 0, 0, w * s["done"] / s["total"], 10)
             pct = 100 * s["done"] / s["total"]
-            text = (f"{s['done']} de {s['total']}" if s.get("items") else
+            text = (f"{pct:.0f}%" if s.get("items") == "pct" else f"{s['done']} de {s['total']}" if s.get("items") else
                     f"{pct:.0f}%  ·  {human(s['done'])} de {human(s['total'])}")
         else:
             self.canvas.coords(self.fill, 0, 0, 0, 10)
-            text = human(s["done"]) if s["done"] else "Conectando..."
+            text = "Começando..." if s.get("items") else human(s["done"]) if s["done"] else "Conectando..."
         if s["speed"]:
             text += f"  ·  {human(s['speed'])}/s"
         if s["eta"] is not None:

@@ -64,6 +64,11 @@ def play(game, cfg):
     args = emulators.args_for(game) or game.get("args", "")
     if "{iso}" in args and not c.get("iso"):
         raise RuntimeError("Esse jogo precisa da sua ISO. Clique em Configurar.")
+    if "{iso}" in args:
+        from .isodl import bad_image
+        bad = bad_image(c["iso"], game)
+        if bad:
+            raise RuntimeError(bad + "\n\nEm Gerenciar, use Escolher outra.")
     argv = split_args(args, c)
     prep = prepare_cmd(game, c, exe)
     if not prep:

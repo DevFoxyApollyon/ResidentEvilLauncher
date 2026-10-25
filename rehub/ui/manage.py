@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageTk
 
 from .. import fluffy, github, isodl, launcher, sources, steam, store
 from ..mods import ModManager
-from . import theme as t
+from . import skin, theme as t
 
 CARD = t.PANEL
 SOFT = "#9a9186"
@@ -59,11 +59,11 @@ class ManageWindow(tk.Toplevel):
                           (0, 0, hub.winfo_screenwidth(), hub.winfo_screenheight()))
         self.geometry(f"{w}x{h}+{ax + (aw - w) // 2}+{ay + max(0, (ah - h) // 2)}")   # no meio do hub
         self.minsize(820, 600)
+        # sem a barra de título do Windows: fecha no X desenhado no canto ou com Esc
+        self.overrideredirect(True)
         self.bind("<Escape>", lambda e: self.destroy())
-        self.configure(bg=t.BG)
+        self.configure(bg=t.BG, highlightthickness=1, highlightbackground=t.LINE)
         self.transient(hub)
-        t.dark_titlebar(self)
-        self.after(50, lambda: self.winfo_exists() and t.dark_titlebar(self))   # de novo depois de aparecer
         self.bind("<Destroy>", lambda e: e.widget is self and hub._sound("prompt_back"))
         self.tab = "instalar"
         self._hero_key, self._hero_photo = None, None
@@ -124,6 +124,16 @@ class ManageWindow(tk.Toplevel):
         if logo:
             c.create_image(PAD, 34, image=logo, anchor="w")
         c.create_text(PAD + (26 if logo else 0), 34, text="GERENCIAR", anchor="w", fill=t.MUTED, font=(t.FONT, 9, "bold"))
+        # o X no lugar da barra de título (Esc também fecha)
+        cx = w - PAD - 2   # botão redondo escuro: lê bem mesmo em cima da parte clara da arte
+        c.create_oval(cx - 18, 16, cx + 18, 52, fill="#141210", outline="#3b342d", tags=("close",))
+        x_btn = c.create_image(cx, 34, image=skin.icon_photo("x", 16, t.MUTED), tags=("close",))
+        c.create_image(cx - 28, 34, image=skin.keycap_photo("Esc"), anchor="e", tags=("close",))
+        c.tag_bind("close", "<Button-1>", lambda e: self.destroy())
+        c.tag_bind("close", "<Enter>", lambda e: (c.itemconfigure(x_btn, image=skin.icon_photo("x", 16, t.TEXT)),
+                                                  c.config(cursor="hand2")))
+        c.tag_bind("close", "<Leave>", lambda e: (c.itemconfigure(x_btn, image=skin.icon_photo("x", 16, t.MUTED)),
+                                                  c.config(cursor="")))
         y = 74
         if g.get("versao"):
             c.create_text(PAD, y, text=g["versao"].upper(), anchor="w", fill=t.RED, font=(t.FONT, 9, "bold"))
@@ -267,11 +277,18 @@ class ManageWindow(tk.Toplevel):
         link = isodl.link_for(g)
         self._section("ISO do jogo", "Os links ficam em data/isos.json, só neste PC (o instalador do hub não leva). "
                                      "Link direto, MediaFire ou Google Drive.")
-        actions = [("Baixar ISO", lambda: self.hub.download_iso(g, self._done), "plain" if iso else "primary")] if link else []
-        actions.append(("Editar links", lambda: os.startfile(isodl.ensure_file(self.hub.games)), "plain"))
+        opts = [v for v in isodl.VARIANTS if v in link] + [v for v in link if v not in isodl.VARIANTS]
+        actions = [(f"Baixar {v}", lambda v=v: self.hub.download_iso(g, self._done, variant=v), "plain") for v in opts]
+        bad = isodl.bad_image(iso, g) if iso else None
+        actions.insert(0, ("Editar local da ISO", self._change_iso, "primary" if bad or not iso else "plain"))
+        if iso and not bad:
+            actions.insert(1, ("Abrir pasta", lambda: os.startfile(os.path.dirname(iso)), "plain"))
+        # os links de download ficam em Opções > ISOs > Editar links das ISOs
         self._card(os.path.basename(iso) if iso else "Nenhuma ISO escolhida",
-                   [(iso or "Escolha em Configurar, baixe pelo link ou use Opções > Organizar ISOs.", t.GREEN if iso else t.MUTED),
-                    (link or "Sem link para este jogo em data/isos.json", SOFT)], actions)
+                   [(iso or "Escolha em Configurar, baixe pelo link ou use Opções > Organizar ISOs.",
+                     "#e0857f" if bad else t.GREEN if iso else t.MUTED),
+                    (bad.split("\n")[0] if bad else "", "#e0857f"),
+                    ("Links: " + ", ".join(opts) if opts else "Sem link para este jogo em data/isos.json", SOFT)], actions)
 
     def _project_download(self):
         g = self.g
@@ -366,6 +383,29 @@ class ManageWindow(tk.Toplevel):
     def _uninstall_game(self):
         self.hub.uninstall_game(self.g, parent=self)
         self.refresh()
+
+    def _change_iso(self):
+        """Escolhe outra imagem e move para dentro do RE Launcher (data/isos/<jogo>/), com o nome dela."""
+        kinds = isodl.image_types(self.g)
+        path = filedialog.askopenfilename(parent=self, title=f"{self.g['nome']}: escolha a SUA ISO/imagem do jogo",
+                                          filetypes=[("Imagem do jogo", kinds + " *.chd"), ("Todos", "*.*")])
+        if not path:
+            return
+        if isodl.convertible(self.g, path):   # .chd num port que só lê .iso: converte (o .iso já nasce em data/isos)
+            if self.hub._offer_convert(self.g, path, self):
+                self.after(500, self.refresh)
+            return
+        bad = isodl.bad_image(path, self.g)
+        if bad:
+            return t.notice(self, "Essa imagem não serve", bad, error=True)
+        g = self.g
+
+        def done(new):
+            self.hub.cfg.set(g["id"], iso=str(new))
+            self._done("ISO trocada", f"Movida para dentro do RE Launcher:\n{new}")
+
+        self._working("Movendo a ISO para a pasta do RE Launcher...")
+        t.in_background(self, lambda: isodl.adopt(g, path), done, self._fail)   # outro disco: pode levar um tempo
 
     def _choose_exe(self):
         if self.hub.configure_local(self.g, parent=self):
