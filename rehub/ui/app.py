@@ -299,7 +299,7 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
         self.c.bind("<Button-1>", self._canvas_click)
         self.c.bind("<Leave>", lambda e: self._set_hover(None))
         self.bind("<MouseWheel>", self._wheel)
-        self.protocol("WM_DELETE_WINDOW", self.ask_quit)
+        self.protocol("WM_DELETE_WINDOW", self._close_request)
         for key, action in (("<Left>", "left"), ("<Right>", "right"), ("<Up>", "up"), ("<Down>", "down"),
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
@@ -572,10 +572,24 @@ class Hub(ChannelsUI, Screens, LoreScreens, tk.Tk):
             self._kick()
         self.refresh()
 
+    def _close_request(self):
+        """Fechar pelo Windows (X da barra de tarefas, Alt+F4). Com o launcher minimizado ou atrás de outro programa,
+        a pergunta abria escondida junto com ele e nada acontecia: aí fecha direto, sem perguntar."""
+        if self.state() == "iconic" or self._away or not self._is_front():
+            return self.quit_app()
+        self.ask_quit()
+
     def ask_quit(self):
-        """O X: pergunta antes de fechar (Cancelar volta para o hub)."""
-        if t.confirm(self, f"Sair do {FR['app']}?", "O hub fecha; os jogos abertos continuam rodando.",
-                     ok="Sair", danger=True):
+        """O X: pergunta antes de fechar (Cancelar volta para o hub). Uma pergunta por vez."""
+        if getattr(self, "_asking_quit", False):
+            return
+        self._asking_quit = True
+        try:
+            sair = t.confirm(self, f"Sair do {FR['app']}?", "O hub fecha; os jogos abertos continuam rodando.",
+                             ok="Sair", danger=True)
+        finally:
+            self._asking_quit = False
+        if sair:
             self.quit_app()
 
     def quit_app(self):
