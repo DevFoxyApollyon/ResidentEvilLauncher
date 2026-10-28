@@ -282,7 +282,7 @@ class ManageWindow(tk.Toplevel):
         actions.insert(0, ("Editar local da ISO", self._change_iso, "primary" if bad or not iso else "plain"))
         if iso and not bad:
             actions.insert(1, ("Abrir pasta", lambda: os.startfile(os.path.dirname(iso)), "plain"))
-        # os links de download ficam em Opções > ISOs > Editar links das ISOs
+        actions.append(("Editar links", lambda: os.startfile(isodl.ensure_file(self.hub.games)), "plain"))   # de onde baixa
         self._card(os.path.basename(iso) if iso else "Nenhuma ISO escolhida",
                    [(iso or "Escolha em Configurar, baixe pelo link ou use Opções > Organizar ISOs.",
                      "#e0857f" if bad else t.GREEN if iso else t.MUTED),
