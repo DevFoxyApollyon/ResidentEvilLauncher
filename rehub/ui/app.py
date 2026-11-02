@@ -1,7 +1,8 @@
 """Tela principal no estilo PS5: capítulos em ordem da história, arte grande, troféus e DLCs.
 
 O Hub junta os mixins: home.py (desenho da tela principal), panel.py (painel da direita), actions.py (ações de
-cada jogo), isos_ui.py (ISOs), screens.py e lore_screens.py (telas por cima) e channels_ui.py (Canais)."""
+cada jogo), isos_ui.py (ISOs), screens.py, lore_screens.py e more_screens.py (telas por cima), channels_ui.py
+(Canais) e system_ui.py (atualização, cache, modo sofá, backups)."""
 import ctypes
 import hashlib
 import os
@@ -15,7 +16,8 @@ from tkinter import filedialog
 
 from PIL import Image, ImageTk
 
-from .. import audio, catalog, gamepad, isodl, library, news, launcher, steam, store, trophies
+from .. import audio, cache, catalog, gamepad, isodl, library, news, launcher, sofa, steam, store, trophies
+from .. import log as logmod
 from ..franchise import FR
 from ..paths import COVERS, DATA, ROOT
 from . import skin, theme as t
@@ -28,8 +30,11 @@ from .isos_ui import IsoActions
 from .panel import Panel
 from .splash import Splash
 from .lore_screens import LoreScreens
+from .more_screens import MoreScreens
 from .screens import Screens
+from .system_ui import SystemActions
 from .channels_ui import ChannelsUI
+from ..log import log
 
 SECTIONS = (("canon", "Linha do tempo"), ("spinoff", "Não canônicos"), ("perdidos", "Perdidos"), ("midia", "Filmes"),
             ("hqs", "HQs e livros"), ("fas", "Feito por fãs"), ("noticias", "Notícias"),
@@ -39,9 +44,10 @@ CARDS = DATA / "cache" / "cards"  # cards já montados (arte recortada ou capa g
 
 
 
-class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens, tk.Tk):
+class Hub(Home, Panel, GameActions, IsoActions, SystemActions, ChannelsUI, Screens, LoreScreens, MoreScreens, tk.Tk):
     def __init__(self):
         super().__init__()
+        self.report_callback_exception = lambda *exc: log.error("erro na interface", exc_info=exc)
         self.title(FR["app"])
         self.geometry("1280x800")
         self.minsize(min(1280, self.winfo_screenwidth() - 40), min(900, self.winfo_screenheight() - 80))
@@ -118,7 +124,8 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
                             ("<Return>", "enter"), ("<g>", "manage"), ("<Tab>", "next_section"), ("<Escape>", "esc"),
                             ("<p>", "profile"), ("<h>", "story"), ("<c>", "people"), ("<l>", "deals"), ("<f>", "photo"),
                             ("<e>", "extras"), ("<Prior>", "tab_prev"), ("<Next>", "tab_next"), ("<m>", "map"),
-                            ("<a>", "left"), ("<d>", "right"), ("<w>", "up"), ("<s>", "down"), ("<q>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements")):
+                            ("<a>", "left"), ("<d>", "right"), ("<w>", "up"), ("<s>", "down"), ("<q>", "files"), ("<r>", "relations"), ("<v>", "virus"), ("<k>", "achievements"),
+                            ("<n>", "marathon"), ("<z>", "quiz"), ("<Control-f>", "search"), ("<slash>", "search")):
             self.bind(key, lambda e, a=action: self._press(a))
         self.bind("<F11>", lambda e: self.toggle_fullscreen())
         self.bind("<F5>", lambda e: self.rescan())
@@ -140,10 +147,12 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
             self.after(300, lambda: (self.lift(), self.focus_force()))
             self.bind("<Map>", lambda e: e.widget is self and self._away and self._come_back())  # voltou pela barra de tarefas
             self.after(1500, self._watch_focus)
+        self._sofa, self._sofa_cancel = sofa.started_by_windows(), False   # aberto pelo Windows (modo sofá)
         if os.environ.get("REHUB_TESTE"):
             self._queue_music()
         else:  # tela de carregamento por cima enquanto a principal monta por baixo; a trilha começa depois
-            Splash(self, on_done=self._queue_music, sound=self.prefs["efeitos"])
+            Splash(self, on_done=lambda: (self._queue_music(), self._sofa and self._sofa_go()), sound=self.prefs["efeitos"])
+        self._system_start()
 
     # ---------- dados ----------
     def _build_chapters(self):
@@ -290,7 +299,7 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
                             store.download_art(g, "capa")
                     self.after(0, self._news_arrived)
             except Exception:  # sem internet: fica com as que já tinha
-                pass
+                log.exception("falhou: notícias do REVIL")
             time.sleep(news.MAX_AGE)
 
     def _news_arrived(self):
@@ -326,6 +335,7 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
             try:
                 state = trophies.load(appid, self.steamid, force=force)
             except Exception as e:  # sem internet, perfil privado etc.: mostra no painel
+                log.exception("falhou: troféus do appid %s", appid)
                 state = {"erro": str(e)}
             new = bool(old and "erro" not in state and state.get("conquistados", 0) > old.get("conquistados", 0))
             self.after(0, lambda a=appid, s=state, n=new: (self.trophy_state.__setitem__(a, s),
@@ -340,6 +350,7 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
             try:
                 state = store.dlcs(appid)
             except Exception as e:
+                log.exception("falhou: DLCs do appid %s", appid)
                 state = {"erro": f"Não consegui buscar as DLCs: {e}"}
             self.after(0, lambda: (self.dlc_state.__setitem__(appid, state), self.refresh()))
         threading.Thread(target=work, daemon=True).start()
@@ -452,8 +463,10 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
 
     def _press(self, action):
         """Uma ação do teclado ou do controle. Com uma tela aberta por cima, ela recebe a ação."""
+        self._sofa_cancel = True   # modo sofá: qualquer tecla ou botão cancela a abertura automática
         screens = {"profile": "perfil", "story": "historia", "people": "personagens", "deals": "ofertas", "extras": "extras",
-                   "map": "mapa", "files": "arquivos", "relations": "relacoes", "virus": "virus", "achievements": "conquistas"}
+                   "map": "mapa", "files": "arquivos", "relations": "relacoes", "virus": "virus", "achievements": "conquistas",
+                   "marathon": "maratona", "quiz": "quiz", "search": "busca"}
         if self.overlay and not (self.overlay["kind"] == "viewer" or action not in screens):
             return self.open_overlay(screens[action])  # atalho de outra tela: troca direto
         if self.overlay:
@@ -806,6 +819,7 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
     # ---------- desenho ----------
     def render(self):
         self._render_job = None
+        self._search_hide()
         c, W, H = self.c, self.c.winfo_width(), self.c.winfo_height()
         if W < 50 or H < 50:
             return
@@ -965,12 +979,14 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
                        ("Linha da história", "H", lambda: self.open_overlay("historia"), "timeline"),
                        ("Personagens", "C", lambda: self.open_overlay("personagens"), "users"),
                        ("Ofertas e lançamentos", "L", lambda: self.open_overlay("ofertas"), "tag"),
+                       ("Busca", "Ctrl+F", lambda: self.open_overlay("busca"), "eye"),
                        ("Foto do card", "F", self.photo_card, "image")]),
             ("Meus jogos e sites", [("Adicionar jogo ou site", "", self.add_custom, "plus"),
                                     ("Gerenciar e remover", "", self.manage_custom, "edit")]),
             ("Canais", [("Vídeos e lives", "", lambda: (self.set_section("canais"), self.refresh()), "live"),
                         ("Escolher canais do YouTube e Twitch", "", self.channels_menu, "tv")]),
-            ("Atualizar", [("Troféus de todos os jogos", "", self.refresh_all_trophies, "trophy"),
+            ("Atualizar", [(f"Procurar versão nova do {FR['app']}", "", self.check_update, "down"),
+                           ("Troféus de todos os jogos", "", self.refresh_all_trophies, "trophy"),
                            ("Baixar as artes de novo", "", self.reload_art, "image"),
                            ("Recarregar catálogo e jogos", "F5", self.rescan, "refresh")]),
             ("Música e sons", [(f"Música para {name}", "", self.pick_music, "music"),
@@ -982,6 +998,10 @@ class Hub(Home, Panel, GameActions, IsoActions, ChannelsUI, Screens, LoreScreens
                       ("Organizar pasta de ISOs", "", self.organize_isos, "folder"),
                       ("Editar links das ISOs", "", lambda: os.startfile(isodl.ensure_file(self.games)), "doc")]),
             ("Sistema", [("Tela cheia", "F11", self.toggle_fullscreen, "screen"),
+                         ("Modo sofá: " + ("ligado" if sofa.enabled() else "desligado"), "", self.toggle_sofa, "screen"),
+                         (f"Limite do cache: {self.cache_limit()} GB", "", self.cycle_cache_limit, "refresh"),
+                         ("Limpar cache", "", self.clear_cache, "trash"),
+                         ("Abrir log de erros", "", self.open_log, "doc"),
                          ("Pasta de dados", "", lambda: (DATA.mkdir(exist_ok=True), os.startfile(DATA)), "folder"),
                          ("Pasta do catálogo", "", lambda: os.startfile(ROOT / "games"), "folder"),
                          ("LEIA-ME", "", lambda: os.startfile(ROOT / "LEIA-ME.md"), "doc"),
@@ -1020,4 +1040,19 @@ def main():
             ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
             ctypes.windll.user32.SetForegroundWindow(hwnd)
         return
+    logmod.setup()
+    if sofa.started_by_windows() and not _pad_soon():
+        return   # modo sofá sem controle ligado: o PC foi ligado para outra coisa, o launcher não aparece
     Hub().mainloop()
+
+
+def _pad_soon(seconds=12):
+    """Espera um controle aparecer (o Windows demora para ligar o Bluetooth/receptor depois do login)."""
+    pad = gamepad.Pad()
+    end = time.time() + seconds
+    while time.time() < end:
+        pad.poll()
+        if pad.connected:
+            return True
+        time.sleep(0.5)
+    return False

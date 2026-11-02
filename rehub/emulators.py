@@ -41,9 +41,35 @@ def of(game):
     return EMULATORS.get(game.get("emulador", ""))
 
 
-def args_for(game):
+# o que dá para mudar por versão (Gerenciar > Perfil do emulador), só por linha de comando: o emulador não é mexido
+PROFILE_OPTIONS = {"pcsx2": ("tela_cheia",), "duckstation": ("tela_cheia",), "mgba": ("tela_cheia",),
+                   "dolphin": ("tela_cheia", "escala", "widescreen"), "azahar": ()}
+SCALES = (0, 1, 2, 3, 4, 5, 6)   # Dolphin: resolução interna (0 = a do emulador, 1 = nativa, 2 = 2x...)
+
+
+def args_for(game, profile=None):
+    """Argumentos do emulador para a versão, com o perfil dela: {"tela_cheia": bool, "escala": int,
+    "widescreen": bool, "extra": "argumentos a mais"}. Sem perfil, os de sempre."""
     e = of(game)
-    return e["args"] if e else None
+    if not e:
+        return None
+    args, p, key = e["args"], profile or {}, game["emulador"]
+    fs = p.get("tela_cheia")
+    if fs is not None:
+        if key in ("pcsx2", "duckstation"):
+            args = args.replace("-fullscreen", "-fullscreen" if fs else "-nofullscreen")
+        elif key == "mgba":
+            args = args.replace("-f ", "-f " if fs else "")
+        elif key == "dolphin":
+            args = f"-C Dolphin.Display.Fullscreen={fs} " + args
+    if key == "dolphin":
+        if p.get("escala"):
+            args = f"-C GFX.Settings.InternalResolution={int(p['escala'])} " + args
+        if p.get("widescreen") is not None:
+            args = f"-C GFX.Settings.wideScreenHack={bool(p['widescreen'])} " + args
+    if p.get("extra", "").strip():
+        args = p["extra"].strip() + " " + args
+    return args
 
 
 def folder(key):
@@ -83,9 +109,10 @@ def install(key):
         if not asset:
             raise RuntimeError(f"Nenhum arquivo '{e['asset']}' na release de {e['repo']}.")
         url, name, tag = asset["browser_download_url"], asset["name"], rel.get("tag_name", "?")
+        digest = asset.get("digest")
     else:
         url, tag = _dolphin_url()
-        name = url.rsplit("/", 1)[1]
+        name, digest = url.rsplit("/", 1)[1], None
     with tempfile.TemporaryDirectory() as tmp:
         pkg = Path(tmp) / name
         with github._open(url, timeout=600) as r, open(pkg, "wb") as f:
@@ -94,6 +121,7 @@ def install(key):
                 if not b:
                     break
                 f.write(b)
+        github.check_digest(pkg, digest)
         github.extract_archive(pkg, folder(key))
     exe = find(key)
     if not exe:

@@ -9,6 +9,7 @@ from PIL import Image, ImageTk
 from .. import catalog, characters, lore, wikipt
 from ..franchise import FR
 from . import app as A
+from ..log import log
 
 LORE_KINDS = ("mapa", "arquivos", "relacoes", "virus", "conquistas")
 EDGE_COLORS = {"familia": None, "aliados": "#6fbf8a", "inimigos": "#d0575b"}  # None = cor de destaque
@@ -50,7 +51,7 @@ class LoreScreens:
                 if wikipt.prepare(names):
                     self.after(0, self.refresh)
             except Exception:
-                pass
+                log.exception("falhou: índice da wiki pt-br")
         threading.Thread(target=work, daemon=True).start()
 
     def wiki_page(self, title):
@@ -295,6 +296,7 @@ class LoreScreens:
             try:
                 store[key] = fn()
             except Exception as e:
+                log.exception("falhou: busca em segundo plano (%s)", key)
                 store[key] = {"erro": str(e)}
             self.after(0, self.refresh)
         threading.Thread(target=work, daemon=True).start()
@@ -592,7 +594,7 @@ class LoreScreens:
         rare = min((it["raridade"] for s in states for it in (s.get("raros") or []) + (s.get("recentes") or [])
                     if it.get("conquistado") and it.get("raridade") is not None), default=None)
         appids = {g.get("appid") for g in games}
-        minutes = sum(p.get("minutos", 0) for appid, p in self.playtimes().items() if appid in appids)
+        minutes = sum(p.get("minutos", 0) for appid, p in self.playtimes().items() if appid in appids) + self.local_minutes()
         out = [("primeiro", "Primeiro passo", f"Jogar um jogo de {FR['nome']}", min(1, sum(map(played, games))), 1),
                ("linha", "Linha do tempo completa", "Jogar todos os capítulos da história oficial", played_canon, len(canon) or 1),
                ("platina1", "Platina!", "Conseguir a primeira platina", min(plats, 1), 1),
@@ -619,6 +621,12 @@ class LoreScreens:
         if groups:
             out.append(("relacoes", "Genealogista", "Ver todos os grupos de relações", min(self._stat("grupos"), len(groups)), len(groups)))
         out.append(("speedrun", "De olho no recorde", "Ver os recordes de speedrun de 5 jogos", min(self._stat("speedrun"), 5), 5))
+        marathon = self._marathon_items()
+        zerados = len(self._marathon_done() & {ch["id"] for ch in marathon})
+        out.append(("maratona", "Maratonista", "Zerar todos os capítulos da linha do tempo na Maratona", zerados, len(marathon) or 1))
+        out.append(("quiz", "Sabe tudo", "Acertar todas as perguntas de uma rodada do Quiz",
+                    int(self.cfg.get("_quiz").get("recorde", 0) >= 10), 1))
+        out.append(("pb", "Contra o relógio", "Registrar um tempo seu na aba Speedrun", int(bool(self._pbs())), 1))
         for ch in catalog.load_timeline(self.games, "canon") + catalog.load_timeline(self.games, "spinoff"):
             vs = [v for v in ch["versoes"] if v.get("tipo") != "info"]
             if len(vs) >= 2:  # "jogou todas as versões do RE2"
@@ -632,6 +640,7 @@ class LoreScreens:
             done = set(self.cfg.get("_conquistas").get("ids", []))
             new = [a for a in self.achievements() if a[3] >= a[4] and a[0] not in done]
         except Exception:
+            log.exception("falhou: conquistas do hub")
             return
         if not new:
             return
@@ -718,11 +727,14 @@ class LoreScreens:
             return self._note(x, y, w, "Não encontrei este jogo no speedrun.com.")
         self.stat_add("speedrun", g["id"])
         c.create_text(x, y - 4, anchor="nw", text=self._elide(data["jogo"], self.f["h"], w - 150), fill=A.WHITE, font=self.f["h"])
+        right = x + w
         if data.get("link"):
-            self._chip(x + w, y - 8, "speedrun.com  ›", lambda: webbrowser.open(data["link"]), "sr_site", anchor="e")
+            right = self._chip(right, y - 8, "speedrun.com  ›", lambda: webbrowser.open(data["link"]), "sr_site", anchor="e") - 8
         recs = data.get("recordes", [])
         if not recs:
             return self._note(x, y + 34, w, "Ainda não há recordes neste jogo.")
+        self._chip(right, y - 8, "Meu tempo", lambda: self._pb_dialog(g, recs), "sr_pb", anchor="e")
+        mine = self._pbs().get(g["id"], {})
 
         def row(r, ry):
             tag = f"sr_{abs(hash(r['link'])) % 10 ** 9}"
@@ -734,9 +746,73 @@ class LoreScreens:
             who = f"{r['jogador']}" + (f"  ·  {r['data'][8:10]}/{r['data'][5:7]}/{r['data'][:4]}" if r.get("data") else "")
             c.create_text(x, ry + 22, anchor="nw", text=self._elide(who, self.f["small"], w), fill=A.MUTED,
                           font=self.f["small"], tags=(tag,))
+            pb = mine.get(r["categoria"])
+            if pb:   # o seu tempo na categoria e a distância para o recorde
+                gap = pb - r["tempo"]
+                c.create_text(x, ry + 40, anchor="nw", fill=A.TIER_COLORS["ouro"] if gap <= 0 else "#d9d2c5", font=self.f["small"],
+                              text=f"Seu: {lore.fmt_time(pb)}   ·   " + ("recorde!" if gap <= 0 else f"+{lore.fmt_time(gap)} do recorde"))
             if r.get("link"):
                 self._clickable(tag, lambda u=r["link"]: webbrowser.open(u))
-        self._list_window(recs, x, y + 30, w, bottom, 50, row)
+        self._list_window(recs, x, y + 30, w, bottom, 66 if mine else 50, row)
+
+    def _pbs(self):
+        """Tempos da pessoa: {id da versão: {categoria: segundos}}."""
+        return self.cfg.get("_pbs")
+
+    @staticmethod
+    def parse_time(text):
+        """'1:23:45', '23:45' ou '45.5' -> segundos (None se não der para ler)."""
+        parts = text.strip().replace(",", ".").split(":")
+        try:
+            nums = [float(p) for p in parts]
+        except ValueError:
+            return None
+        if not nums or len(nums) > 3 or any(n < 0 for n in nums):
+            return None
+        secs = 0.0
+        for n in nums:
+            secs = secs * 60 + n
+        return secs or None
+
+    def _pb_dialog(self, g, recs):
+        """Registrar (ou apagar) o seu melhor tempo numa categoria do speedrun.com."""
+        import tkinter as tk
+        from . import theme as t
+        cats = [r["categoria"] for r in recs]
+        top, body, bar, close = t.modal(self, "Meu tempo", f"{g['nome']}: o seu melhor tempo, para comparar com o recorde.")
+        t.section_title(body, "Categoria").pack(fill="x", pady=(0, 6))
+        cat = tk.StringVar(value=cats[0])
+        t.dropdown(body, cat, cats, self.accent).pack(fill="x")
+        t.section_title(body, "Tempo (h:mm:ss)").pack(fill="x", pady=(16, 6))
+        cur = self._pbs().get(g["id"], {}).get(cats[0])
+        val = tk.StringVar(value=lore.fmt_time(cur) if cur else "")
+        e = t.entry(body, val)
+        e.pack(fill="x")
+        msg = tk.Label(body, text="", fg="#e0857f", bg=t.PANEL, font=(t.FONT, 10), anchor="w")
+        msg.pack(fill="x", pady=(8, 0))
+
+        def store(secs):
+            pbs = dict(self._pbs())
+            mine = dict(pbs.get(g["id"], {}))
+            if secs:
+                mine[cat.get()] = secs
+            else:
+                mine.pop(cat.get(), None)
+            self.cfg.set("_pbs", **{g["id"]: mine})
+            close()
+            self.after(300, self.check_achievements)
+            self.refresh()
+
+        def save(_e=None):
+            secs = self.parse_time(val.get())
+            if not secs:
+                return msg.config(text="Use horas:minutos:segundos, por exemplo 1:23:45 ou 58:10.")
+            store(secs)
+        t.flat_button(bar, "Salvar", save, "primary").pack(side="right")
+        t.flat_button(bar, "Cancelar", close, "ghost").pack(side="right", padx=(0, 8))
+        t.flat_button(bar, "Apagar", lambda: store(None), "danger").pack(side="left")
+        top.bind("<Return>", save)
+        top.after(60, e.focus_set)
 
     def _lore_init(self):
         self._map_cache, self._files, self._file_texts, self._speedruns, self._wiki_pages = {}, {}, {}, {}, {}

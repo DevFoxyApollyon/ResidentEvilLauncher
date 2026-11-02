@@ -5,8 +5,10 @@ trabalho e no menu Iniciar e registra o desinstalador em "Adicionar ou remover p
 (so para este usuario: nada pede administrador). A pasta data/ de uma instalacao anterior
 (configuracoes, jogos baixados, mods, musicas suas) nunca e apagada nem sobrescrita.
 
-    "RE Launcher - Instalar.exe"          instala (janela)
-    "RE Launcher - Instalar.exe" --uninstall   desinstala (o atalho do Windows chama assim)
+    "RE Launcher - Instalar.exe"                    instala (janela)
+    "RE Launcher - Instalar.exe" --auto --dir PASTA  atualiza sozinho (o launcher chama ao achar versão nova)
+    "RE Launcher.exe" --uninstall                   desinstala (o "Adicionar ou remover programas" chama assim:
+                                                    o próprio launcher abre esta janela, sem um .exe extra de 70 MB)
 """
 import os
 import shutil
@@ -23,7 +25,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageTk
 
 APP = "RE Launcher"
 EXE = "RE Launcher.exe"
-UNINSTALLER = "Desinstalar RE Launcher.exe"
+UNINSTALLER = "Desinstalar RE Launcher.exe"   # versões antigas copiavam o instalador inteiro com esse nome
 REG = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\REHub"
 DEFAULT = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "Programs" / APP
 BG, PANEL, LINE, TEXT, MUTED = "#0b0a09", "#151311", "#2c2723", "#ece6da", "#958c80"
@@ -103,7 +105,8 @@ def install(dest, progress, desktop=True):
             z.extract(n, dest)
             if i % 40 == 0:
                 progress(i / len(names))
-    shutil.copy2(sys.executable, dest / UNINSTALLER)
+    (dest / UNINSTALLER).unlink(missing_ok=True)   # desinstalar agora é o próprio launcher com --uninstall
+    (dest / "VERSION").write_text(version(), encoding="utf-8")   # o launcher compara com a última release
     exe = dest / EXE
     desk, menu = places()
     for lnk in ([desk] if desktop else []) + [menu]:
@@ -115,7 +118,7 @@ def install(dest, progress, desktop=True):
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, REG) as k:
         for name, value in (("DisplayName", APP), ("DisplayVersion", version()), ("Publisher", "DevFoxyApollyon"),
                             ("InstallLocation", str(dest)), ("DisplayIcon", str(exe)),
-                            ("UninstallString", f'"{dest / UNINSTALLER}" --uninstall')):
+                            ("UninstallString", f'"{exe}" --uninstall')):
             winreg.SetValueEx(k, name, 0, winreg.REG_SZ, value)
         winreg.SetValueEx(k, "EstimatedSize", 0, winreg.REG_DWORD, size)
         winreg.SetValueEx(k, "NoModify", 0, winreg.REG_DWORD, 1)
@@ -132,7 +135,11 @@ def installed_at():
 
 
 def asset(name):
-    return Path(getattr(sys, "_MEIPASS", Path(__file__).parent.parent)) / name
+    """Arquivo do instalador (dentro do .exe) ou, desinstalando pelo launcher, ao lado do RE Launcher.exe."""
+    for base in (getattr(sys, "_MEIPASS", None), Path(sys.executable).parent, Path(__file__).parent.parent):
+        if base and (Path(base) / name).exists():
+            return Path(base) / name
+    return Path(name)
 
 
 def font(size, bold=False):
@@ -261,8 +268,9 @@ def banner(w, h, subtitle):
 class Window(tk.Tk):
     W = 600
 
-    def __init__(self, uninstall):
+    def __init__(self, uninstall, auto_dir=None):
         super().__init__()
+        self.auto_dir = auto_dir
         self.title(f"{APP} - {'Desinstalar' if uninstall else 'Instalar'}")
         self.configure(bg=BG, highlightthickness=1, highlightbackground="#3a342f")
         self.resizable(False, False)
@@ -336,7 +344,7 @@ class Window(tk.Tk):
         box.pack(fill="x", pady=(6, 8))
         inner = tk.Frame(box, bg="#141210")
         inner.pack(fill="x")
-        self.path = tk.StringVar(value=str(prev or DEFAULT))
+        self.path = tk.StringVar(value=str(self.auto_dir or prev or DEFAULT))
         e = tk.Entry(inner, textvariable=self.path, bg="#141210", fg=TEXT, insertbackground=TEXT, relief="flat",
                      font=(FONT, 11), highlightthickness=0, selectbackground=RED)
         e.pack(side="left", fill="x", expand=True, ipady=9, padx=(12, 6))
@@ -351,7 +359,7 @@ class Window(tk.Tk):
         tk.Label(note, text=("Já instalado aqui: atualiza (fecha o launcher se estiver aberto) e mantém seus dados." if prev else
                              "Atalho no menu Iniciar. Não precisa de administrador."),
                  fg=GREEN if prev else MUTED, bg=BG, font=(FONT, 10), anchor="w").pack(side="left")
-        self.desktop = tk.BooleanVar(value=True)
+        self.desktop = tk.BooleanVar(value=places()[0].exists() if self.auto_dir else True)
         self.open_after = tk.BooleanVar(value=True)
         Switch(self.body, "Criar atalho na área de trabalho", self.desktop).pack(fill="x", pady=3)
         Switch(self.body, f"Abrir o {APP} quando terminar", self.open_after).pack(fill="x", pady=3)
@@ -361,6 +369,8 @@ class Window(tk.Tk):
         self.go = Button(bar, "Instalar" if not prev else "Atualizar", self._start, "primary", w=160)
         self.go.pack(side="right")
         Button(bar, "Cancelar", self.destroy, "ghost").pack(side="right", padx=(0, 10))
+        if self.auto_dir:   # atualização pedida pelo launcher: começa sozinho
+            self.after(600, self._start)
 
     def _browse(self):
         d = filedialog.askdirectory(parent=self, initialdir=self.path.get())
@@ -412,23 +422,41 @@ class Window(tk.Tk):
 
     def _remove(self):
         where = self.where
+        me = Path(sys.executable).name if getattr(sys, "frozen", False) else ""
+        # outras janelas do launcher abertas prendem os arquivos: fecha (menos esta, que é o próprio launcher)
+        subprocess.run(["taskkill", "/F", "/IM", EXE, "/FI", f"PID ne {os.getpid()}"], capture_output=True,
+                       creationflags=subprocess.CREATE_NO_WINDOW)
         for lnk in places():
             lnk.unlink(missing_ok=True)
         try:
             winreg.DeleteKey(winreg.HKEY_CURRENT_USER, REG)
         except OSError:
             pass
+        try:   # modo sofá: o launcher não abre mais com o Windows
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0,
+                                winreg.KEY_SET_VALUE) as k:
+                winreg.DeleteValue(k, APP)
+        except OSError:
+            pass
         for item in where.iterdir() if where.exists() else ():
-            if item.name == UNINSTALLER or (item.name == "data" and self.keep.get()):
+            busy = item.name in (UNINSTALLER, me) or (me == EXE and item.name == "_internal")   # em uso agora
+            if busy or (item.name == "data" and self.keep.get()):
                 continue
             shutil.rmtree(item, ignore_errors=True) if item.is_dir() else item.unlink(missing_ok=True)
-        # o proprio desinstalador sai depois que este processo fechar
-        rest = "" if self.keep.get() else f' & rmdir /s /q "{where}"'
-        subprocess.Popen(f'cmd /c ping 127.0.0.1 -n 3 >nul & del /f /q "{where / UNINSTALLER}"{rest}',
-                         creationflags=subprocess.CREATE_NO_WINDOW)
+        # o que está em uso (este .exe e a _internal dele) sai depois que este processo fechar
+        later = [where / n for n in (UNINSTALLER, me) if n] + ([where / "_internal"] if me == EXE else [])
+        cmds = [f'rmdir /s /q "{p}"' if p.name == "_internal" else f'del /f /q "{p}"' for p in later]
+        if not self.keep.get():
+            cmds.append(f'rmdir /s /q "{where}"')
+        subprocess.Popen("cmd /c ping 127.0.0.1 -n 3 >nul & " + " & ".join(cmds), creationflags=subprocess.CREATE_NO_WINDOW)
         self.status.config(text=f"{APP} removido.", fg=TEXT)
         self.after(900, self.destroy)
 
 
+def run(argv):
+    auto = argv[argv.index("--dir") + 1] if "--auto" in argv and "--dir" in argv[:-1] else None
+    Window("--uninstall" in argv, auto).mainloop()
+
+
 if __name__ == "__main__":
-    Window("--uninstall" in sys.argv).mainloop()
+    run(sys.argv)

@@ -8,6 +8,7 @@ from .. import isodl, isofind
 from ..franchise import FR
 from . import theme as t
 from .progress import Progress
+from ..log import log
 
 
 class IsoActions:
@@ -166,6 +167,7 @@ class IsoActions:
                                                      prog.cancelled, variant=variant)
                     got[g["id"]] = by_url[url]
                 except Exception as e:
+                    log.exception("falhou: ISO de %s", g["id"])
                     errors.append(f"{g['nome']}: {e}")
             return got, errors
 

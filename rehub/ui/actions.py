@@ -11,7 +11,8 @@ import webbrowser
 from tkinter import filedialog, messagebox
 from tkinter import font as tkfont
 
-from .. import audio, catalog, emulators, fluffy, github, isodl, launcher, library, steam, store
+from .. import audio, catalog, emulators, fluffy, github, isodl, launcher, library, saves, steam, store
+from ..log import log
 from ..franchise import FR
 from ..paths import COVERS
 from ..mods import ModManager
@@ -46,7 +47,7 @@ class GameActions:
             out.append((f"lança {self.countdown(rel)}", self.accent, None))
         if g["tipo"] == "info":
             return out
-        p = self.playtimes().get(g["appid"], {}) if g["tipo"] == "steam" else {}
+        p = self.playtimes().get(g["appid"], {}) if g["tipo"] == "steam" else self.cfg.get(g["id"])   # fora da Steam: o hub conta
         if p.get("minutos"):
             out.append((f"{library.hours(p['minutos'])} jogadas", WHITE, None))
         last = self.last_played(g)
@@ -309,7 +310,7 @@ class GameActions:
         dl = launcher.download_dir(g)
         details = ["Apaga o que o app baixou para este jogo." if dl.exists() else
                    "O app só esquece onde o executável e a ISO estão.",
-                   "Seus arquivos (jogo, ISO, saves) não são apagados."]
+                   "Seus arquivos (jogo, ISO, saves) não são apagados; os saves ganham um backup antes (Gerenciar > Saves)."]
         if not t.confirm(parent, f"Desinstalar {g['nome']} do app?", "O jogo volta a aparecer como não configurado.",
                          details, ok="Desinstalar", danger=True):
             return
@@ -319,6 +320,10 @@ class GameActions:
             except OSError:
                 pass
         if dl.exists():
+            try:   # o port pode guardar o save dentro da própria pasta: backup antes de apagar
+                saves.backup(g["id"], self.save_paths(g), "antes de desinstalar")
+            except (OSError, RuntimeError):
+                log.exception("falhou: backup antes de desinstalar %s", g["id"])
             shutil.rmtree(dl.parent, ignore_errors=True)  # data/recomps/<jogo>/
         self.cfg.clear(g["id"])
         self.refresh()
@@ -377,7 +382,7 @@ class GameActions:
         try:
             if g["tipo"] != "steam":  # a Steam já guarda quando você jogou; os outros, o app guarda
                 self.cfg.set(g["id"], ultima=int(time.time()))
-            aviso = launcher.play(g, self.cfg)
+            aviso = self.launch(g)
             if aviso:
                 messagebox.showinfo(FR["app"], aviso)
         except RuntimeError as e:
@@ -421,6 +426,11 @@ class GameActions:
                                                    prog.step(f"{g['nome']}: instalador"), prog.cancelled)
                 os.startfile(setup)
                 return tag, None
+            if launcher.download_dir(g).exists():   # atualizando: backup dos saves antes de copiar por cima
+                try:
+                    saves.backup(g["id"], self.save_paths(g), "antes de atualizar o port")
+                except (OSError, RuntimeError):
+                    log.exception("falhou: backup antes de atualizar %s", g["id"])
             tag = github.download_release(g["github"], g.get("asset"), launcher.download_dir(g), merge=True,
                                           progress=prog.step("Baixando o port"), cancelled=prog.cancelled)
             return tag, launcher.find_exe(g)

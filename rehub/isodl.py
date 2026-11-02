@@ -2,7 +2,8 @@
 
 O arquivo fica em data/, que o instalador e o repositório não levam: os links nunca saem deste PC. Cada chave é o id
 da versão (ex.: "cvx_enhanced") ou do capítulo (ex.: "veronica", vale para todas as versões dele). O valor é um link
-ou, para ter mais de uma opção, {"Normal": link, "Português": link, "Dublada": link}. Aceita link direto, MediaFire e
+ou, para ter mais de uma opção, {"Normal": link, "Português": link, "Dublada": link}. Uma opção também pode ser
+{"link": ..., "sha256": ...}: o hub confere o arquivo baixado com esse hash. Aceita link direto, MediaFire e
 Google Drive; se vier .zip/.rar/.7z, o hub extrai e acha a imagem. Se a imagem for de um formato que a versão não abre
 (ex.: .chd num port que só lê .iso), o hub converte com o chdman do MAME.
 """
@@ -24,7 +25,8 @@ DEST = DATA / "isos"
 CHDMAN = DATA / "ferramentas" / "chdman.exe"
 VARIANTS = ("Normal", "Português", "Dublada")
 HELP = ('Um jogo por chave (id da versão em games/<id>.json, ou do capítulo). Valor: {"Normal": link, "Português": link, '
-        '"Dublada": link} (deixe vazio o que não tiver). Aceita link direto, MediaFire e Google Drive (MEGA não: os '
+        '"Dublada": link} (deixe vazio o que não tiver). Para conferir o arquivo baixado, use {"link": ..., "sha256": ...} '
+        'no lugar do link. Aceita link direto, MediaFire e Google Drive (MEGA não: os '
         "arquivos de lá vêm criptografados). Use só cópias suas.")
 PREFER = [".cue", ".iso", ".chd", ".gdi", ".cdi", ".rvz", ".wbfs", ".cso", ".pbp"]
 PARTIAL = (".crdownload", ".part", ".partial", ".download", ".tmp", ".opdownload")
@@ -79,8 +81,27 @@ def _variants(value):
     if isinstance(value, str):
         return {"Normal": value.strip()} if value.strip() else {}
     if isinstance(value, dict):
-        return {k: v.strip() for k, v in value.items() if isinstance(v, str) and v.strip()}
+        out = {}
+        for k, v in value.items():
+            link = v.get("link") if isinstance(v, dict) else v
+            if isinstance(link, str) and link.strip():
+                out[k] = link.strip()
+        return out
     return {}
+
+
+def hash_for(game, variant):
+    """SHA-256 cadastrado para a opção ({"link": ..., "sha256": ...} em data/isos.json), ou None."""
+    try:
+        data = json.loads(LINKS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    for key in (game["id"], game.get("capitulo", "")):
+        v = data.get(key)
+        opt = v.get(variant) if isinstance(v, dict) else None
+        if isinstance(opt, dict) and opt.get("sha256"):
+            return opt["sha256"]
+    return None
 
 
 def links():
@@ -183,6 +204,9 @@ def download(game, progress=None, cancelled=lambda: False, variant=None, convert
         part = tmp / name
         with open(part, "wb") as f:
             github.copy_progress(r, f, progress, cancelled)
+    want = hash_for(game, variant)
+    if want:
+        github.check_digest(part, "sha256:" + want)
     if part.suffix.lower() in github.ARCHIVES:
         out = folder / "jogo"
         github.extract_archive(part, out)

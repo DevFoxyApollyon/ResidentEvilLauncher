@@ -15,6 +15,7 @@ from ..paths import COVERS, ROOT
 from . import app as A, skin
 from .art import (DIM, DIM_LUT, GAP, GREEN, HOVER_LIFT, HOVER_SCALE, MARGIN, MUTED, RED, TIER_COLORS, TILES_Y, WHITE, Font,
                   accent_from, compose_background, ease, make_halo, make_poster, make_tile)
+from ..log import log
 
 
 class Home:
@@ -49,7 +50,7 @@ class Home:
                     try:  # capas geradas (filmes, fãs, HQs sem arte) também: abrir essas abas fica instantâneo
                         self._ensure_tile_base(ch, g, art)
                     except Exception:
-                        pass
+                        log.exception("falhou: pré-carga do card de %s", g["id"])
                     self._logo_pil_of(key)   # logo já recortado e reduzido: na troca só vira PhotoImage
 
     # ---------- fundo com transição ----------

@@ -1,5 +1,6 @@
-"""Baixa releases do GitHub e extrai .zip com segurança."""
+"""Baixa releases do GitHub, confere o SHA-256 que o GitHub publica de cada arquivo e extrai .zip com segurança."""
 import fnmatch
+import hashlib
 import json
 import os
 import subprocess
@@ -39,6 +40,28 @@ def copy_progress(r, f, progress=None, cancelled=lambda: False):
             progress(done, total, speed, (total - done) / speed if total and speed else None)
 
 
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def check_digest(path, digest):
+    """Confere o arquivo baixado com o hash publicado ("sha256:<hex>", como o GitHub informa em cada asset).
+    Sem hash conhecido não confere. Diferente: apaga o arquivo e avisa (download corrompido ou arquivo trocado)."""
+    algo, _, want = (digest or "").partition(":")
+    if algo.lower() != "sha256" or not want:
+        return False
+    got = sha256(path)
+    if got.lower() != want.strip().lower():
+        Path(path).unlink(missing_ok=True)
+        raise RuntimeError(f"{Path(path).name} chegou diferente do publicado (SHA-256 não confere). O download pode ter "
+                           "corrompido no caminho ou o arquivo foi trocado: tente de novo mais tarde.")
+    return True
+
+
 def latest_release(repo):
     """A release estavel mais nova; projetos que so publicam pre-releases (alfas) usam a mais nova delas."""
     import urllib.error
@@ -74,6 +97,7 @@ def download_release(repo, pattern, dest, merge=False, progress=None, cancelled=
         zip_path = Path(tmp) / asset["name"]
         with _open(asset["browser_download_url"], timeout=300) as r, open(zip_path, "wb") as f:
             copy_progress(r, f, progress, cancelled)
+        check_digest(zip_path, asset.get("digest"))
         if merge:
             staged = Path(tmp) / "staged"
             extract_zip(zip_path, staged)
@@ -94,6 +118,7 @@ def download_asset(repo, pattern, dest_dir, progress=None, cancelled=lambda: Fal
     path = dest_dir / asset["name"]
     with _open(asset["browser_download_url"], timeout=600) as r, open(path, "wb") as f:
         copy_progress(r, f, progress, cancelled)
+    check_digest(path, asset.get("digest"))
     return release.get("tag_name", "?"), path
 
 
