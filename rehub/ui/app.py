@@ -398,11 +398,9 @@ class Hub(Home, Panel, GameActions, IsoActions, SystemActions, ChannelsUI, Scree
         self.refresh()
 
     def _close_request(self):
-        """Fechar pelo Windows (X da barra de tarefas, Alt+F4). Com o launcher minimizado ou atrás de outro programa,
-        a pergunta abria escondida junto com ele e nada acontecia: aí fecha direto, sem perguntar."""
-        if self.state() == "iconic" or self._away or not self._is_front():
-            return self.quit_app()
-        self.ask_quit()
+        """Fechar pelo Windows (Alt+F4, X da barra de tarefas): fecha direto, sem perguntar.
+        Só o ✕ desenhado no canto pergunta antes."""
+        self.quit_app()
 
     def ask_quit(self):
         """O X: pergunta antes de fechar (Cancelar volta para o hub). Uma pergunta por vez."""
