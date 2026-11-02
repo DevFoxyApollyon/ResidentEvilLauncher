@@ -1,7 +1,9 @@
 """ISOs pela interface: achar no PC, converter, baixar pelos links, importar lista e organizar uma pasta.
 Mixin do Hub (rehub/ui/app.py)."""
 import os
+import time
 import tkinter as tk
+import webbrowser
 from tkinter import filedialog, messagebox
 
 from .. import isodl, isofind
@@ -102,6 +104,9 @@ class IsoActions:
         """Baixa a ISO pelo link de data/isos.json (na opção escolhida), com a janela de progresso, e já deixa
         escolhida. Se vier .chd para um port que só lê .iso, converte no fim."""
         variant = variant or isodl.default_variant(g)
+        url = isodl.link_for(g).get(variant, "")
+        if isodl.needs_browser(url):   # MediaFire etc. recusam o download feito pelo programa (HTTP 403)
+            return self.download_iso_browser(g, on_done, variant)
         prog = self._task(g, f"Baixando a ISO ({variant})")
 
         def done(iso):
@@ -113,6 +118,10 @@ class IsoActions:
         def fail(msg):
             prog.close()
             self.refresh()
+            if "403" in msg and t.confirm(self, "O site recusou o download", "Alguns sites só deixam baixar pelo "
+                                          "navegador. Abrir o link no navegador? O launcher pega o arquivo quando terminar.",
+                                          ok="Abrir no navegador"):
+                return self.download_iso_browser(g, on_done, variant)
             messagebox.showerror(FR["app"], f"Falha ao baixar a ISO:\n{msg}")
 
         def converting(d, total, _speed, _eta):   # se vier .chd para um port que só lê .iso
@@ -120,6 +129,38 @@ class IsoActions:
 
         t.in_background(self, lambda: isodl.download(g, prog.step(f"Baixando a ISO ({variant})"), prog.cancelled,
                                                      variant=variant, convert_progress=converting), done, fail)
+
+    def download_iso_browser(self, g, on_done=None, variant=None):
+        """Abre o link no navegador e espera o arquivo aparecer em Downloads; quando termina, leva para
+        data/isos/<jogo>/ e já deixa escolhida. A pessoa só clica no botão de download da página."""
+        variant = variant or isodl.default_variant(g)
+        url = isodl.link_for(g).get(variant)
+        if not url:
+            return t.notice(self, "Sem link", f"Cadastre o link de {g['nome']} em Opções > ISOs > Editar links.", error=True)
+        since = time.time()
+        webbrowser.open(url)
+        prog = self._task(g, "Esperando o download no navegador")
+        self.notify("Clique em Download na página que abriu. O launcher pega o arquivo em Downloads quando terminar.", 8)
+        folder = isodl.downloads_dir()
+
+        def work():
+            path = isodl.wait_browser_download(g, since, prog.cancelled, prog.step("Baixando pelo navegador"), folder)
+            prog.step("Levando a ISO para o launcher")
+            return isodl.take_download(g, path, variant, prog.step(".chd para .iso", items="pct"), prog.cancelled)
+
+        def done(iso):
+            prog.close()
+            self.cfg.set(g["id"], iso=str(iso))
+            self.refresh()
+            self.summon()
+            (on_done or (lambda: t.notice(self, "ISO pronta", str(iso))))()
+
+        def fail(msg):
+            prog.close()
+            self.refresh()
+            if msg != "Cancelado.":
+                messagebox.showerror(FR["app"], f"Falha ao pegar a ISO baixada:\n{msg}")
+        t.in_background(self, work, done, fail)
 
     def _iso_games(self, with_link=False):
         """Versoes que abrem a ISO da pessoa e ainda nao tem uma (com link em data/isos.json, se with_link)."""
@@ -161,6 +202,9 @@ class IsoActions:
                     break
                 variant = isodl.default_variant(g)   # em lote vai a opção Normal (ou a única que houver)
                 url = isodl.link_for(g)[variant]
+                if isodl.needs_browser(url):
+                    errors.append(f"{g['nome']}: esse site só baixa pelo navegador (use Baixar em Gerenciar > ISO)")
+                    continue
                 try:
                     if url not in by_url:   # versoes do mesmo jogo com o mesmo link baixam uma vez so
                         by_url[url] = isodl.download(g, prog.step(f"Baixando a ISO ({k}/{len(todo)})", gid=g["id"]),

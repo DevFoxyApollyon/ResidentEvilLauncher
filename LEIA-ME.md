@@ -112,6 +112,7 @@ O hub não traz nenhuma ISO. Para as suas cópias, em **Opções → ISOs**:
   id da versão (`cvx_enhanced`) ou do capítulo (`veronica`). Aceita link direto, MediaFire e Google Drive (MEGA não).
 - **Importar lista de links:** um `.txt` com uma linha por jogo (`code veronica = https://...`, ou só o link com o nome
   do jogo no arquivo) ou um `.json` igual ao `isos.json`. O hub liga cada link ao jogo e oferece baixar tudo.
+- **MediaFire (e sites que recusam download automático):** o Baixar abre o link no seu navegador; clique em Download na página e o launcher pega o arquivo em Downloads quando terminar, leva para `data/isos/<jogo>` e já deixa escolhido.
 - **Baixar todas as ISOs:** baixa em fila as que têm link e ainda faltam, mostrando quanto falta e a velocidade.
   O Instalar de um port também já baixa a ISO junto quando há link.
 - **Organizar pasta de ISOs:** escolha a pasta onde estão as ISOs baixadas; o hub reconhece cada uma (nome ou código do

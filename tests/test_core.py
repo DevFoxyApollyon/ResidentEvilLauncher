@@ -84,6 +84,31 @@ class IsoLinksTest(unittest.TestCase):
         self.assertIsNone(isodl.hash_for(g, "Dublada"))
 
 
+class BrowserDownloadTest(unittest.TestCase):
+    def test_waits_for_partial_then_takes_file(self):
+        import threading
+        folder = Path(tempfile.mkdtemp())
+        g = {"id": "outbreak_teste", "nome": "Outbreak", "emulador": "pcsx2", "iso_busca": ["outbreak"]}
+        since = time.time()
+        (folder / "outro.txt").write_text("x")
+
+        def browser():
+            part = folder / "Não confirmado 1.crdownload"
+            part.write_bytes(b"x" * 10)
+            time.sleep(0.5)
+            part.rename(folder / "Biohazard - Outbreak #1.iso")
+        threading.Thread(target=browser).start()
+        path = isodl.wait_browser_download(g, since, folder=folder, timeout=10, tick=0.2)
+        self.assertEqual(path.name, "Biohazard - Outbreak #1.iso")
+        image = isodl.take_download(g, path, "Português")
+        self.assertTrue(image.exists() and not path.exists())
+        self.assertIn("outbreak_teste", str(image))
+
+    def test_needs_browser(self):
+        self.assertTrue(isodl.needs_browser("https://www.mediafire.com/file/abc/x.iso/file"))
+        self.assertFalse(isodl.needs_browser("https://drive.google.com/file/d/abc/view"))
+
+
 class CacheTest(unittest.TestCase):
     def test_prune_removes_oldest_first(self):
         folder = cache.FOLDERS[0] / "teste"
