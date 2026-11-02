@@ -6,6 +6,8 @@ BG, PANEL, PANEL_HI = "#0b0a09", "#171513", "#26221f"
 RED, RED_DARK, TEXT, MUTED, GREEN = "#b3121b", "#7a0c12", "#ece6da", "#958c80", "#5fbf6f"
 FONT = "Bahnschrift"
 from ..franchise import FR, hex_rgb  # noqa: E402
+from ..log import log  # noqa: E402
+
 RED = FR["cor"]
 RED_DARK = "#%02x%02x%02x" % tuple(int(v * 0.65) for v in hex_rgb(RED))
 
@@ -282,6 +284,7 @@ def in_background(widget, work, done, fail):
             result = work()
             widget.after(0, lambda: done(result))
         except Exception as e:  # mostra qualquer erro ao usuário em vez de travar
+            log.exception("falhou: tarefa em segundo plano")
             msg = str(e)
             widget.after(0, lambda: fail(msg))
     threading.Thread(target=runner, daemon=True).start()

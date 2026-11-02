@@ -12,6 +12,7 @@ from PIL import Image, ImageTk
 
 from .. import catalog, channels, store
 from . import theme as t
+from ..log import log
 
 YT_RED, TWITCH = "#ff2b3b", "#9d6bff"
 BANNER_W, BANNER_H = 440, 104
@@ -36,7 +37,7 @@ class ChannelsUI:
                             store.download_art(g, "capa")
                     self.after(0, lambda got=got: self._channels_arrived(*got))
             except Exception:  # sem internet: fica com o que já tinha
-                pass
+                log.exception("falhou: canais (YouTube/Twitch)")
             time.sleep(channels.MAX_AGE)
 
     def _channels_arrived(self, new_videos, new_lives):

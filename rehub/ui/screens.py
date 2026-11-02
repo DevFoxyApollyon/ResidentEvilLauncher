@@ -16,6 +16,8 @@ from ..franchise import FR
 from ..paths import DATA, ROOT
 from . import app as A
 from .lore_screens import LORE_KINDS
+from .more_screens import MORE_KINDS
+from ..log import log
 
 THUMBS = DATA / "cache" / "prints"
 EXTRAS = (("perfil", "Perfil", "Troféus, horas e progresso na franquia", "P"),
@@ -42,6 +44,8 @@ class Screens:
             self.refresh_deals()
         elif kind in LORE_KINDS:
             self._lore_open(kind)
+        elif kind in MORE_KINDS:
+            self._more_open(kind)
         if kind != "viewer" and self.prefs["trilha"]:   # telas por cima tocam a música dos submenus
             if self._music_job:
                 self.after_cancel(self._music_job)
@@ -72,6 +76,8 @@ class Screens:
             return
         if kind in LORE_KINDS:
             return self._lore_press(kind, action)
+        if kind in MORE_KINDS:
+            return self._more_press(kind, action)
         if kind == "extras":
             items = self._extras()
             n, cols = len(items), 5
@@ -181,7 +187,7 @@ class Screens:
                   "personagens": ("Personagens", "Tab troca o filtro · PageUp/PageDown (ou LT/RT) troca a versão · "
                                                  "clique num jogo para abrir no hub"),
                   "ofertas": ("Ofertas e lançamentos", "Preços da Steam Brasil. Clique para abrir na loja"),
-                  **self._lore_titles()}
+                  **self._lore_titles(), **self._more_titles()}
         title, sub = titles[kind]
         tx = A.MARGIN
         avatar = self._avatar() if kind == "perfil" else None
@@ -226,14 +232,15 @@ class Screens:
 
     # ---------- Extras ----------
     def _extras(self):
-        return list(EXTRAS[:4]) + self._lore_extras() + [EXTRAS[4]]
+        return list(EXTRAS[:4]) + self._lore_extras() + self._more_extras() + [EXTRAS[4]]
 
     def _draw_extras(self, x, y, w, bottom):
         c, ov = self.c, self.overlay
         items = self._extras()
         cols, gap = 5, 18
+        rows = (len(items) + cols - 1) // cols
         cw = (w - gap * (cols - 1)) / cols
-        ch = min(170, (bottom - y - 90 - gap) / 2)
+        ch = min(170, (bottom - y - 90 - gap * (rows - 1)) / rows)
         for i, (kind, title, desc, key) in enumerate(items):
             cx = x + (i % cols) * (cw + gap)
             cy = y + (i // cols) * (ch + gap)
@@ -242,13 +249,16 @@ class Screens:
             self._round_rect(cx, cy, cx + cw, cy + ch, 18, fill=A.CHIP_HI if on else "#151311",
                              outline=self.accent if on else "#2c2723", width=3 if on else 1, tags=(tag,))
             self._extra_icon(kind, cx + 28, cy + 34, A.WHITE if on else A.MUTED, tag)
-            c.create_text(cx + 22, cy + 66, anchor="nw", text=title, fill=A.WHITE, font=self.f["h"], width=cw - 40, tags=(tag,))
-            c.create_text(cx + 22, cy + 94, anchor="nw", text=desc, fill=A.MUTED, font=self.f["small"], width=cw - 40, tags=(tag,))
+            ty = cy + min(66, ch * 0.4)   # com 3 linhas de cartões eles ficam mais baixos
+            c.create_text(cx + 22, ty, anchor="nw", text=title, fill=A.WHITE, font=self.f["h"], width=cw - 40, tags=(tag,))
+            if ch > 120:
+                c.create_text(cx + 22, ty + 28, anchor="nw", text=desc, fill=A.MUTED, font=self.f["small"], width=cw - 40,
+                              tags=(tag,))
             c.create_text(cx + cw - 18, cy + ch - 14, anchor="se", text=key, fill=A.DIM, font=self.f["h"], tags=(tag,))
             self._clickable(tag, lambda k=kind: self.open_overlay(k))
         ty = y + ((len(items) + cols - 1) // cols) * (ch + gap) + 16
-        tips = ["Teclado: P perfil · H história · C personagens · L ofertas · M mapa · A arquivos · R relações · V vírus · "
-                "K conquistas · F foto · Ctrl+Alt+H traz o hub de volta",
+        tips = ["Teclado: P perfil · H história · C personagens · L ofertas · M mapa · Q arquivos · R relações · V vírus · "
+                "K conquistas · N maratona · Z quiz · Ctrl+F busca · F foto · Ctrl+Alt+H traz o hub de volta",
                 "Controle: Start abre Extras · View abre o Perfil · Y tira a foto do card · segurar o botão Xbox traz o hub"]
         for k, tip in enumerate(tips):
             c.create_text(x, ty + k * 24, anchor="nw", text=tip, fill=A.DIM, font=self.f["small"])
@@ -292,6 +302,20 @@ class Screens:
                               x + 17 * math.cos(a), y + 17 * math.sin(a), fill=color, width=2, tags=(tag,))
         elif kind == "conquistas":
             self._cup(x, y, 14, color)
+        elif kind == "maratona":   # bandeira de chegada
+            c.create_line(x - 12, y - 16, x - 12, y + 18, fill=color, width=2, tags=(tag,))
+            for k in range(3):
+                for j in range(2):
+                    if (k + j) % 2 == 0:
+                        c.create_rectangle(x - 11 + k * 8, y - 16 + j * 8, x - 3 + k * 8, y - 8 + j * 8, fill=color,
+                                           outline="", tags=(tag,))
+            c.create_rectangle(x - 11, y - 16, x + 13, y, outline=color, tags=(tag,))
+        elif kind == "quiz":
+            c.create_oval(x - 16, y - 16, x + 16, y + 16, outline=color, width=2, tags=(tag,))
+            c.create_text(x, y, text="?", fill=color, font=self.f["h"], tags=(tag,))
+        elif kind == "busca":
+            c.create_oval(x - 14, y - 14, x + 6, y + 6, outline=color, width=2, tags=(tag,))
+            c.create_line(x + 4, y + 4, x + 15, y + 15, fill=color, width=3, tags=(tag,))
         else:
             c.create_rectangle(x - 16, y - 8, x + 18, y + 16, outline=color, width=2, tags=(tag,))
             c.create_oval(x - 6, y - 3, x + 8, y + 11, outline=color, width=2, tags=(tag,))
@@ -316,7 +340,7 @@ class Screens:
         got, total = sum(s["conquistados"] for s in with_trophies), sum(s["total"] for s in with_trophies)
         tiers = {tier: sum(s["por_tier"][tier][0] for s in with_trophies) for tier in trophies.TIERS}
         play = self.playtimes()
-        minutes = sum(play.get(g["appid"], {}).get("minutos", 0) for g in games)
+        minutes = sum(play.get(g["appid"], {}).get("minutos", 0) for g in games) + self.local_minutes()   # + fora da Steam
         played = sum(1 for g in games if play.get(g["appid"], {}).get("minutos") or play.get(g["appid"], {}).get("ultima"))
 
         stats = ((f"{plats}", f"de {len(with_trophies)} platinas", A.TIER_COLORS["platina"]),
@@ -577,7 +601,7 @@ class Screens:
                 try:
                     characters.download_versions(q)
                 except Exception:
-                    pass
+                    log.exception("falhou: versões do personagem")
                 self._ver_done.add(q["id"])
                 self.after(0, self.refresh)
             self._ver_busy = False
@@ -772,7 +796,7 @@ class Screens:
                 result = deals.refresh(self.steamid, appids, force=force)
                 self.after(0, lambda: self._deals_arrived(result))
             except Exception:
-                pass
+                log.exception("falhou: ofertas da Steam")
             finally:
                 self._deals_busy = False
         threading.Thread(target=work, daemon=True).start()

@@ -1,0 +1,33 @@
+# Publica uma versão: ao criar a tag vX.Y.Z (git tag v1.9.0 && git push origin v1.9.0), roda os testes, gera o
+# instalador com tools/build_installer.py e o anexa à release da tag (criada se ainda não existir).
+# O app Android (RE Launcher.apk) não é gerado aqui: anexe à mesma release se quiser.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  instalador:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt pyinstaller
+      - run: python -m unittest -v
+      - name: Gerar o instalador
+        shell: bash
+        run: python tools/build_installer.py --version "${GITHUB_REF_NAME#v}"
+      - name: Anexar à release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --title "RE Launcher ${GITHUB_REF_NAME#v}" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" "build/installer/RE Launcher - Instalar.exe" --clobber

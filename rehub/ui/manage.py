@@ -1,15 +1,18 @@
-"""Janela "Gerenciar" de um jogo: situação do jogo, mods pelo Fluffy Mod Manager e projetos da comunidade.
+"""Janela "Gerenciar" de um jogo: situação do jogo, saves, perfil do emulador, mods pelo Fluffy Mod Manager e
+projetos da comunidade.
 
 No topo, a arte do jogo com o título e as ações principais; embaixo, abas (Instalação e Mods).
 """
 import os
+import time
 import tkinter as tk
 import webbrowser
 from tkinter import filedialog
 
 from PIL import Image, ImageDraw, ImageTk
 
-from .. import fluffy, github, isodl, launcher, sources, steam, store
+from .. import emulators, fluffy, github, isodl, launcher, saves, sources, steam, store
+from ..log import log
 from ..mods import ModManager
 from . import skin, theme as t
 
@@ -84,6 +87,15 @@ class ManageWindow(tk.Toplevel):
         self.lift()
         self.focus_force()  # na frente da tela cheia
 
+    def show_game(self, game):
+        """Troca o jogo mostrado (o hub chama quando a pessoa escolhe outra versão com a janela aberta)."""
+        self.g = game
+        self.title(f"Gerenciar — {game['nome']}")
+        self._hero_key = None   # redesenha a arte do jogo novo
+        self._busy_text = ""
+        self.refresh()
+        self.body.canvas.yview_moveto(0)
+
     @property
     def page(self):
         return self.body.inner
@@ -102,8 +114,11 @@ class ManageWindow(tk.Toplevel):
                 self._old_mods_section()
         else:
             self._steps_section()
+            if self.g.get("emulador") and emulators.of(self.g):
+                self._profile_section()
             if isodl.needs_iso(self.g) and self.g["tipo"] != "steam":
                 self._iso_section()
+            self._saves_section()
             if self.g.get("github"):
                 self._project_download()
             self._sources_section()
@@ -359,21 +374,153 @@ class ManageWindow(tk.Toplevel):
         return d
 
     def _add_mod(self):
+        """Um ou vários mods de uma vez (Ctrl/Shift na janela de escolha); antes, backup dos saves."""
         if not fluffy.CODES.get(self.g["id"]) and not self._chosen() and not self._pick_mods_dir():
             return
-        path = filedialog.askopenfilename(parent=self, title="Escolha o mod (.zip, .rar ou .7z)", filetypes=github.FILETYPES)
-        if path:
-            self._run(lambda: fluffy.add_mod(self.g["id"], path, self._chosen()), "Copiando para o Fluffy...",
-                      ("Mod na pasta do Fluffy", "Abra o Fluffy e ative o mod na lista do jogo."))
+        paths = filedialog.askopenfilenames(parent=self, title="Escolha os mods (.zip, .rar ou .7z; vários com Ctrl)",
+                                            filetypes=github.FILETYPES)
+        if not paths:
+            return
+
+        def work():
+            self._backup_now("antes de instalar mod")
+            for path in paths:
+                fluffy.add_mod(self.g["id"], path, self._chosen())
+        n = len(paths)
+        self._run(work, f"Copiando {n} mod(s) para o Fluffy...",
+                  (f"{n} mod(s) na pasta do Fluffy", "Abra o Fluffy e ative na lista do jogo. A ordem de carga "
+                   "(quem fica por cima em conflitos) se ajusta lá, arrastando os mods."))
 
     def _add_reframework(self):
-        self._run(lambda: fluffy.add_reframework(self.g["id"]), "Baixando o REFramework nightly...",
+        def work():
+            self._backup_now("antes do REFramework")
+            return fluffy.add_reframework(self.g["id"])
+        self._run(work, "Baixando o REFramework nightly...",
                   ("REFramework na pasta do Fluffy", "Abra o Fluffy e ative o REFramework na lista do jogo."))
+
+    def _backup_now(self, reason):
+        """Backup dos saves na thread de trabalho (antes de mexer no jogo). Erro aqui não impede o resto."""
+        try:
+            if saves.backup(self.g["id"], self.hub.save_paths(self.g), reason):
+                self.hub.cfg.set(self.g["id"], ultimo_backup=int(time.time()))
+        except (OSError, RuntimeError):
+            log.exception("falhou: backup dos saves (%s)", reason)
+
+    # ---------- saves ----------
+    def _saves_section(self):
+        g = self.g
+        paths = self.hub.save_paths(g)
+        backs = saves.backups(g["id"])
+        self._section("Saves", "Backup dos seus saves em data/backups/saves. O hub também faz um sozinho antes de "
+                               "instalar mod, atualizar o port, desinstalar e (uma vez por dia) antes de jogar.")
+        if not paths and not backs:
+            hint = ("Os saves aparecem aqui depois de jogar uma vez." if g["tipo"] == "steam" or g.get("emulador") else
+                    'Não achei a pasta de saves. No catálogo, o campo "saves" do jogo diz onde fica.')
+            self._card("Nenhum save encontrado", [(hint, SOFT)])
+            return
+        lines = [(str(p), t.MUTED) for p in paths[:3]] + ([(f"+ {len(paths) - 3} pasta(s)", SOFT)] if len(paths) > 3 else [])
+        if g.get("emulador"):
+            lines.append(("Cartões de memória do emulador: valem para todos os jogos dele.", SOFT))
+        lines.append((f"{len(backs)} backup(s)" + (f"  ·  último: {saves.describe(backs[0])}" if backs else ""),
+                      t.GREEN if backs else SOFT))
+        actions = [("Fazer backup", self._backup_click, "primary" if paths else "plain")]
+        if backs:
+            actions.append(("Restaurar...", self._restore_dialog, "plain"))
+            actions.append(("Abrir pasta", lambda: os.startfile(saves.folder(g["id"])), "plain"))
+        self._card("Saves deste jogo", lines, actions)
+
+    def _backup_click(self):
+        self._working("Fazendo backup...")
+
+        def done(path):
+            if path:
+                self._done("Backup pronto", path.name)
+            else:
+                self._done("Nada para guardar", "Não há saves nas pastas do jogo.")
+        self.hub.backup_saves(self.g, "manual", done, quiet=False)
+
+    def _restore_dialog(self):
+        backs = saves.backups(self.g["id"])
+        top, body, bar, close = t.modal(self, "Restaurar saves", "Os saves atuais ganham um backup antes, então dá "
+                                        "para voltar atrás.", width=600)
+        for b in backs[:10]:
+            row = tk.Frame(body, bg=t.PANEL_HI)
+            row.pack(fill="x", pady=3)
+            t.flat_button(row, "Restaurar", lambda b=b: (close(), self._restore(b)), "plain", height=30, size=9).pack(
+                side="right", padx=10, pady=8)
+            t.label(row, saves.describe(b), 10, bold=True, bg=t.PANEL_HI).pack(side="left", padx=14, pady=10)
+        t.flat_button(bar, "Fechar", close, "ghost").pack(side="right")
+        top.place_again()
+
+    def _restore(self, path):
+        if not t.confirm(self, "Restaurar este backup?", saves.describe(path),
+                         ["Feche o jogo antes. Os saves atuais são guardados num backup antes de trocar."], ok="Restaurar"):
+            return
+
+        def work():
+            self._backup_now("antes de restaurar")
+            return saves.restore(path)
+        self._working("Restaurando...")
+        t.in_background(self, work, lambda n: self._done("Saves restaurados", f"{n} arquivo(s) de volta."), self._fail)
+
+    # ---------- perfil do emulador ----------
+    def _profile_section(self):
+        g, e = self.g, emulators.of(self.g)
+        opts = emulators.PROFILE_OPTIONS.get(g["emulador"], ())
+        prof = dict(self.hub.cfg.get(g["id"]).get("perfil_emu") or {})
+        self._section(f"Perfil do {e['nome']}", "Só para esta versão: o hub passa isso para o emulador ao abrir o jogo "
+                                                "(as configurações do emulador não mudam).")
+        card = tk.Frame(self.page, bg=CARD)
+        card.pack(fill="x", pady=4)
+        grid = tk.Frame(card, bg=CARD)
+        grid.pack(fill="x", padx=18, pady=14)
+        tri = {None: "Como no emulador", True: "Ligado", False: "Desligado"}
+        names = {v: k for k, v in tri.items()}
+        scale_names = {0: "Como no emulador", 1: "Nativa (1x)", 2: "2x (720p)", 3: "3x (1080p)", 4: "4x (1440p)",
+                       5: "5x", 6: "6x (4K)"}
+        fields = {}
+
+        def field(key, label, value, choices):
+            box = tk.Frame(grid, bg=CARD)
+            box.grid(row=0, column=len(fields), sticky="we", padx=(0, 14))
+            grid.columnconfigure(len(fields), weight=1)
+            t.label(box, label, 9, fg=t.MUTED, bg=CARD).pack(fill="x", pady=(0, 4))
+            fields[key] = tk.StringVar(value=value)
+            t.dropdown(box, fields[key], choices, self.hub.accent).pack(fill="x")
+        if "tela_cheia" in opts:
+            field("tela_cheia", "Tela cheia", tri[prof.get("tela_cheia")], list(tri.values()))
+        if "escala" in opts:
+            field("escala", "Resolução interna", scale_names[prof.get("escala") or 0], list(scale_names.values()))
+        if "widescreen" in opts:
+            field("widescreen", "Widescreen (hack)", tri[prof.get("widescreen")], list(tri.values()))
+        extra = tk.StringVar(value=prof.get("extra", ""))
+        row = tk.Frame(card, bg=CARD)
+        row.pack(fill="x", padx=18, pady=(0, 14))
+        t.label(row, "Argumentos extras (avançado)", 9, fg=t.MUTED, bg=CARD).pack(fill="x", pady=(0, 4))
+        t.entry(row, extra).pack(fill="x")
+
+        def save():
+            new = {"extra": extra.get().strip()}
+            for key in ("tela_cheia", "widescreen"):
+                if key in fields:
+                    new[key] = names[fields[key].get()]
+            if "escala" in fields:
+                new["escala"] = next(k for k, v in scale_names.items() if v == fields["escala"].get())
+            prof = {k: v for k, v in new.items() if v not in (None, "", 0)}
+            self.hub.cfg.set(g["id"], perfil_emu=prof)
+            self._done("Perfil salvo", "Vale a partir da próxima vez que abrir o jogo. Argumentos:\n"
+                       + (emulators.args_for(g, prof) or ""))
+        bar = tk.Frame(card, bg=CARD)
+        bar.pack(fill="x", padx=18, pady=(0, 14))
+        t.flat_button(bar, "Salvar perfil", save, "primary", height=32, size=9).pack(side="left")
+        t.flat_button(bar, "Voltar ao padrão", lambda: (self.hub.cfg.set(g["id"], perfil_emu={}), self.refresh()),
+                      "plain", height=32, size=9).pack(side="left", padx=(8, 0))
 
     def _undo_old_mods(self):
         if t.confirm(self, "Desfazer os mods antigos?", "Os arquivos que eles substituíram no jogo voltam ao original.",
                      ["Depois, se quiser o mod de novo, instale pelo Fluffy."], ok="Desfazer", danger=True):
             def work():
+                self._backup_now("antes de desfazer mods")
                 mm = ModManager(self.g["id"], self.gdir)
                 for mod_id in list(mm.state["ativos"]):
                     mm.disable(mod_id)

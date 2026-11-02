@@ -1,4 +1,5 @@
 """Pastas usadas pelo RE Launcher."""
+import os
 import sys
 from pathlib import Path
 
@@ -24,6 +25,8 @@ if not getattr(sys, "frozen", False):   # rodando pelo código: usa os mesmos da
         DATA = ROOT.parent / "App" / "data"
     elif _installed_data():
         DATA = _installed_data()
+if os.environ.get("REHUB_DATA"):   # testes: uma pasta de dados separada (nunca mexe nos dados de verdade)
+    DATA = Path(os.environ["REHUB_DATA"])
 CONFIG = DATA / "config.json"   # executáveis, ISOs e preferências escolhidos pelo usuário
 COVERS = DATA / "covers"
 RECOMPS = DATA / "recomps"      # recomps/decomps e ferramentas baixados

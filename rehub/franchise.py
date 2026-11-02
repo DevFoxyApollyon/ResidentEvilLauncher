@@ -26,6 +26,7 @@ DEFAULTS = {
     "fontes": {},                     # capítulo -> fonte do título (chaves em rehub/fonts.py)
     "temas": {},                      # clima do tema composto -> lista de capítulos (rehub/compose.py)
     "rotulo_criaturas": "Armas biológicas",  # nome do filtro de criaturas na tela Personagens
+    "repositorio": "DevFoxyApollyon/ResidentEvilLauncher",  # releases do GitHub: de onde vem a atualização do app
 }
 
 

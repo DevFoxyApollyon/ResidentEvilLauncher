@@ -4,6 +4,7 @@ import shlex
 import shutil
 import subprocess
 import threading
+import time
 import webbrowser
 from pathlib import Path
 
@@ -48,9 +49,19 @@ def is_ready(game, cfg, installed):
     return bool(c.get("exe"))
 
 
-def play(game, cfg):
+def _watch(proc, on_exit, started):
+    """Espera o jogo fechar e conta quanto tempo ficou aberto (jogos fora da Steam: a Steam não conta)."""
+    def wait():
+        proc.wait()
+        if on_exit:
+            on_exit(time.time() - started)
+    threading.Thread(target=wait, daemon=True).start()
+
+
+def play(game, cfg, on_exit=None):
     """Abre o jogo. Lança RuntimeError com uma mensagem para o usuário se faltar algo. Retorna um aviso
-    quando o jogo só abre depois do passo 'preparar' (que roda em segundo plano)."""
+    quando o jogo só abre depois do passo 'preparar' (que roda em segundo plano).
+    on_exit(segundos): chamado (numa thread) quando um jogo fora da Steam fecha."""
     if game["tipo"] == "steam":
         steam.run(game["appid"])
         return None
@@ -61,7 +72,7 @@ def play(game, cfg):
     exe = Path(c.get("exe", ""))
     if not exe.is_file():
         raise RuntimeError(f"Executável não encontrado:\n{exe}\n\nUse Configurar para escolher de novo.")
-    args = emulators.args_for(game) or game.get("args", "")
+    args = emulators.args_for(game, c.get("perfil_emu")) or game.get("args", "")
     if "{iso}" in args and not c.get("iso"):
         raise RuntimeError("Esse jogo precisa da sua ISO. Clique em Configurar.")
     if "{iso}" in args:
@@ -72,13 +83,13 @@ def play(game, cfg):
     argv = split_args(args, c)
     prep = prepare_cmd(game, c, exe)
     if not prep:
-        subprocess.Popen([str(exe), *argv], cwd=exe.parent)
+        _watch(subprocess.Popen([str(exe), *argv], cwd=exe.parent), on_exit, time.time())
         return None
 
     def run():
         with open(exe.parent / "preparar.log", "w", encoding="utf-8") as log:
             subprocess.run(prep, cwd=exe.parent, stdout=log, stderr=subprocess.STDOUT, creationflags=NO_WINDOW)
-        subprocess.Popen([str(exe), *argv], cwd=exe.parent)
+        _watch(subprocess.Popen([str(exe), *argv], cwd=exe.parent), on_exit, time.time())
     threading.Thread(target=run).start()
     return game["preparar"].get("aviso")
 

@@ -2,7 +2,8 @@
 
 O arquivo fica em data/, que o instalador e o repositório não levam: os links nunca saem deste PC. Cada chave é o id
 da versão (ex.: "cvx_enhanced") ou do capítulo (ex.: "veronica", vale para todas as versões dele). O valor é um link
-ou, para ter mais de uma opção, {"Normal": link, "Português": link, "Dublada": link}. Aceita link direto, MediaFire e
+ou, para ter mais de uma opção, {"Normal": link, "Português": link, "Dublada": link}. Uma opção também pode ser
+{"link": ..., "sha256": ...}: o hub confere o arquivo baixado com esse hash. Aceita link direto, MediaFire e
 Google Drive; se vier .zip/.rar/.7z, o hub extrai e acha a imagem. Se a imagem for de um formato que a versão não abre
 (ex.: .chd num port que só lê .iso), o hub converte com o chdman do MAME.
 """
@@ -24,7 +25,8 @@ DEST = DATA / "isos"
 CHDMAN = DATA / "ferramentas" / "chdman.exe"
 VARIANTS = ("Normal", "Português", "Dublada")
 HELP = ('Um jogo por chave (id da versão em games/<id>.json, ou do capítulo). Valor: {"Normal": link, "Português": link, '
-        '"Dublada": link} (deixe vazio o que não tiver). Aceita link direto, MediaFire e Google Drive (MEGA não: os '
+        '"Dublada": link} (deixe vazio o que não tiver). Para conferir o arquivo baixado, use {"link": ..., "sha256": ...} '
+        'no lugar do link. Aceita link direto, MediaFire e Google Drive (MEGA não: os '
         "arquivos de lá vêm criptografados). Use só cópias suas.")
 PREFER = [".cue", ".iso", ".chd", ".gdi", ".cdi", ".rvz", ".wbfs", ".cso", ".pbp"]
 PARTIAL = (".crdownload", ".part", ".partial", ".download", ".tmp", ".opdownload")
@@ -79,8 +81,27 @@ def _variants(value):
     if isinstance(value, str):
         return {"Normal": value.strip()} if value.strip() else {}
     if isinstance(value, dict):
-        return {k: v.strip() for k, v in value.items() if isinstance(v, str) and v.strip()}
+        out = {}
+        for k, v in value.items():
+            link = v.get("link") if isinstance(v, dict) else v
+            if isinstance(link, str) and link.strip():
+                out[k] = link.strip()
+        return out
     return {}
+
+
+def hash_for(game, variant):
+    """SHA-256 cadastrado para a opção ({"link": ..., "sha256": ...} em data/isos.json), ou None."""
+    try:
+        data = json.loads(LINKS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    for key in (game["id"], game.get("capitulo", "")):
+        v = data.get(key)
+        opt = v.get(variant) if isinstance(v, dict) else None
+        if isinstance(opt, dict) and opt.get("sha256"):
+            return opt["sha256"]
+    return None
 
 
 def links():
@@ -183,6 +204,9 @@ def download(game, progress=None, cancelled=lambda: False, variant=None, convert
         part = tmp / name
         with open(part, "wb") as f:
             github.copy_progress(r, f, progress, cancelled)
+    want = hash_for(game, variant)
+    if want:
+        github.check_digest(part, "sha256:" + want)
     if part.suffix.lower() in github.ARCHIVES:
         out = folder / "jogo"
         github.extract_archive(part, out)
@@ -195,6 +219,84 @@ def download(game, progress=None, cancelled=lambda: False, variant=None, convert
         shutil.rmtree(tmp, ignore_errors=True)
     if convertible(game, image):
         image = convert(game, image, convert_progress or progress, cancelled, keep=False)
+    return image
+
+
+# ---------- pelo navegador (sites que recusam download automático, como o MediaFire) ----------
+BROWSER_HOSTS = ("mediafire.com",)
+
+
+def needs_browser(url):
+    """Sites que bloqueiam o download feito pelo programa (HTTP 403): esses abrem no navegador da pessoa."""
+    host = urllib.parse.urlparse(url).netloc.lower()
+    return any(h in host for h in BROWSER_HOSTS)
+
+
+def downloads_dir():
+    """A pasta Downloads do Windows (pode ter sido mudada de lugar)."""
+    try:
+        import os
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                            r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders") as k:
+            return Path(os.path.expandvars(winreg.QueryValueEx(k, "{374DE290-123F-4565-9164-39C4925E467B}")[0]))
+    except OSError:
+        return Path.home() / "Downloads"
+
+
+def _fresh(folder, since):
+    """Arquivos de imagem/compactados que apareceram na pasta depois de 'since' (e os .crdownload em andamento)."""
+    done, partial = [], []
+    for p in Path(folder).glob("*"):
+        try:
+            st = p.stat()
+        except OSError:
+            continue
+        if not p.is_file() or max(st.st_mtime, st.st_ctime) < since - 5:
+            continue
+        ext = p.suffix.lower()
+        if ext in PARTIAL:
+            partial.append((p, st.st_size))
+        elif ext in isofind.EXTS or ext in github.ARCHIVES:
+            done.append((p, st.st_size))
+    return done, partial
+
+
+def wait_browser_download(game, since, cancelled=lambda: False, progress=None, folder=None, timeout=6 * 3600, tick=1.0):
+    """Espera o navegador terminar de baixar o arquivo do jogo na pasta Downloads. Devolve o caminho.
+    Um arquivo conta como pronto quando não há mais .crdownload/.part e o tamanho parou de mudar."""
+    import time
+    folder = Path(folder or downloads_dir())
+    seen, start = {}, time.monotonic()
+    while time.monotonic() - start < timeout:
+        if cancelled():
+            raise RuntimeError("Cancelado.")
+        done, partial = _fresh(folder, since)
+        if progress and partial:
+            progress(max(s for _p, s in partial), 0, 0, None)
+        ours = [(p, s) for p, s in done if not game.get("iso_busca") or _score(p, game)] or (done if len(done) == 1 else [])
+        for p, size in ours:
+            if not partial and size and seen.get(p) == size:
+                return p
+            seen[p] = size
+        time.sleep(tick)
+    raise RuntimeError("O download pelo navegador não terminou a tempo.")
+
+
+def take_download(game, path, variant=None, convert_progress=None, cancelled=lambda: False):
+    """Leva o arquivo baixado pelo navegador para data/isos/<jogo>/ (extrai se vier compactado; o .zip original
+    fica em Downloads) e converte se precisar. Devolve a imagem."""
+    path, folder = Path(path), _folder(game, variant)
+    if path.suffix.lower() in github.ARCHIVES:
+        github.extract_archive(path, folder / "jogo")
+        image = _pick_image(folder / "jogo")
+    else:
+        folder.mkdir(parents=True, exist_ok=True)
+        image = folder / path.name
+        image.unlink(missing_ok=True)
+        shutil.move(str(path), str(image))
+    if convertible(game, image):
+        image = convert(game, image, convert_progress, cancelled, keep=False)
     return image
 
 

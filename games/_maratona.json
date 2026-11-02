@@ -1,0 +1,21 @@
+{
+  "_comentario": "Horas aproximadas da história principal de cada capítulo (referência: HowLongToBeat, arredondado). Usadas no modo Maratona para estimar quanto falta. Capítulo sem número aqui aparece sem estimativa.",
+  "horas": {
+    "re0": 10,
+    "re1": 9,
+    "outbreak": 6,
+    "re3": 6,
+    "re2": 9,
+    "veronica": 13,
+    "darkside_chronicles": 6,
+    "umbrella_chronicles": 7,
+    "re4": 16,
+    "rev1": 10,
+    "re5": 12,
+    "rev2": 9,
+    "re6": 21,
+    "re7": 9,
+    "village": 10,
+    "shadows_of_rose": 4
+  }
+}

@@ -18,6 +18,8 @@ pip install -r requirements.txt
 python main.py
 ```
 
+Testes: `python -m unittest`. Uma tag `vX.Y.Z` enviada ao GitHub gera o instalador e a release sozinha (GitHub Actions).
+
 Documentação completa (em português): [LEIA-ME.md](LEIA-ME.md).
 
 ## O que não vem no repositório
