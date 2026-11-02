@@ -820,6 +820,7 @@ class Hub(Home, Panel, GameActions, IsoActions, SystemActions, ChannelsUI, Scree
     def render(self):
         self._render_job = None
         self._search_hide()
+        self._sync_manage()
         c, W, H = self.c, self.c.winfo_width(), self.c.winfo_height()
         if W < 50 or H < 50:
             return

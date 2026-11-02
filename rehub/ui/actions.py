@@ -346,7 +346,18 @@ class GameActions:
     def manage(self):
         if self.game and self.game["tipo"] != "info":
             self._sound("open")
-            ManageWindow(self, self.game)
+            self._manage_win = ManageWindow(self, self.game)
+
+    def _sync_manage(self):
+        """Com o Gerenciar aberto, trocar de versão (ou de jogo) no hub troca o jogo mostrado nele."""
+        mw = getattr(self, "_manage_win", None)
+        g = self.game
+        if mw is None or not mw.winfo_exists() or g is None or mw.g is g:
+            return
+        if g["tipo"] == "info":   # filme, HQ, notícia: não há o que gerenciar
+            mw.destroy()
+        else:
+            mw.show_game(g)
 
     def refresh_trophies(self):
         g = self.steam_game()

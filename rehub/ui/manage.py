@@ -87,6 +87,15 @@ class ManageWindow(tk.Toplevel):
         self.lift()
         self.focus_force()  # na frente da tela cheia
 
+    def show_game(self, game):
+        """Troca o jogo mostrado (o hub chama quando a pessoa escolhe outra versão com a janela aberta)."""
+        self.g = game
+        self.title(f"Gerenciar — {game['nome']}")
+        self._hero_key = None   # redesenha a arte do jogo novo
+        self._busy_text = ""
+        self.refresh()
+        self.body.canvas.yview_moveto(0)
+
     @property
     def page(self):
         return self.body.inner
