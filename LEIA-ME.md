@@ -8,7 +8,7 @@ Abra com **`RE Launcher.exe`** (não precisa de Python). Ou, para rodar o códig
 Abre em tela cheia (uma cópia só: clicar de novo no .exe só traz a janela para frente). Teclado: ← → capítulos
 (no fim de uma aba, mais um toque na seta passa para a próxima) · ↑ ↓ versões · Enter jogar · G gerenciar · Tab troca de seção ·
 F11 tela cheia · Esc sai da tela cheia · F5 atualizar · E extras · P perfil · H história · C personagens · L ofertas ·
-F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao começo; a roda do mouse anda como as setas.
+N maratona · Z quiz · Ctrl+F busca · F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao começo; a roda do mouse anda como as setas.
 
 - **Seções:** "Linha do tempo" (história oficial), "Não canônicos" (spin-offs), "Perdidos" (versões canceladas, betas e
   demos), "Filmes" (CG, live-action e séries), "HQs e livros" (quadrinhos, mangás e os livros de S. D. Perry) e
@@ -48,9 +48,54 @@ F foto do card. O ✕ no canto de cima fecha o app; o logo no topo volta ao come
 - **Conquistas do hub (K):** metas que o hub acompanha sozinho (linha do tempo completa, todas as versões de um jogo,
   horas, platinas, arquivos lidos...). Quando uma é liberada aparece um aviso com som de troféu.
 - **Bestiário:** nas armas biológicas, a ficha mostra o ponto fraco, a melhor arma e onde ela é chefe.
-- **Speedrun:** aba no painel com o recorde de cada categoria no speedrun.com (clique abre a run).
+- **Speedrun:** aba no painel com o recorde de cada categoria no speedrun.com (clique abre a run). Em **Meu tempo**
+  você registra o seu melhor tempo numa categoria e o painel mostra a distância para o recorde.
+- **Maratona (N):** os capítulos da linha do tempo em ordem, para zerar um por um: marque o que já zerou (X ou G),
+  veja o próximo, as horas que já jogou em cada um e quanto falta (estimativa da história principal em
+  `games/_maratona.json`).
+- **Quiz (Z):** 10 perguntas de múltipla escolha montadas com o catálogo (anos, lugares, personagens, vírus). Guarda o
+  seu recorde.
+- **Busca (Ctrl+F ou /):** jogos, versões, personagens, vírus e lugares do mapa numa busca só (sem acento também
+  acha). Enter abre o resultado.
 - **Foto do card (F):** salva uma imagem 1920x1080 do jogo selecionado (arte, capa, troféus e horas) em
   `Imagens/RE Launcher`, pronta para postar.
+
+## Saves (backup)
+
+Em **Gerenciar > Instalação > Saves**: **Fazer backup** e **Restaurar** (os saves atuais ganham um backup antes de
+trocar). Os backups ficam em `data/backups/saves/<jogo>/` (os 15 mais novos de cada jogo). O hub também faz um sozinho
+antes de instalar mod ou REFramework, atualizar um port, desinstalar e, uma vez por dia, antes de jogar.
+Onde ele procura: na Steam, a pasta da sua conta para o jogo (`userdata/<conta>/<appid>`); nos emuladores, os cartões
+de memória / saves deles; nos ports, o campo `"saves"` do .json do jogo (ex.: `["{jogo}/savedata", "%APPDATA%/Jogo"]`)
+ou, sem ele, o que tiver "save" no nome dentro da pasta do jogo.
+
+## Horas fora da Steam
+
+Ports, emuladores e programas que você adicionou: o hub conta o tempo do jogo aberto (de 1 minuto para cima) e mostra
+embaixo do título, no Perfil, na Maratona e nas conquistas.
+
+## Perfil do emulador
+
+Nas versões por emulador, **Gerenciar > Perfil do <emulador>**: tela cheia ou janela, resolução interna e widescreen
+(Dolphin) e argumentos extras, só para aquela versão. O hub passa isso na linha de comando ao abrir; as configurações
+do emulador não mudam.
+
+## Modo sofá
+
+Opções > Sistema > **Modo sofá**: o launcher abre junto com o Windows. Se houver um controle ligado nos primeiros
+segundos, ele vai para o último jogo e o abre em 5 segundos (qualquer botão cancela). Sem controle, não aparece.
+
+## Atualização, cache e log
+
+- **Atualização:** uma vez por dia o launcher compara a versão instalada com a última release do GitHub
+  (`"repositorio"` no `franquia.json`). Se houver uma nova, aparece um aviso: ao aceitar, ele baixa o instalador,
+  confere o SHA-256 publicado pelo GitHub e se reinstala sozinho (seus dados ficam). Opções > Atualizar procura na hora.
+- **Downloads conferidos:** tudo que vem de releases do GitHub (ports, emuladores, REFramework, o próprio launcher) é
+  conferido com o SHA-256 que o GitHub publica; arquivo diferente é apagado e o download falha. Para as ISOs, use
+  `{"link": ..., "sha256": ...}` no lugar do link em `data/isos.json`.
+- **Cache:** cards, prints, páginas da wiki, imagens e trailers têm limite (Opções > Sistema > Limite do cache: 1, 2,
+  5 ou 10 GB; padrão 2 GB). Passando dele, saem os usados há mais tempo. **Limpar cache** apaga tudo (é refeito).
+- **Log:** erros ficam em `data/logs/launcher.log` (Opções > Sistema > Abrir log de erros).
 
 ## Prints e gravações
 
@@ -129,6 +174,12 @@ trabalho e no menu Iniciar e aparece em "Adicionar ou remover programas". Não p
 Para atualizar, rode a versão nova por cima: seus dados (`data/`) ficam.
 
 Gerar o instalador: `python tools/build_installer.py --version 1.0.0` (sai em `build/installer`).
+Para desinstalar, "Adicionar ou remover programas" abre o próprio `RE Launcher.exe --uninstall` (não há mais um
+desinstalador separado de 70 MB).
+
+**Publicar uma versão:** crie e envie a tag (`git tag v1.9.0` e `git push origin v1.9.0`). O GitHub Actions
+(`.github/workflows/release.yml`) roda os testes, gera o instalador e anexa à release da tag. Os testes também rodam a
+cada push (`.github/workflows/testes.yml`); localmente: `python -m unittest`.
 
 ## Gerar o .exe de novo (depois de mudar o código)
 
@@ -194,7 +245,16 @@ rehub/
   fluffy.py          Fluffy Mod Manager (baixar, abrir, pasta de mods de cada jogo)
   mods.py            só para desfazer mods ativados pelo sistema antigo
   catalog.py         lê games/ e guarda suas escolhas (data/config.json)
-  ui/                janelas (app.py = lista, manage.py = "Gerenciar", theme.py = visual)
+  saves.py           backup e restauração dos saves de cada jogo
+  updater.py         atualização do próprio launcher pelas releases do GitHub
+  cache.py, log.py   limite do cache e registro de erros (data/logs)
+  quiz.py, search.py perguntas do Quiz e a Busca (Ctrl+F)
+  sofa.py            modo sofá (abrir com o Windows)
+  ui/                janelas: app.py (o Hub, junta os mixins), home.py (tela principal), panel.py (painel da
+                     direita), actions.py e isos_ui.py (ações dos jogos e ISOs), screens.py, lore_screens.py e
+                     more_screens.py (telas por cima), system_ui.py (atualização, cache, sofá, backups),
+                     manage.py ("Gerenciar"), theme.py e art.py (visual)
+tests/               python -m unittest
 data/                gerado pelo app: config, capas, recomps baixados e biblioteca de mods
 ```
 
