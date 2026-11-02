@@ -1037,6 +1037,15 @@ def main():
     k32 = ctypes.WinDLL("kernel32", use_last_error=True)
     k32.CreateMutexW(None, False, f"{FR['id']}_hub_uma_janela")  # cada franquia abre a sua
     if ctypes.get_last_error() == 183:  # ERROR_ALREADY_EXISTS
+        # avisa a janela aberta para voltar (ela pode estar minimizada fora da tela cheia: só o ShowWindow
+        # daqui não a trazia, e o clique no .exe parecia não fazer nada)
+        k32.OpenEventW.restype = ctypes.c_void_p
+        k32.SetEvent.argtypes = k32.CloseHandle.argtypes = [ctypes.c_void_p]
+        ev = k32.OpenEventW(0x0002, False, SUMMON_EVENT)   # EVENT_MODIFY_STATE
+        if ev:
+            k32.SetEvent(ev)
+            k32.CloseHandle(ev)
+            return
         hwnd = ctypes.windll.user32.FindWindowW(None, FR["app"])
         if hwnd:
             ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
@@ -1045,7 +1054,28 @@ def main():
     logmod.setup()
     if sofa.started_by_windows() and not _pad_soon():
         return   # modo sofá sem controle ligado: o PC foi ligado para outra coisa, o launcher não aparece
-    Hub().mainloop()
+    hub = Hub()
+    threading.Thread(target=_listen_summon, args=(hub,), daemon=True).start()
+    hub.mainloop()
+
+
+SUMMON_EVENT = f"{FR['id']}_hub_mostrar"
+
+
+def _listen_summon(hub):
+    """Espera o aviso de outro clique no .exe (evento do Windows) e traz o hub para a frente."""
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.CreateEventW.restype = ctypes.c_void_p
+    k32.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_ulong]
+    ev = k32.CreateEventW(None, False, False, SUMMON_EVENT)
+    if not ev:
+        return
+    while True:
+        if k32.WaitForSingleObject(ev, 0xFFFFFFFF) == 0:
+            try:
+                hub.after(0, hub.summon)
+            except RuntimeError:   # o hub já fechou
+                return
 
 
 def _pad_soon(seconds=12):
