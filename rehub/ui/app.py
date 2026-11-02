@@ -902,17 +902,18 @@ class Hub(Home, Panel, GameActions, IsoActions, SystemActions, ChannelsUI, Scree
         normal = skin.button_photo(text, state="normal", **opts)
         hot = lambda: skin.button_photo(text, state="hover", **opts)   # a versao acesa so e desenhada no primeiro hover
         item = c.create_image(x - 8, y - 8, image=normal, anchor="nw", tags=(tag,))
-        self._clickable(tag, lambda: (self._sound("prompt_enter" if primary else "enter"), cmd()), hover=[(item, normal, hot)])
+        self._clickable(tag, lambda: (self._sound("prompt_enter" if primary else "enter"), cmd()), hover=[(item, normal, hot)],
+                        once=True)
         return x + normal.width() - 16
 
-    def _clickable(self, tag, cmd, shape=None, hover=None, outline=False):
+    def _clickable(self, tag, cmd, shape=None, hover=None, outline=False, once=False):
         """Clique + cursor de mão + reação ao passar o mouse.
         shape: fundo de botão escuro (clareia). hover: [(item, cor normal, cor com o mouse)] para outros itens.
 
         Cada tag é ligada ao Tk uma vez só; nos redesenhos seguintes só troca a ação guardada.
         (Ligar de novo a cada quadro criava milhares de comandos no Tk e deixava tudo lento.)"""
         changes = list(hover or []) + ([(shape, CHIP, CHIP_HI)] if shape else [])
-        self._clicks[tag] = (cmd, changes, outline)
+        self._clicks[tag] = (cmd, changes, outline, once)
         if tag in self._bound:
             return
         self._bound.add(tag)
@@ -942,7 +943,7 @@ class Hub(Home, Panel, GameActions, IsoActions, SystemActions, ChannelsUI, Scree
             now = time.time()
             last = self._last_click.get(tag, 0)
             self._last_click[tag] = now
-            if now - last < 1.2:   # duplo clique: o primeiro ja foi aceito
+            if self._clicks[tag][3] and now - last < 1.2:   # só nos botões do jogo (Jogar, Instalar...): o primeiro já foi aceito
                 self.notify("Um clique ja basta: estou fazendo isso.")
                 return
             self._clicks[tag][0]()
